@@ -1,0 +1,17 @@
+services:
+  dancemotion-web:
+    build: .
+    container_name: dancemotion-web
+    restart: unless-stopped
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dancemotion.rule=Host(`dancemotion.homebasetheisen.me`)"
+      - "traefik.http.routers.dancemotion.entrypoints=websecure"
+      - "traefik.http.routers.dancemotion.tls=true"
+      - "traefik.http.services.dancemotion.loadbalancer.server.port=3000"
+
+networks:
+  traefik:
+    external: true
