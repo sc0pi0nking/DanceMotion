@@ -162,8 +162,8 @@ export default function Header() {
               aria-label="Mobile Navigation"
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b dark:border-gray-800">
-                <h2 className="text-lg font-bold" style={{ color: "var(--fg)" }}>
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">
                   Menü
                 </h2>
                 <button
@@ -171,7 +171,7 @@ export default function Header() {
                   className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                   aria-label="Menü schließen"
                 >
-                  <X size={20} style={{ color: "var(--fg)" }} />
+                  <X size={20} className="text-gray-900 dark:text-white" />
                 </button>
               </div>
 
@@ -185,8 +185,7 @@ export default function Header() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="px-4 py-3 rounded-lg text-base font-medium transition-all hover:bg-gray-100 dark:hover:bg-gray-800"
-                    style={{ color: "var(--fg)" }}
+                    className="px-4 py-3 rounded-lg text-base font-medium transition-all hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-900 dark:text-white"
                   >
                     {link.label}
                   </motion.a>
@@ -215,15 +214,14 @@ export default function Header() {
                 )}
 
                 {/* Additional Links */}
-                <div className="mt-6 pt-6 border-t dark:border-gray-800">
+                <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                   <motion.a
                     href="/impressum"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.4 }}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block px-4 py-2 text-sm"
-                    style={{ color: "var(--muted)" }}
+                    className="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                   >
                     Impressum
                   </motion.a>
@@ -233,8 +231,7 @@ export default function Header() {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.45 }}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block px-4 py-2 text-sm"
-                    style={{ color: "var(--muted)" }}
+                    className="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                   >
                     Datenschutz
                   </motion.a>
