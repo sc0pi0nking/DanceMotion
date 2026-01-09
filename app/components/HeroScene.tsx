@@ -2,6 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import EditableContent from "./EditableContent";
 
 export default function HeroScene() {
   return (
@@ -98,24 +99,33 @@ export default function HeroScene() {
         transition={{ duration: 0.8, delay: 0.2 }}
       >
         <div className="max-w-3xl">
-          <motion.h1
-            className="text-5xl font-bold leading-tight"
-            style={{ color: "var(--fg)" }}
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
           >
-            Bewegung ist Ausdruck
-          </motion.h1>
-          <motion.p
-            className="mt-6 text-lg leading-relaxed"
-            style={{ color: "var(--muted)" }}
+            <EditableContent
+              contentKey="hero.title"
+              defaultValue="Bewegung ist Ausdruck"
+              className="text-5xl font-bold leading-tight"
+              style={{ color: "var(--fg)" }}
+              as="h1"
+            />
+          </motion.div>
+          <motion.div
+            className="mt-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
-            DanceMotion ist eine offene Tanzgemeinschaft — voller Energie, Kreativität und Wärme. Wir laden dich ein, dich selbst auszudrücken und Teil unserer Bühne zu werden.
-          </motion.p>
+            <EditableContent
+              contentKey="hero.subtitle"
+              defaultValue="DanceMotion ist eine offene Tanzgemeinschaft — voller Energie, Kreativität und Wärme. Wir laden dich ein, dich selbst auszudrücken und Teil unserer Bühne zu werden."
+              className="text-lg leading-relaxed"
+              style={{ color: "var(--muted)" }}
+              multiline
+            />
+          </motion.div>
           <motion.div
             className="mt-8"
             initial={{ opacity: 0, y: 20 }}

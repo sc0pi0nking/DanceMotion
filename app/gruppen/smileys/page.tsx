@@ -1,4 +1,5 @@
 import Link from "next/link";
+import EditableContent from "@/app/components/EditableContent";
 
 export const metadata = {
   title: "Smileys — DanceMotion Eschweiler",
@@ -12,34 +13,49 @@ export default function SmileysPage() {
         <span>←</span> Zurück zur Startseite
       </Link>
       <h1 className="mt-8 text-4xl font-bold" style={{ color: "var(--fg)" }}>Smileys</h1>
-      <p className="mt-4 text-lg" style={{ color: "var(--muted)" }}>
-        Fröhliche Gruppe für Kinder mit Bewegung und Musik.
-      </p>
+      <EditableContent
+        contentKey="smileys.subtitle"
+        defaultValue="Fröhliche Gruppe für Kinder mit Bewegung und Musik."
+        className="mt-4 text-lg"
+        style={{ color: "var(--muted)" }}
+      />
       
       <div className="mt-12 space-y-8">
         <section>
           <h2 className="text-2xl font-semibold mb-3" style={{ color: "var(--fg)" }}>Für wen?</h2>
-          <p style={{ color: "var(--muted)" }} className="leading-relaxed">
-            Smileys richtet sich an Kinder, die Freude am Tanzen und an der Gemeinschaft haben. 
-            Hier dreht es sich um Spaß, Energie und positive Vibes!
-          </p>
+          <EditableContent
+            contentKey="smileys.for_whom"
+            defaultValue="Smileys richtet sich an Kinder, die Freude am Tanzen und an der Gemeinschaft haben. Hier dreht es sich um Spaß, Energie und positive Vibes!"
+            className="leading-relaxed"
+            style={{ color: "var(--muted)" }}
+            multiline
+          />
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold mb-3" style={{ color: "var(--fg)" }}>Was erwartet dich?</h2>
-          <ul style={{ color: "var(--muted)" }} className="list-disc list-inside space-y-2">
-            <li>Moderne, fröhliche Choreografien</li>
-            <li>Kreative Ausdrucksformen</li>
-            <li>Teamgeist und positive Atmosphäre</li>
-            <li>Performances und gemeinsame Events</li>
-          </ul>
+          <EditableContent
+            contentKey="smileys.what_to_expect"
+            defaultValue="• Moderne, fröhliche Choreografien
+• Kreative Ausdrucksformen
+• Teamgeist und positive Atmosphäre
+• Performances und gemeinsame Events"
+            className="leading-relaxed whitespace-pre-line"
+            style={{ color: "var(--muted)" }}
+            multiline
+            as="div"
+          />
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold mb-3" style={{ color: "var(--fg)" }}>Kontakt & Anmeldung</h2>
-          <p style={{ color: "var(--muted)" }} className="leading-relaxed">
-            Neugierig geworden? Komm zu unserem nächsten Treffen oder schreib uns!
-          </p>
+          <EditableContent
+            contentKey="smileys.contact_text"
+            defaultValue="Neugierig geworden? Komm zu unserem nächsten Treffen oder schreib uns!"
+            className="leading-relaxed"
+            style={{ color: "var(--muted)" }}
+            multiline
+          />
           <a 
             href="mailto:info@dancemotion-eschweiler.de"
             className="inline-block mt-4 px-6 py-3 rounded-full font-semibold"

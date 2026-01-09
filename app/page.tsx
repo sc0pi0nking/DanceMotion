@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import HeroScene from "./components/HeroScene";
 import EventTimeline from "./components/EventTimeline";
+import EditableContent from "./components/EditableContent";
 import { tiles } from "../lib/site-data";
 import { fetchUpcomingEvents } from "../lib/events-db";
 import type { Event } from "../lib/supabase";
@@ -112,9 +113,13 @@ export default function Home() {
                   {tile.title}
                 </h3>
                 
-                <p className="mt-4 text-base leading-relaxed" style={{ color: "var(--muted)" }}>
-                  {tile.shortDescription}
-                </p>
+                <EditableContent
+                  contentKey={`${tile.slug}.short_description`}
+                  defaultValue={tile.shortDescription}
+                  className="mt-4 text-base leading-relaxed"
+                  style={{ color: "var(--muted)" }}
+                  multiline
+                />
 
                 <div className="mt-8 flex gap-3">
                   <Link

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import EditableContent from "@/app/components/EditableContent";
 
 export const metadata = {
   title: "Emotion — DanceMotion Eschweiler",
@@ -12,35 +13,50 @@ export default function EmotionPage() {
         <span>←</span> Zurück zur Startseite
       </Link>
       <h1 className="mt-8 text-4xl font-bold" style={{ color: "var(--fg)" }}>Emotion</h1>
-      <p className="mt-4 text-lg" style={{ color: "var(--muted)" }}>
-        Ausdrucksstarker Tanz für Jugendliche und Erwachsene.
-      </p>
+      <EditableContent
+        contentKey="emotion.subtitle"
+        defaultValue="Ausdrucksstarker Tanz für Jugendliche und Erwachsene."
+        className="mt-4 text-lg"
+        style={{ color: "var(--muted)" }}
+      />
       
       <div className="mt-12 space-y-8">
         <section>
           <h2 className="text-2xl font-semibold mb-3" style={{ color: "var(--fg)" }}>Für wen?</h2>
-          <p style={{ color: "var(--muted)" }} className="leading-relaxed">
-            Emotion ist für dich, wenn du deinen eigenen Ausdruck finden möchtest. Wir tanzen nicht nur Choreografien — 
-            wir bringen Gefühle zum Ausdruck und erkunden unsere Persönlichkeit durch Bewegung.
-          </p>
+          <EditableContent
+            contentKey="emotion.for_whom"
+            defaultValue="Emotion ist für dich, wenn du deinen eigenen Ausdruck finden möchtest. Wir tanzen nicht nur Choreografien — wir bringen Gefühle zum Ausdruck und erkunden unsere Persönlichkeit durch Bewegung."
+            className="leading-relaxed"
+            style={{ color: "var(--muted)" }}
+            multiline
+          />
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold mb-3" style={{ color: "var(--fg)" }}>Was erwartet dich?</h2>
-          <ul style={{ color: "var(--muted)" }} className="list-disc list-inside space-y-2">
-            <li>Contemporary & Modern Dance</li>
-            <li>Persönlicher künstlerischer Ausdruck</li>
-            <li>Intensive Trainingssessions</li>
-            <li>Auftritte und künstlerische Projekte</li>
-            <li>Eine unterstützende Community</li>
-          </ul>
+          <EditableContent
+            contentKey="emotion.what_to_expect"
+            defaultValue="• Contemporary & Modern Dance
+• Persönlicher künstlerischer Ausdruck
+• Intensive Trainingssessions
+• Auftritte und künstlerische Projekte
+• Eine unterstützende Community"
+            className="leading-relaxed whitespace-pre-line"
+            style={{ color: "var(--muted)" }}
+            multiline
+            as="div"
+          />
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold mb-3" style={{ color: "var(--fg)" }}>Kontakt & Anmeldung</h2>
-          <p style={{ color: "var(--muted)" }} className="leading-relaxed">
-            Bereit, deine Kreativität auszudrücken? Komm mit zu uns!
-          </p>
+          <EditableContent
+            contentKey="emotion.contact_text"
+            defaultValue="Bereit, deine Kreativität auszudrücken? Komm mit zu uns!"
+            className="leading-relaxed"
+            style={{ color: "var(--muted)" }}
+            multiline
+          />
           <a 
             href="mailto:info@dancemotion-eschweiler.de"
             className="inline-block mt-4 px-6 py-3 rounded-full font-semibold"
