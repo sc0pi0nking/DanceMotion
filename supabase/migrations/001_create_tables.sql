@@ -128,56 +128,56 @@ CREATE POLICY "Events are public" ON events
   FOR SELECT USING (is_published = true);
 
 CREATE POLICY "Events admin insert" ON events
-  FOR INSERT WITH CHECK (auth.jwt() ->> 'role' = 'authenticated');
+  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 
 CREATE POLICY "Events admin update" ON events
-  FOR UPDATE USING (auth.jwt() ->> 'role' = 'authenticated');
+  FOR UPDATE USING (auth.role() = 'authenticated');
 
 CREATE POLICY "Events admin delete" ON events
-  FOR DELETE USING (auth.jwt() ->> 'role' = 'authenticated');
+  FOR DELETE USING (auth.role() = 'authenticated');
 
 -- Content policies
 CREATE POLICY "Content is public" ON content
   FOR SELECT USING (true);
 
 CREATE POLICY "Content admin insert" ON content
-  FOR INSERT WITH CHECK (auth.jwt() ->> 'role' = 'authenticated');
+  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 
 CREATE POLICY "Content admin update" ON content
-  FOR UPDATE USING (auth.jwt() ->> 'role' = 'authenticated');
+  FOR UPDATE USING (auth.role() = 'authenticated');
 
 CREATE POLICY "Content admin delete" ON content
-  FOR DELETE USING (auth.jwt() ->> 'role' = 'authenticated');
+  FOR DELETE USING (auth.role() = 'authenticated');
 
 -- Gallery policies
 CREATE POLICY "Gallery is public" ON gallery
   FOR SELECT USING (is_published = true);
 
 CREATE POLICY "Gallery admin insert" ON gallery
-  FOR INSERT WITH CHECK (auth.jwt() ->> 'role' = 'authenticated');
+  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 
 CREATE POLICY "Gallery admin update" ON gallery
-  FOR UPDATE USING (auth.jwt() ->> 'role' = 'authenticated');
+  FOR UPDATE USING (auth.role() = 'authenticated');
 
 CREATE POLICY "Gallery admin delete" ON gallery
-  FOR DELETE USING (auth.jwt() ->> 'role' = 'authenticated');
+  FOR DELETE USING (auth.role() = 'authenticated');
 
 -- Forms policies
 CREATE POLICY "Forms visible when active" ON forms
   FOR SELECT USING (is_active = true);
 
 CREATE POLICY "Forms admin insert" ON forms
-  FOR INSERT WITH CHECK (auth.jwt() ->> 'role' = 'authenticated');
+  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 
 CREATE POLICY "Forms admin update" ON forms
-  FOR UPDATE USING (auth.jwt() ->> 'role' = 'authenticated');
+  FOR UPDATE USING (auth.role() = 'authenticated');
 
 CREATE POLICY "Forms admin delete" ON forms
-  FOR DELETE USING (auth.jwt() ->> 'role' = 'authenticated');
+  FOR DELETE USING (auth.role() = 'authenticated');
 
 -- Form submissions policies
 CREATE POLICY "Submissions read by admin" ON form_submissions
-  FOR SELECT USING (auth.jwt() ->> 'role' = 'authenticated');
+  FOR SELECT USING (auth.role() = 'authenticated');
 
 CREATE POLICY "Submissions insert public" ON form_submissions
   FOR INSERT WITH CHECK (true);
