@@ -161,32 +161,32 @@ export default function AdminDocumentManager() {
                 <p className="font-medium text-green-600 dark:text-green-400">
                   ✓ {selectedFile.name}
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   {formatFileSize(selectedFile.size)}
                 </p>
               </div>
             ) : (
               <div>
-                <p className="font-medium">
+                <p className="font-medium text-gray-900 dark:text-gray-100">
                   {isDragActive
                     ? 'PDF hier ablegen...'
                     : 'PDF hier ablegen oder klicken zum Auswählen'}
                 </p>
-                <p className="text-sm text-gray-500 mt-2">Nur PDF-Dateien</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Nur PDF-Dateien</p>
               </div>
             )}
           </div>
 
           {/* Titel */}
           <div>
-            <label className="block font-medium mb-2">
+            <label className="block font-medium mb-2 text-gray-900 dark:text-gray-100">
               Titel <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+              className="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
               placeholder="z.B. Anmeldeformular 2024"
               required
             />
@@ -194,11 +194,11 @@ export default function AdminDocumentManager() {
 
           {/* Beschreibung */}
           <div>
-            <label className="block font-medium mb-2">Beschreibung</label>
+            <label className="block font-medium mb-2 text-gray-900 dark:text-gray-100">Beschreibung</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+              className="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
               rows={3}
               placeholder="Optionale Beschreibung..."
             />
@@ -206,13 +206,13 @@ export default function AdminDocumentManager() {
 
           {/* Kategorie */}
           <div>
-            <label className="block font-medium mb-2">
+            <label className="block font-medium mb-2 text-gray-900 dark:text-gray-100">
               Kategorie <span className="text-red-500">*</span>
             </label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+              className="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
               required
             >
               {CATEGORIES.map((cat) => (

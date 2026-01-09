@@ -195,22 +195,22 @@ export default function AdminGalleryManager() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Titel *</label>
+                <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">Titel *</label>
                 <input
                   type="text"
                   value={newGallery.title}
                   onChange={(e) => setNewGallery({ ...newGallery, title: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
+                  className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
                   placeholder="z.B. Auftritt 2026"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Kategorie</label>
+                <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">Kategorie</label>
                 <select
                   value={newGallery.category}
                   onChange={(e) => setNewGallery({ ...newGallery, category: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg"
+                  className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
                 >
                   <option value="general">Allgemein</option>
                   <option value="performances">Auftritte</option>
@@ -220,11 +220,11 @@ export default function AdminGalleryManager() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Beschreibung</label>
+                <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">Beschreibung</label>
                 <textarea
                   value={newGallery.description}
                   onChange={(e) => setNewGallery({ ...newGallery, description: e.target.value })}
-                  className="w-full px-3 py-2 border rounded-lg resize-y"
+                  className="w-full px-3 py-2 border rounded-lg resize-y bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
                   rows={3}
                 />
               </div>
@@ -237,28 +237,28 @@ export default function AdminGalleryManager() {
                   onChange={(e) => setNewGallery({ ...newGallery, is_published: e.target.checked })}
                   className="rounded"
                 />
-                <label htmlFor="is_published" className="text-sm font-medium">
+                <label htmlFor="is_published" className="text-sm font-medium text-gray-900 dark:text-gray-100">
                   Sofort veröffentlichen
                 </label>
               </div>
 
               {/* Dropzone */}
               <div>
-                <label className="block text-sm font-medium mb-2">Bilder hochladen *</label>
+                <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">Bilder hochladen *</label>
                 <div
                   {...getRootProps()}
                   className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-                    isDragActive ? 'border-accent bg-accent/5' : 'border-gray-300'
+                    isDragActive ? 'border-accent bg-accent/5' : 'border-gray-300 dark:border-gray-600'
                   }`}
                 >
                   <input {...getInputProps()} />
-                  <ImageIcon size={48} className="mx-auto mb-4 text-muted" />
-                  <p className="text-sm text-muted">
+                  <ImageIcon size={48} className="mx-auto mb-4 text-gray-400" />
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
                     {isDragActive
                       ? 'Bilder hier ablegen...'
                       : 'Bilder hier ablegen oder klicken zum Auswählen'}
                   </p>
-                  <p className="text-xs text-muted mt-2">PNG, JPG, GIF bis 10MB</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">PNG, JPG, GIF bis 10MB</p>
                 </div>
               </div>
 
@@ -288,13 +288,13 @@ export default function AdminGalleryManager() {
               <button
                 onClick={handleUpload}
                 disabled={uploading}
-                className="flex-1 px-4 py-2 bg-accent text-bg rounded-lg font-semibold hover:opacity-90 disabled:opacity-50"
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50"
               >
                 {uploading ? 'Wird hochgeladen...' : 'Galerie erstellen'}
               </button>
               <button
                 onClick={() => setShowUploadModal(false)}
-                className="px-4 py-2 border rounded-lg"
+                className="px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
               >
                 Abbrechen
               </button>
