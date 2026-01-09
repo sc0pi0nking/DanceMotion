@@ -97,6 +97,30 @@ ALTER TABLE form_submissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE gallery ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist (for idempotency)
+DROP POLICY IF EXISTS "Events are public" ON events;
+DROP POLICY IF EXISTS "Events admin insert" ON events;
+DROP POLICY IF EXISTS "Events admin update" ON events;
+DROP POLICY IF EXISTS "Events admin delete" ON events;
+
+DROP POLICY IF EXISTS "Content is public" ON content;
+DROP POLICY IF EXISTS "Content admin insert" ON content;
+DROP POLICY IF EXISTS "Content admin update" ON content;
+DROP POLICY IF EXISTS "Content admin delete" ON content;
+
+DROP POLICY IF EXISTS "Gallery is public" ON gallery;
+DROP POLICY IF EXISTS "Gallery admin insert" ON gallery;
+DROP POLICY IF EXISTS "Gallery admin update" ON gallery;
+DROP POLICY IF EXISTS "Gallery admin delete" ON gallery;
+
+DROP POLICY IF EXISTS "Forms visible when active" ON forms;
+DROP POLICY IF EXISTS "Forms admin insert" ON forms;
+DROP POLICY IF EXISTS "Forms admin update" ON forms;
+DROP POLICY IF EXISTS "Forms admin delete" ON forms;
+
+DROP POLICY IF EXISTS "Submissions read by admin" ON form_submissions;
+DROP POLICY IF EXISTS "Submissions insert public" ON form_submissions;
+
 -- RLS Policies: Allow public read, admin write
 
 -- Events policies
