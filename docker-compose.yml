@@ -1,9 +1,11 @@
+version: '3.8'
+
 services:
   dancemotion-web:
     build:
       context: .
+      dockerfile: dockerfile
       args:
-        # Pass environment variables to Docker build
         NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
         NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
         SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
@@ -14,15 +16,10 @@ services:
     restart: unless-stopped
     networks:
       - traefik_proxy
+    env_file:
+      - .env
     environment:
-      # Runtime environment variables
       NODE_ENV: production
-      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
-      ADMIN_EMAIL: ${ADMIN_EMAIL}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
-      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-https://dancemotion.homebasetheisen.me}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.dancemotion.rule=Host(`dancemotion.homebasetheisen.me`)"

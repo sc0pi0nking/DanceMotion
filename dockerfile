@@ -10,7 +10,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build-time environment variables - MUST be set during build for NEXT_PUBLIC_* vars
+# Build-time environment variables (from build args)
 ARG NEXT_PUBLIC_SUPABASE_URL
 ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
 ARG SUPABASE_SERVICE_ROLE_KEY

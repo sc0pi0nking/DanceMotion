@@ -1,25 +1,44 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+// Validate environment variables
+if (!supabaseUrl) {
+  console.error('Missing NEXT_PUBLIC_SUPABASE_URL')
+}
+if (!supabaseAnonKey) {
+  console.error('Missing NEXT_PUBLIC_SUPABASE_ANON_KEY')
+}
+if (!supabaseServiceKey && typeof window === 'undefined') {
+  console.error('Missing SUPABASE_SERVICE_ROLE_KEY')
+}
 
 // Client für Browser (mit RLS)
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-  },
-})
+export const supabase = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseAnonKey || 'placeholder-key',
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
+  }
+)
 
 // Server Client (mit Service Role für API Routes)
-export const supabaseServer = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-})
+export const supabaseServer = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseServiceKey || 'placeholder-key',
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  }
+)
 
 // Types
 export interface Event {
