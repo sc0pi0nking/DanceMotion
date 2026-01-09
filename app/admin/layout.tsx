@@ -44,7 +44,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { icon: BarChart3, label: 'Dashboard', href: '/admin' },
     { icon: Calendar, label: 'Termine', href: '/admin/events' },
     { icon: FileText, label: 'Inhalte', href: '/admin/content' },
-    { icon: Images, label: 'Galerie', href: '/admin/gallery', disabled: true },
+    { icon: Images, label: 'Galerie', href: '/admin/gallery' },
   ]
 
   return (
@@ -72,12 +72,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition ${
-                  item.disabled
-                    ? 'text-slate-600 cursor-not-allowed opacity-50'
-                    : 'text-slate-300 hover:bg-slate-700 hover:text-white'
-                }`}
-                onClick={(e) => item.disabled && e.preventDefault()}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg transition text-slate-300 hover:bg-slate-700 hover:text-white"
               >
                 <item.icon size={20} />
                 {sidebarOpen && <span className="text-sm font-medium">{item.label}</span>}

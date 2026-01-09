@@ -72,6 +72,12 @@ export default function Header() {
               Termine
             </a>
             <a 
+              href="/galerie" 
+              className="site-nav-link"
+            >
+              Galerie
+            </a>
+            <a 
               href="/eventstudio" 
               className="site-nav-link"
             >
