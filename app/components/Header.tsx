@@ -90,6 +90,12 @@ export default function Header() {
               FAQ
             </a>
             <a 
+              href="/team" 
+              className="site-nav-link"
+            >
+              Team
+            </a>
+            <a 
               href="/eventstudio" 
               className="site-nav-link"
             >
