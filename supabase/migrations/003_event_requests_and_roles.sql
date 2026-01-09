@@ -3,6 +3,15 @@
 -- Beschreibung: Event-Anfragen und Rollen-Verwaltung
 -- =====================================================
 
+-- 0. Updated_at Funktion erstellen (falls nicht vorhanden)
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
 -- 1. Admin Roles Tabelle
 CREATE TABLE IF NOT EXISTS public.admin_roles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
