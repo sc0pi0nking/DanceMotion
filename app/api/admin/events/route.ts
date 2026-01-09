@@ -9,12 +9,20 @@ export async function GET() {
       .select('*')
       .order('date', { ascending: true })
 
-    if (error) throw error
+    if (error) {
+      console.error('Supabase error:', error);
+      // Return empty array if table doesn't exist yet
+      if (error.message.includes("Can't find the table")) {
+        return Response.json([]);
+      }
+      throw error;
+    }
 
-    return Response.json(data)
+    return Response.json(data || [])
   } catch (error: any) {
+    console.error('GET /api/admin/events error:', error);
     return Response.json(
-      { error: error.message },
+      { error: error.message, code: error.code },
       { status: 500 }
     )
   }
