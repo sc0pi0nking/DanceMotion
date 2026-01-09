@@ -16,8 +16,8 @@ CREATE TABLE IF NOT EXISTS events (
   is_published BOOLEAN DEFAULT true
 );
 
-CREATE INDEX idx_events_date ON events(date);
-CREATE INDEX idx_events_category ON events(category);
+CREATE INDEX IF NOT EXISTS idx_events_date ON events(date);
+CREATE INDEX IF NOT EXISTS idx_events_category ON events(category);
 
 -- Content Table (für alle Texte)
 CREATE TABLE IF NOT EXISTS content (
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS content (
   updated_by TEXT
 );
 
-CREATE INDEX idx_content_section ON content(section);
+CREATE INDEX IF NOT EXISTS idx_content_section ON content(section);
 
 -- Forms Table (Future)
 CREATE TABLE IF NOT EXISTS forms (
@@ -59,8 +59,8 @@ CREATE TABLE IF NOT EXISTS form_submissions (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_submissions_form ON form_submissions(form_id);
-CREATE INDEX idx_submissions_created ON form_submissions(created_at);
+CREATE INDEX IF NOT EXISTS idx_submissions_form ON form_submissions(form_id);
+CREATE INDEX IF NOT EXISTS idx_submissions_created ON form_submissions(created_at);
 
 -- Gallery Table (Future)
 CREATE TABLE IF NOT EXISTS gallery (
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS gallery (
   updated_by TEXT
 );
 
-CREATE INDEX idx_gallery_category ON gallery(category);
+CREATE INDEX IF NOT EXISTS idx_gallery_category ON gallery(category);
 
 -- Admin Users Table
 CREATE TABLE IF NOT EXISTS admin_users (
