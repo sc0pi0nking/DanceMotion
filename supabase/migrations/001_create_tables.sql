@@ -98,33 +98,60 @@ ALTER TABLE gallery ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies: Allow public read, admin write
+
+-- Events policies
 CREATE POLICY "Events are public" ON events
   FOR SELECT USING (is_published = true);
 
-CREATE POLICY "Events admin write" ON events
-  FOR INSERT, UPDATE, DELETE USING (auth.jwt() ->> 'role' = 'authenticated');
+CREATE POLICY "Events admin insert" ON events
+  FOR INSERT WITH CHECK (auth.jwt() ->> 'role' = 'authenticated');
 
+CREATE POLICY "Events admin update" ON events
+  FOR UPDATE USING (auth.jwt() ->> 'role' = 'authenticated');
+
+CREATE POLICY "Events admin delete" ON events
+  FOR DELETE USING (auth.jwt() ->> 'role' = 'authenticated');
+
+-- Content policies
 CREATE POLICY "Content is public" ON content
   FOR SELECT USING (true);
 
-CREATE POLICY "Content admin write" ON content
-  FOR INSERT, UPDATE, DELETE USING (auth.jwt() ->> 'role' = 'authenticated');
+CREATE POLICY "Content admin insert" ON content
+  FOR INSERT WITH CHECK (auth.jwt() ->> 'role' = 'authenticated');
 
--- Gallery public read
+CREATE POLICY "Content admin update" ON content
+  FOR UPDATE USING (auth.jwt() ->> 'role' = 'authenticated');
+
+CREATE POLICY "Content admin delete" ON content
+  FOR DELETE USING (auth.jwt() ->> 'role' = 'authenticated');
+
+-- Gallery policies
 CREATE POLICY "Gallery is public" ON gallery
   FOR SELECT USING (is_published = true);
 
-CREATE POLICY "Gallery admin write" ON gallery
-  FOR INSERT, UPDATE, DELETE USING (auth.jwt() ->> 'role' = 'authenticated');
+CREATE POLICY "Gallery admin insert" ON gallery
+  FOR INSERT WITH CHECK (auth.jwt() ->> 'role' = 'authenticated');
 
--- Forms read
+CREATE POLICY "Gallery admin update" ON gallery
+  FOR UPDATE USING (auth.jwt() ->> 'role' = 'authenticated');
+
+CREATE POLICY "Gallery admin delete" ON gallery
+  FOR DELETE USING (auth.jwt() ->> 'role' = 'authenticated');
+
+-- Forms policies
 CREATE POLICY "Forms visible when active" ON forms
   FOR SELECT USING (is_active = true);
 
-CREATE POLICY "Forms admin write" ON forms
-  FOR INSERT, UPDATE, DELETE USING (auth.jwt() ->> 'role' = 'authenticated');
+CREATE POLICY "Forms admin insert" ON forms
+  FOR INSERT WITH CHECK (auth.jwt() ->> 'role' = 'authenticated');
 
--- Form submissions
+CREATE POLICY "Forms admin update" ON forms
+  FOR UPDATE USING (auth.jwt() ->> 'role' = 'authenticated');
+
+CREATE POLICY "Forms admin delete" ON forms
+  FOR DELETE USING (auth.jwt() ->> 'role' = 'authenticated');
+
+-- Form submissions policies
 CREATE POLICY "Submissions read by admin" ON form_submissions
   FOR SELECT USING (auth.jwt() ->> 'role' = 'authenticated');
 
