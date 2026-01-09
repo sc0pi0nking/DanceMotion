@@ -25,7 +25,7 @@ export async function GET(
   }
 }
 
-// PUT - Update content item
+// PUT - Update or create content item (UPSERT)
 export async function PUT(
   req: Request,
   { params }: { params: Promise<{ key: string }> }
@@ -34,19 +34,29 @@ export async function PUT(
     const { key } = await params
     const item: Partial<ContentItem> = await req.json()
 
+    // Try to upsert (update if exists, insert if not)
     const { data, error } = await supabaseServer
       .from('content')
-      .update({
-        ...item,
+      .upsert({
+        key: key,
+        value: item.value,
+        section: item.section || key.split('.')[0],
+        description: item.description || `Content for ${key}`,
         updated_at: new Date().toISOString(),
+      }, {
+        onConflict: 'key',
+        ignoreDuplicates: false,
       })
-      .eq('key', key)
       .select()
 
-    if (error) throw error
+    if (error) {
+      console.error('Upsert error:', error)
+      throw error
+    }
 
     return Response.json(data[0])
   } catch (error: any) {
+    console.error('PUT /api/admin/content/[key] error:', error)
     return Response.json(
       { error: error.message },
       { status: 500 }

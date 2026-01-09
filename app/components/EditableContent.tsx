@@ -74,11 +74,13 @@ export default function EditableContent({
         setContent(editValue)
         setIsEditing(false)
       } else {
-        alert('Fehler beim Speichern')
+        const errorData = await res.json()
+        console.error('Save failed:', errorData)
+        alert(`Fehler beim Speichern: ${errorData.error || 'Unbekannter Fehler'}`)
       }
     } catch (error) {
       console.error('Save error:', error)
-      alert('Fehler beim Speichern')
+      alert('Fehler beim Speichern: Netzwerkfehler')
     } finally {
       setIsSaving(false)
     }
