@@ -4,9 +4,10 @@ import { supabaseServer } from '@/lib/supabase';
 // PATCH - Team-Mitglied aktualisieren
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { name, role, bio, image_url, order_index, social_links, published } = body;
 
@@ -22,7 +23,7 @@ export async function PATCH(
     const { data: member, error } = await supabaseServer
       .from('team_members')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single();
 
@@ -41,13 +42,14 @@ export async function PATCH(
 // DELETE - Team-Mitglied löschen
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const { error } = await supabaseServer
       .from('team_members')
       .delete()
-      .eq('id', params.id);
+      .eq('id', id);
 
     if (error) throw error;
 
