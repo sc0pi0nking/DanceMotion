@@ -78,6 +78,12 @@ export default function Header() {
               Galerie
             </a>
             <a 
+              href="/formulare" 
+              className="site-nav-link"
+            >
+              Formulare
+            </a>
+            <a 
               href="/eventstudio" 
               className="site-nav-link"
             >
