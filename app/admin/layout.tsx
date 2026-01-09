@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Calendar, FileText, BarChart3, Images, LogOut, Menu, X, FileDown, MessageCircle } from 'lucide-react'
+import { Calendar, FileText, BarChart3, Images, LogOut, Menu, X, FileDown, MessageCircle, HelpCircle } from 'lucide-react'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -50,6 +50,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { icon: FileText, label: 'Inhalte', href: '/admin/content', roles: ['admin', 'editor'] },
     { icon: Images, label: 'Galerie', href: '/admin/gallery', roles: ['admin', 'editor'] },
     { icon: FileDown, label: 'Dokumente', href: '/admin/documents', roles: ['admin', 'editor'] },
+    { icon: HelpCircle, label: 'FAQs', href: '/admin/faqs', roles: ['admin', 'editor'] },
   ]
 
   // Filter Navigation Items basierend auf Rolle

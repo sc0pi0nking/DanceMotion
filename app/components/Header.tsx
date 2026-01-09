@@ -84,6 +84,12 @@ export default function Header() {
               Formulare
             </a>
             <a 
+              href="/faq" 
+              className="site-nav-link"
+            >
+              FAQ
+            </a>
+            <a 
               href="/eventstudio" 
               className="site-nav-link"
             >
