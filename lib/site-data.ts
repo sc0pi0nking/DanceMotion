@@ -3,6 +3,7 @@ export type Tile = {
   slug: string;
   shortDescription: string;
   href: string;
+logo?: string;
 };
 
 export const tiles: Tile[] = [
@@ -11,24 +12,21 @@ export const tiles: Tile[] = [
     slug: "little-joys",
     shortDescription: "Tanzen für die Kleinsten — spielerisch und mit viel Freude.",
     href: "/gruppen/little-joys",
+    logo: "/logo-littlejoys.svg",
   },
   {
     title: "Smileys",
     slug: "smileys",
     shortDescription: "Fröhliche Gruppe für Kinder mit Bewegung und Musik.",
     href: "/gruppen/smileys",
+    logo: "/logo-smileys.svg",
   },
   {
     title: "Emotion",
     slug: "emotion",
     shortDescription: "Ausdrucksstarker Tanz für Jugendliche und Erwachsene.",
     href: "/gruppen/emotion",
-  },
-  {
-    title: "Eventstudio",
-    slug: "eventstudio",
-    shortDescription: "Vermietung & Kurse: Unser Studio für Events und Proben.",
-    href: "/eventstudio",
+    logo: "/logo-emotion.svg",
   },
 ];
 

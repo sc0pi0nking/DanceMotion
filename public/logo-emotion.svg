@@ -1,0 +1,20 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- EMOTION Logo: Diamond with teal burst, bold text -->
+  <defs>
+    <linearGradient id="emotionGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2EC4C6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a9496;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Diamond shape -->
+  <path d="M 100 20 L 160 100 L 100 180 L 40 100 Z" fill="none" stroke="url(#emotionGrad)" stroke-width="3"/>
+  
+  <!-- Inner burst lines -->
+  <line x1="100" y1="60" x2="100" y2="140" stroke="#2EC4C6" stroke-width="2" opacity="0.6"/>
+  <line x1="60" y1="100" x2="140" y2="100" stroke="#2EC4C6" stroke-width="2" opacity="0.6"/>
+  
+  <!-- TEXT: EMOTION -->
+  <text x="100" y="110" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#2EC4C6">EMOTION</text>
+  <text x="100" y="128" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" fill="#2EC4C6" opacity="0.8">Showtan Gruppe</text>
+</svg>

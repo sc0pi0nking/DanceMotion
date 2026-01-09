@@ -39,10 +39,10 @@ export default function ThemeToggle() {
 
   return (
     <button
-      aria-label="Toggle theme"
+      aria-label={theme === "dark" ? "Wechsel zu Hellmodus" : "Wechsel zu Dunkelmodus"}
       onClick={toggle}
       className="theme-toggle"
-      title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+      title={theme === "dark" ? "Zum Hellmodus wechseln" : "Zum Dunkelmodus wechseln"}
     >
       {theme === "dark" ? "☀️" : "🌙"}
     </button>

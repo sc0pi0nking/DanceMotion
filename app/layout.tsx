@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DanceMotion Eschweiler",
-  description: "Tanzgruppen & Eventstudio — DanceMotion Eschweiler",
+  title: "DanceMotion Eschweiler — Tanzgruppen & Eventstudio",
+  description: "Offene Tanzgemeinschaft in Eschweiler: Little Joys, Smileys, Emotion & Eventstudio. Energie, Kreativität und Wärme.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

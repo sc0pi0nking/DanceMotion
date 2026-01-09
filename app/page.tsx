@@ -1,30 +1,236 @@
 "use client";
-import TileCard from "./components/TileCard";
+import Link from "next/link";
+import Image from "next/image";
+import HeroScene from "./components/HeroScene";
 import { tiles } from "../lib/site-data";
 
 export default function Home() {
   return (
     <div className="min-h-screen">
-      <section className="mx-auto max-w-5xl px-6 py-20">
-        <div className="max-w-3xl">
-          <h1 className="text-4xl font-bold" style={{ color: "var(--fg)" }}>DanceMotion Eschweiler</h1>
-          <p className="mt-4" style={{ color: "var(--muted)" }}>
-            Tanzgruppen & Eventstudio — gemeinsam bewegen, ausprobieren und feiern.
+      <HeroScene />
+
+      {/* Groups Section - Alternating Layout */}
+      <section id="groups" className="mx-auto max-w-6xl px-6 py-28">
+        <div className="mb-16">
+          <h2 className="text-4xl font-bold" style={{ color: "var(--fg)" }}>
+            Unsere Gruppen
+          </h2>
+          <p className="mt-3 text-lg" style={{ color: "var(--muted)" }}>
+            Verschiedene Stile, eine Community
           </p>
-          <div className="mt-6">
-            <a className="inline-block rounded-full px-4 py-2 text-sm btn-accent" href="#groups">
-              Unsere Gruppen entdecken
-            </a>
-          </div>
+        </div>
+        
+        {/* Alternating Groups - Text/Image Left-Right */}
+        <div className="space-y-24">
+          {tiles.map((tile, index) => (
+            <div
+              key={tile.slug}
+              className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center"
+              style={{
+                direction: index % 2 === 1 ? "rtl" : "ltr",
+              }}
+            >
+              {/* Image/Visual Side */}
+              <div className="relative h-64 lg:h-80 rounded-2xl overflow-hidden">
+                <div
+                  className="absolute inset-0 rounded-2xl"
+                  style={{
+                    background: `linear-gradient(135deg, rgba(46,196,198,0.2), rgba(46,196,198,0.08))`,
+                    backdropFilter: "blur(10px)",
+                    border: "1px solid rgba(46,196,198,0.15)",
+                  }}
+                >
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center">
+                      {tile.logo ? (
+                        <Image
+                          src={tile.logo}
+                          alt={tile.title}
+                          width={120}
+                          height={120}
+                          className="mx-auto opacity-70"
+                        />
+                      ) : (
+                        <div className="text-5xl font-bold opacity-20" style={{ color: "var(--accent)" }}>
+                          💃
+                        </div>
+                      )}
+                      <p className="mt-6 text-sm font-semibold" style={{ color: "var(--muted)" }}>
+                        {tile.title}
+                      </p>
+                    </div>
+                  </div>
+                  {/* Decorative circles */}
+                  <div
+                    className="absolute top-4 right-4 h-20 w-20 rounded-full opacity-15"
+                    style={{
+                      background: "radial-gradient(circle, var(--accent), transparent)",
+                    }}
+                  ></div>
+                  <div
+                    className="absolute bottom-4 left-4 h-28 w-28 rounded-full opacity-10"
+                    style={{
+                      background: "radial-gradient(circle, var(--accent), transparent)",
+                    }}
+                  ></div>
+                </div>
+              </div>
+
+              {/* Text/Info Side */}
+              <div style={{ direction: "ltr" }} className="flex flex-col justify-center">
+                <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-full px-3 py-1" 
+                     style={{ backgroundColor: "rgba(46,196,198,0.1)" }}>
+                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: "var(--accent)" }}></span>
+                  <span className="text-xs font-semibold" style={{ color: "var(--accent)" }}>
+                    Tanzgruppe
+                  </span>
+                </div>
+                
+                <h3 className="text-3xl font-bold leading-tight" style={{ color: "var(--fg)" }}>
+                  {tile.title}
+                </h3>
+                
+                <p className="mt-4 text-base leading-relaxed" style={{ color: "var(--muted)" }}>
+                  {tile.shortDescription}
+                </p>
+
+                <div className="mt-8 flex gap-3">
+                  <Link
+                    href={`/gruppen/${tile.slug}`}
+                    className="inline-flex items-center rounded-full px-6 py-3 font-semibold transition-all duration-300"
+                    style={{
+                      backgroundColor: "var(--accent)",
+                      color: "var(--bg)",
+                    }}
+                  >
+                    Mehr erfahren →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
-      <section id="groups" className="mx-auto max-w-5xl px-6 pb-20">
-        <h2 className="mb-6 text-2xl font-semibold" style={{ color: "var(--fg)" }}>Gruppen & Angebote</h2>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
-          {tiles.map((t) => (
-            <TileCard key={t.slug} tile={t} />
-          ))}
+      {/* Event Studio Section - VISUALLY DIFFERENT FROM GROUPS */}
+      <section className="mx-auto max-w-6xl px-6 py-28">
+        <div className="relative rounded-3xl p-12 lg:p-16 overflow-hidden"
+             style={{
+               background: "linear-gradient(135deg, rgba(46,196,198,0.06), rgba(46,196,198,0.02))",
+               border: "1px solid rgba(46,196,198,0.15)",
+               backdropFilter: "blur(8px)",
+             }}>
+          
+          <div className="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:items-center relative z-10">
+            {/* Left: Text Content */}
+            <div className="flex flex-col justify-center">
+              <div className="mb-2 inline-flex w-fit items-center gap-2 rounded-full px-4 py-2" 
+                   style={{ backgroundColor: "rgba(46,196,198,0.15)", border: "1px solid rgba(46,196,198,0.3)" }}>
+                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: "var(--accent)" }}></span>
+                <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--accent)" }}>Spezialangebot</span>
+              </div>
+              
+              <h2 className="mt-8 text-4xl font-bold leading-tight" style={{ color: "var(--fg)" }}>
+                DanceMotion <br /> <span style={{ color: "var(--accent)" }}>Eventstudio</span>
+              </h2>
+              
+              <p className="mt-6 text-lg leading-relaxed" style={{ color: "var(--muted)" }}>
+                Professionelle Räume für Vermietung, Proben und Events. Dein Platz für Creativity und Performance.
+              </p>
+
+              <div className="mt-10 flex flex-col gap-4">
+                <div className="flex gap-4 items-start">
+                  <div className="mt-1.5 h-1 w-1 rounded-full flex-shrink-0" style={{ backgroundColor: "var(--accent)" }}></div>
+                  <div>
+                    <p className="font-semibold" style={{ color: "var(--fg)" }}>Stundenvermietung</p>
+                    <p className="text-sm" style={{ color: "var(--muted)" }}>Tagsüber bis abends, flexibel buchbar</p>
+                  </div>
+                </div>
+                <div className="flex gap-4 items-start">
+                  <div className="mt-1.5 h-1 w-1 rounded-full flex-shrink-0" style={{ backgroundColor: "var(--accent)" }}></div>
+                  <div>
+                    <p className="font-semibold" style={{ color: "var(--fg)" }}>Professionelle Ausstattung</p>
+                    <p className="text-sm" style={{ color: "var(--muted)" }}>Großer Spiegel, Soundanlage, Klimaanlage</p>
+                  </div>
+                </div>
+                <div className="flex gap-4 items-start">
+                  <div className="mt-1.5 h-1 w-1 rounded-full flex-shrink-0" style={{ backgroundColor: "var(--accent)" }}></div>
+                  <div>
+                    <p className="font-semibold" style={{ color: "var(--fg)" }}>Event-Hosting</p>
+                    <p className="text-sm" style={{ color: "var(--muted)" }}>Für Performances und spezielle Events</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-12">
+                <Link
+                  href="/eventstudio"
+                  className="inline-flex items-center rounded-full px-8 py-4 font-semibold transition-all duration-300 hover:shadow-lg"
+                  style={{
+                    backgroundColor: "var(--accent)",
+                    color: "#000",
+                  }}
+                >
+                  Studio erkunden →
+                </Link>
+              </div>
+            </div>
+
+            {/* Right: Visual Element - DIFFERENT STYLE */}
+            <div className="relative h-80 hidden lg:flex items-center justify-center">
+              <div className="relative w-full h-full">
+                {/* Background blob */}
+                <div
+                  className="absolute inset-0 rounded-2xl"
+                  style={{
+                    background: "radial-gradient(circle at 60% 40%, rgba(46,196,198,0.15), rgba(46,196,198,0.02))",
+                    border: "1px solid rgba(46,196,198,0.2)",
+                  }}
+                >
+                  {/* Large center circle */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center">
+                      <Image
+                        src="/logo-dms.svg"
+                        alt="DanceMotion Eventstudio"
+                        width={140}
+                        height={140}
+                        className="mx-auto opacity-60"
+                      />
+                      <p className="mt-8 text-sm font-semibold" style={{ color: "var(--muted)" }}>
+                        Event Studio
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Decorative elements */}
+                  <div
+                    className="absolute top-8 right-8 h-16 w-16 rounded-full"
+                    style={{
+                      background: "radial-gradient(circle, rgba(46,196,198,0.25), transparent)",
+                      filter: "blur(24px)",
+                    }}
+                  ></div>
+                  <div
+                    className="absolute bottom-12 left-12 h-24 w-24 rounded-full"
+                    style={{
+                      background: "radial-gradient(circle, rgba(46,196,198,0.2), transparent)",
+                      filter: "blur(28px)",
+                    }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Background decorative element for eventstudio section */}
+          <div
+            className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-20 blur-3xl pointer-events-none"
+            style={{
+              background: "radial-gradient(circle, rgba(46,196,198,0.4), transparent)",
+              transform: "translate(100px, -100px)",
+            }}
+          ></div>
         </div>
       </section>
     </div>

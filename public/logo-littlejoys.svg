@@ -1,0 +1,21 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- LITTLE JOYS Logo: Triangle/mountain with joy rays -->
+  <defs>
+    <linearGradient id="littlejoysGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2EC4C6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a9496;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Diamond/mountain shape -->
+  <path d="M 100 20 L 160 110 L 100 180 L 40 110 Z" fill="none" stroke="url(#littlejoysGrad)" stroke-width="3"/>
+  
+  <!-- Radiating joy lines -->
+  <line x1="100" y1="35" x2="100" y2="55" stroke="#2EC4C6" stroke-width="2" opacity="0.7"/>
+  <line x1="125" y1="45" x2="140" y2="60" stroke="#2EC4C6" stroke-width="2" opacity="0.7"/>
+  <line x1="75" y1="45" x2="60" y2="60" stroke="#2EC4C6" stroke-width="2" opacity="0.7"/>
+  
+  <!-- TEXT: LITTLE JOYS -->
+  <text x="100" y="110" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="#2EC4C6">LITTLE</text>
+  <text x="100" y="130" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="#2EC4C6">JOYS</text>
+</svg>
