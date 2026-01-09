@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS public.event_requests (
   message TEXT,
   status TEXT DEFAULT 'new' CHECK (status IN ('new', 'read', 'in-progress', 'completed', 'rejected')),
   notes TEXT, -- Interne Notizen vom Event-Manager
-  assigned_to UUID REFERENCES public.admin_users(id),
+  assigned_to TEXT, -- TEXT weil admin_users.id als TEXT existiert
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
