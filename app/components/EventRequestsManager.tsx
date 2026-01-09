@@ -134,15 +134,15 @@ export default function EventRequestsManager() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-200px)]">
+    <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 md:gap-6 min-h-[500px] lg:h-[calc(100vh-200px)]">
       {/* Liste */}
-      <div className="lg:col-span-1 flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-        <div className="p-4 border-b dark:border-gray-700">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+      <div className={`lg:col-span-1 flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden ${selectedRequest ? 'hidden lg:flex' : 'flex'}`}>
+        <div className="p-3 md:p-4 border-b dark:border-gray-700">
+          <div className="flex items-center justify-between mb-3 md:mb-4">
+            <h2 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white">
               Event-Anfragen
               {newCount > 0 && (
-                <span className="ml-2 px-2 py-1 text-xs bg-blue-600 text-white rounded-full">
+                <span className="ml-2 px-2 py-0.5 md:py-1 text-xs bg-blue-600 text-white rounded-full">
                   {newCount} neu
                 </span>
               )}
@@ -153,7 +153,7 @@ export default function EventRequestsManager() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+            className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 text-sm md:text-base"
           >
             <option value="all">Alle ({requests.length})</option>
             <option value="new">Neu ({requests.filter(r => r.status === 'new').length})</option>
@@ -212,20 +212,27 @@ export default function EventRequestsManager() {
       </div>
 
       {/* Details */}
-      <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+      <div className={`lg:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden ${selectedRequest ? 'flex' : 'hidden lg:flex'}`}>
         {selectedRequest ? (
-          <div className="h-full flex flex-col">
+          <div className="h-full flex flex-col w-full">
             {/* Header */}
-            <div className="p-6 border-b dark:border-gray-700">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">{selectedRequest.name}</h2>
-                  <div className="flex flex-wrap gap-2">
+            <div className="p-4 md:p-6 border-b dark:border-gray-700">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  {/* Back button on mobile */}
+                  <button
+                    onClick={() => setSelectedRequest(null)}
+                    className="lg:hidden text-sm text-blue-600 dark:text-blue-400 mb-2 flex items-center gap-1"
+                  >
+                    ← Zurück zur Liste
+                  </button>
+                  <h2 className="text-xl md:text-2xl font-bold mb-2 text-gray-900 dark:text-white truncate">{selectedRequest.name}</h2>
+                  <div className="flex flex-wrap gap-1.5 md:gap-2">
                     {Object.entries(STATUS_CONFIG).map(([status, config]) => (
                       <button
                         key={status}
                         onClick={() => updateStatus(selectedRequest.id, status)}
-                        className={`px-3 py-1 rounded-full text-sm font-medium transition-all ${
+                        className={`px-2 md:px-3 py-0.5 md:py-1 rounded-full text-xs md:text-sm font-medium transition-all ${
                           selectedRequest.status === status
                             ? config.color
                             : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
@@ -238,7 +245,7 @@ export default function EventRequestsManager() {
                 </div>
                 <button
                   onClick={() => deleteRequest(selectedRequest.id)}
-                  className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                  className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex-shrink-0"
                 >
                   <Trash2 size={20} />
                 </button>
@@ -246,9 +253,9 @@ export default function EventRequestsManager() {
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-6">
               {/* Kontaktdaten */}
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 <div className="flex items-center gap-3">
                   <Mail className="w-5 h-5 text-gray-400" />
                   <div>
@@ -273,7 +280,7 @@ export default function EventRequestsManager() {
               </div>
 
               {/* Event-Details */}
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                 <div className="flex items-center gap-3">
                   <Calendar className="w-5 h-5 text-gray-400" />
                   <div>

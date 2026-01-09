@@ -140,12 +140,12 @@ export default function FAQManager() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">FAQ Verwaltung</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">FAQ Verwaltung</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm md:text-base">
             {faqs.length} Fragen • {faqs.filter(f => f.published).length} veröffentlicht
           </p>
         </div>
@@ -154,7 +154,7 @@ export default function FAQManager() {
             setIsCreating(true);
             resetForm();
           }}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto"
         >
           <Plus size={20} />
           Neue FAQ
@@ -162,10 +162,10 @@ export default function FAQManager() {
       </div>
 
       {/* Filter */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:flex-wrap">
         <button
           onClick={() => setFilterCategory('all')}
-          className={`px-4 py-2 rounded-lg transition-colors ${
+          className={`px-3 md:px-4 py-2 rounded-lg transition-colors whitespace-nowrap text-sm md:text-base flex-shrink-0 ${
             filterCategory === 'all'
               ? 'bg-blue-600 text-white'
               : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
@@ -177,7 +177,7 @@ export default function FAQManager() {
           <button
             key={cat.value}
             onClick={() => setFilterCategory(cat.value)}
-            className={`px-4 py-2 rounded-lg transition-colors ${
+            className={`px-3 md:px-4 py-2 rounded-lg transition-colors whitespace-nowrap text-sm md:text-base flex-shrink-0 ${
               filterCategory === cat.value
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
@@ -190,7 +190,7 @@ export default function FAQManager() {
 
       {/* Create Form */}
       {isCreating && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border-2 border-blue-500">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 md:p-6 border-2 border-blue-500">
           <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Neue FAQ erstellen</h3>
           <div className="space-y-4">
             <div>

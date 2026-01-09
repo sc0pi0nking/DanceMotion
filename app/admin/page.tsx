@@ -53,13 +53,13 @@ export default function AdminDashboard() {
   return (
     <div>
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Willkommen zurück</h1>
-        <p className="text-slate-400">Hier ist ein Überblick über deine DanceMotion Inhalte</p>
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">Willkommen zurück</h1>
+        <p className="text-slate-400 text-sm md:text-base">Hier ist ein Überblick über deine DanceMotion Inhalte</p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
         {/* Upcoming Events */}
         <StatCard
           icon={Calendar}
@@ -163,13 +163,14 @@ function StatCard({
   color: string
 }) {
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 hover:border-slate-600 transition">
-      <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center mb-4`}>
-        <Icon size={24} className="text-white" />
+    <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 md:p-6 hover:border-slate-600 transition">
+      <div className={`w-10 h-10 md:w-12 md:h-12 rounded-lg bg-gradient-to-br ${color} flex items-center justify-center mb-3 md:mb-4`}>
+        <Icon size={20} className="text-white md:hidden" />
+        <Icon size={24} className="text-white hidden md:block" />
       </div>
-      <p className="text-slate-400 text-sm mb-1">{label}</p>
-      <p className="text-2xl font-bold text-white mb-2">{value}</p>
-      <p className="text-xs text-slate-500">{sublabel}</p>
+      <p className="text-slate-400 text-xs md:text-sm mb-1 truncate">{label}</p>
+      <p className="text-xl md:text-2xl font-bold text-white mb-1 md:mb-2">{value}</p>
+      <p className="text-xs text-slate-500 truncate">{sublabel}</p>
     </div>
   )
 }

@@ -187,13 +187,13 @@ export default function TeamManager() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Team verwalten</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Team verwalten</h1>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto"
         >
           {showAddForm ? <X size={20} /> : <Plus size={20} />}
           {showAddForm ? 'Abbrechen' : 'Mitglied hinzufügen'}
@@ -202,10 +202,10 @@ export default function TeamManager() {
 
       {/* Add Form */}
       {showAddForm && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border-2 border-blue-500">
-          <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">Neues Team-Mitglied</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 md:p-6 border-2 border-blue-500">
+          <h2 className="text-lg md:text-xl font-bold mb-4 text-gray-900 dark:text-white">Neues Team-Mitglied</h2>
           
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             {/* Name */}
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">Name *</label>
