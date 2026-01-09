@@ -27,6 +27,7 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
     guest_count: '',
     message: '',
   });
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -35,6 +36,13 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
     e.preventDefault();
     setSubmitting(true);
     setError('');
+
+    // DSGVO-Prüfung: Datenschutz muss akzeptiert sein
+    if (!privacyAccepted) {
+      setError('Bitte akzeptieren Sie die Datenschutzerklärung');
+      setSubmitting(false);
+      return;
+    }
 
     try {
       const res = await fetch('/api/event-requests', {
@@ -106,7 +114,7 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Name */}
           <div>
-            <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
+            <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">
               <User size={16} className="inline mr-2" />
               Ihr Name <span className="text-red-500">*</span>
             </label>
@@ -114,7 +122,7 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Max Mustermann"
               required
             />
@@ -123,7 +131,7 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
           {/* Email & Phone */}
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
+              <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">
                 <Mail size={16} className="inline mr-2" />
                 E-Mail <span className="text-red-500">*</span>
               </label>
@@ -131,14 +139,14 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="max@beispiel.de"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
+              <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">
                 <Phone size={16} className="inline mr-2" />
                 Telefon
               </label>
@@ -146,7 +154,7 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="+49 123 456789"
               />
             </div>
@@ -155,13 +163,13 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
           {/* Event Type & Date */}
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
+              <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">
                 Event-Art <span className="text-red-500">*</span>
               </label>
               <select
                 value={formData.event_type}
                 onChange={(e) => setFormData({ ...formData, event_type: e.target.value })}
-                className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               >
                 {EVENT_TYPES.map((type) => (
@@ -173,7 +181,7 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
+              <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">
                 <Calendar size={16} className="inline mr-2" />
                 Wunschdatum
               </label>
@@ -181,14 +189,14 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
                 type="date"
                 value={formData.event_date}
                 onChange={(e) => setFormData({ ...formData, event_date: e.target.value })}
-                className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
           </div>
 
           {/* Guest Count */}
           <div>
-            <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
+            <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">
               <Users size={16} className="inline mr-2" />
               Anzahl Gäste (ca.)
             </label>
@@ -196,7 +204,7 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
               type="number"
               value={formData.guest_count}
               onChange={(e) => setFormData({ ...formData, guest_count: e.target.value })}
-              className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="z.B. 100"
               min="1"
             />
@@ -204,17 +212,49 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
 
           {/* Message */}
           <div>
-            <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
+            <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">
               <MessageSquare size={16} className="inline mr-2" />
               Ihre Nachricht
             </label>
             <textarea
               value={formData.message}
               onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-              className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"
+              className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"
               rows={4}
               placeholder="Beschreiben Sie Ihr Event und Ihre Wünsche..."
             />
+          </div>
+
+          {/* DSGVO: Datenschutz-Checkbox */}
+          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="privacy-consent"
+                checked={privacyAccepted}
+                onChange={(e) => setPrivacyAccepted(e.target.checked)}
+                className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                required
+              />
+              <label htmlFor="privacy-consent" className="text-sm text-gray-700 dark:text-gray-200">
+                Ich habe die{' '}
+                <a 
+                  href="/datenschutz" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                >
+                  Datenschutzerklärung
+                </a>{' '}
+                zur Kenntnis genommen. Ich stimme zu, dass meine Angaben zur Kontaktaufnahme und für Rückfragen 
+                dauerhaft gespeichert werden. <span className="font-semibold">Diese Einwilligung kann ich jederzeit 
+                per E-Mail an info@dancemotion-eschweiler.de widerrufen.</span>
+              </label>
+            </div>
+            <p className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+              Ihre Daten werden verschlüsselt übertragen und ausschließlich zur Bearbeitung Ihrer Anfrage verwendet. 
+              Nach 90 Tagen ohne Aktivität werden Ihre Daten automatisch gelöscht.
+            </p>
           </div>
 
           {/* Error */}

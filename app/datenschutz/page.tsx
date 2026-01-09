@@ -46,6 +46,35 @@ export default function DatenschutzPage() {
         </section>
 
         <section>
+          <h2 className="text-lg font-semibold mb-2" style={{ color: "var(--fg)" }}>Event-Anfragen (DSGVO)</h2>
+          <div className="space-y-3" style={{ color: "var(--muted)" }}>
+            <p>
+              <strong>Rechtsgrundlage:</strong> Die Verarbeitung Ihrer Daten erfolgt auf Basis Ihrer Einwilligung (Art. 6 Abs. 1 lit. a DSGVO).
+            </p>
+            <p>
+              <strong>Zweck:</strong> Ihre über das Event-Anfrageformular übermittelten Daten (Name, E-Mail, Telefon, Event-Details, Nachricht) 
+              werden ausschließlich zur Bearbeitung Ihrer Anfrage und zur Kontaktaufnahme verwendet.
+            </p>
+            <p>
+              <strong>Speicherdauer:</strong> Ihre Daten werden für maximal 90 Tage nach Abschluss (Status: "Abgeschlossen" oder "Abgelehnt") 
+              gespeichert. Unbearbeitete Anfragen werden nach 180 Tagen automatisch gelöscht.
+            </p>
+            <p>
+              <strong>Widerruf:</strong> Sie können Ihre Einwilligung jederzeit per E-Mail an{' '}
+              <a href="mailto:info@dancemotion-eschweiler.de" className="underline">info@dancemotion-eschweiler.de</a>{' '}
+              widerrufen. Ihre Daten werden dann umgehend gelöscht.
+            </p>
+            <p>
+              <strong>Weitergabe:</strong> Ihre Daten werden nicht an Dritte weitergegeben.
+            </p>
+            <p>
+              <strong>Verschlüsselung:</strong> Die Übertragung erfolgt verschlüsselt über HTTPS. Die Speicherung erfolgt in einer 
+              gesicherten Datenbank mit Zugriffsbeschränkung.
+            </p>
+          </div>
+        </section>
+
+        <section>
           <h2 className="text-lg font-semibold mb-2" style={{ color: "var(--fg)" }}>Cookies</h2>
           <EditableContent
             contentKey="datenschutz.cookies"

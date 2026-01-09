@@ -12,6 +12,7 @@ interface AdminLayoutProps {
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [user, setUser] = useState<any>(null)
+  const [userRole, setUserRole] = useState<string>('')
   const router = useRouter()
 
   useEffect(() => {
@@ -28,6 +29,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       }
       const data = await res.json()
       setUser(data.user)
+      setUserRole(data.user.role || '')
     } catch {
       router.push('/admin/login')
     }
@@ -40,14 +42,20 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     } catch {}
   }
 
-  const navItems = [
-    { icon: BarChart3, label: 'Dashboard', href: '/admin' },
-    { icon: Calendar, label: 'Termine', href: '/admin/events' },
-    { icon: MessageCircle, label: 'Event-Anfragen', href: '/admin/event-requests' },
-    { icon: FileText, label: 'Inhalte', href: '/admin/content' },
-    { icon: Images, label: 'Galerie', href: '/admin/gallery' },
-    { icon: FileDown, label: 'Dokumente', href: '/admin/documents' },
+  // Alle verfügbaren Navigation Items
+  const allNavItems = [
+    { icon: BarChart3, label: 'Dashboard', href: '/admin', roles: ['admin'] },
+    { icon: Calendar, label: 'Termine', href: '/admin/events', roles: ['admin'] },
+    { icon: MessageCircle, label: 'Event-Anfragen', href: '/admin/event-requests', roles: ['admin', 'event-manager'] },
+    { icon: FileText, label: 'Inhalte', href: '/admin/content', roles: ['admin', 'editor'] },
+    { icon: Images, label: 'Galerie', href: '/admin/gallery', roles: ['admin', 'editor'] },
+    { icon: FileDown, label: 'Dokumente', href: '/admin/documents', roles: ['admin', 'editor'] },
   ]
+
+  // Filter Navigation Items basierend auf Rolle
+  const navItems = allNavItems.filter(item => 
+    item.roles.includes(userRole) || userRole === 'admin'
+  )
 
   return (
     <div className="flex h-screen bg-slate-900 text-slate-100">
