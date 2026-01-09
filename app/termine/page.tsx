@@ -1,15 +1,36 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import HeroScene from "../components/HeroScene";
 import EventTimeline from "../components/EventTimeline";
-import { getUpcomingEvents, getPastEvents } from "../../lib/events";
+import { fetchUpcomingEvents, fetchPastEvents } from "../../lib/events-db";
+import type { Event } from "../../lib/supabase";
 
 export default function TerminePage() {
-  const upcomingEvents = getUpcomingEvents();
-  const pastEvents = getPastEvents();
+  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
+  const [pastEvents, setPastEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showAllPast, setShowAllPast] = useState(false);
+
+  useEffect(() => {
+    loadEvents();
+  }, []);
+
+  async function loadEvents(): Promise<void> {
+    try {
+      const [upcoming, past] = await Promise.all([
+        fetchUpcomingEvents(),
+        fetchPastEvents(),
+      ]);
+      setUpcomingEvents(upcoming);
+      setPastEvents(past);
+    } catch (error) {
+      console.error("Failed to load events:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const displayedPastEvents = showAllPast ? pastEvents : pastEvents.slice(0, 8);
 

@@ -1,12 +1,32 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
+import { useState, useEffect } from "react";
 import HeroScene from "./components/HeroScene";
 import EventTimeline from "./components/EventTimeline";
 import { tiles } from "../lib/site-data";
-import { getUpcomingEvents } from "../lib/events";
+import { fetchUpcomingEvents } from "../lib/events-db";
+import type { Event } from "../lib/supabase";
 
 export default function Home() {
+  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadEvents() {
+      try {
+        const events = await fetchUpcomingEvents(4);
+        setUpcomingEvents(events);
+      } catch (error) {
+        console.error("Failed to load events:", error);
+        setUpcomingEvents([]);
+      } finally {
+        setEventsLoading(false);
+      }
+    }
+    loadEvents();
+  }, []);
+
   return (
     <div className="min-h-screen">
       <HeroScene />
@@ -125,7 +145,7 @@ export default function Home() {
           </p>
         </div>
 
-        <EventTimeline events={getUpcomingEvents(4)} variant="compact" />
+        <EventTimeline events={upcomingEvents} variant="compact" />
 
         <div className="mt-12 text-center">
           <Link

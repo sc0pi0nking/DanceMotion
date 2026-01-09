@@ -3,10 +3,11 @@
 import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Event, formatDateGerman, getGroupBadgeInfo, getCategoryColor } from "../../lib/events";
+import { formatDateGerman, getGroupBadgeInfo, getCategoryColor } from "../../lib/events";
+import type { Event as EventType } from "../../lib/supabase";
 
 export interface EventTimelineProps {
-  events: Event[];
+  events: EventType[];
   variant?: "compact" | "full";
   showYear?: boolean;
 }
@@ -56,7 +57,7 @@ export default function EventTimeline({
 }
 
 interface EventCardProps {
-  event: Event;
+  event: EventType;
   index: number;
   isCompact: boolean;
   showYear: boolean;
@@ -167,7 +168,7 @@ function EventCard({
                 event.groups.length > 0 &&
                 !isCompact &&
                 event.groups.map((groupSlug) => {
-                  const groupInfo = getGroupBadgeInfo(groupSlug);
+                  const groupInfo = getGroupBadgeInfo(groupSlug as any);
                   return (
                     <span
                       key={groupSlug}
