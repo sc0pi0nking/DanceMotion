@@ -139,7 +139,7 @@ export default function EventRequestsManager() {
       <div className="lg:col-span-1 flex flex-col bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
         <div className="p-4 border-b dark:border-gray-700">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
               Event-Anfragen
               {newCount > 0 && (
                 <span className="ml-2 px-2 py-1 text-xs bg-blue-600 text-white rounded-full">
@@ -153,7 +153,7 @@ export default function EventRequestsManager() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+            className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
           >
             <option value="all">Alle ({requests.length})</option>
             <option value="new">Neu ({requests.filter(r => r.status === 'new').length})</option>
@@ -189,19 +189,19 @@ export default function EventRequestsManager() {
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <h3 className="font-semibold truncate">{request.name}</h3>
+                          <h3 className="font-semibold truncate text-gray-900 dark:text-white">{request.name}</h3>
                           {request.status === 'new' && (
                             <span className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0"></span>
                           )}
                         </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                        <p className="text-sm text-gray-600 dark:text-gray-300 truncate">
                           {EVENT_TYPE_LABELS[request.event_type] || request.event_type}
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                           {new Date(request.created_at).toLocaleDateString('de-DE')}
                         </p>
                       </div>
-                      <StatusIcon size={16} className="flex-shrink-0 text-gray-400" />
+                      <StatusIcon size={16} className="flex-shrink-0 text-gray-400 dark:text-gray-500" />
                     </div>
                   </div>
                 );
@@ -219,7 +219,7 @@ export default function EventRequestsManager() {
             <div className="p-6 border-b dark:border-gray-700">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <h2 className="text-2xl font-bold mb-2">{selectedRequest.name}</h2>
+                  <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">{selectedRequest.name}</h2>
                   <div className="flex flex-wrap gap-2">
                     {Object.entries(STATUS_CONFIG).map(([status, config]) => (
                       <button
@@ -228,7 +228,7 @@ export default function EventRequestsManager() {
                         className={`px-3 py-1 rounded-full text-sm font-medium transition-all ${
                           selectedRequest.status === status
                             ? config.color
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                         }`}
                       >
                         {config.label}
@@ -329,7 +329,7 @@ export default function EventRequestsManager() {
                     setSelectedRequest({ ...selectedRequest, notes: e.target.value });
                   }}
                   onBlur={(e) => updateNotes(selectedRequest.id, e.target.value)}
-                  className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 resize-y"
+                  className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 resize-y"
                   rows={4}
                   placeholder="Notizen zur Anfrage..."
                 />
@@ -337,9 +337,9 @@ export default function EventRequestsManager() {
             </div>
           </div>
         ) : (
-          <div className="h-full flex items-center justify-center text-gray-500">
+          <div className="h-full flex items-center justify-center text-gray-500 dark:text-gray-400">
             <div className="text-center">
-              <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+              <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
               <p>Wählen Sie eine Anfrage aus der Liste</p>
             </div>
           </div>
