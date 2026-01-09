@@ -1,18 +1,33 @@
 "use client";
 import Link from "next/link";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import ThemeToggle from "./ThemeToggle";
+import { Settings } from "lucide-react";
 
 export default function Header() {
-  const [scrolled, setScrolled] = React.useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 32);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Check admin session
+  useEffect(() => {
+    async function checkAdmin() {
+      try {
+        const res = await fetch('/api/admin/auth/session')
+        setIsAdmin(res.ok)
+      } catch {
+        setIsAdmin(false)
+      }
+    }
+    checkAdmin()
+  }, [])
 
   return (
     <header className={`site-header transition-all duration-300 ${scrolled ? "scrolled" : ""}`}>
@@ -62,6 +77,22 @@ export default function Header() {
             >
               Eventstudio
             </a>
+            
+            {/* Admin Button - nur für eingeloggte Admins */}
+            {isAdmin && (
+              <Link 
+                href="/admin" 
+                className="site-nav-link flex items-center gap-2 px-3 py-2 rounded-lg transition-all"
+                style={{
+                  backgroundColor: "rgba(46,196,198,0.1)",
+                  color: "var(--accent)",
+                }}
+                title="Admin-Bereich"
+              >
+                <Settings size={16} />
+                <span className="font-semibold">Admin</span>
+              </Link>
+            )}
           </nav>
 
           {/* Theme Toggle */}
