@@ -53,3 +53,26 @@ export async function PUT(
     )
   }
 }
+
+// DELETE - Remove content item
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ key: string }> }
+) {
+  try {
+    const { key } = await params
+    const { error } = await supabaseServer
+      .from('content')
+      .delete()
+      .eq('key', key)
+
+    if (error) throw error
+
+    return Response.json({ success: true })
+  } catch (error: any) {
+    return Response.json(
+      { error: error.message },
+      { status: 500 }
+    )
+  }
+}
