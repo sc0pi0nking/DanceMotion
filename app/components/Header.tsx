@@ -51,6 +51,12 @@ export default function Header() {
               Gruppen
             </a>
             <a 
+              href="/termine" 
+              className="site-nav-link"
+            >
+              Termine
+            </a>
+            <a 
               href="/eventstudio" 
               className="site-nav-link"
             >

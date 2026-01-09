@@ -2,7 +2,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import HeroScene from "./components/HeroScene";
+import EventTimeline from "./components/EventTimeline";
 import { tiles } from "../lib/site-data";
+import { getUpcomingEvents } from "../lib/events";
 
 export default function Home() {
   return (
@@ -109,6 +111,41 @@ export default function Home() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Events Timeline Section - NEW */}
+      <section id="events" className="mx-auto max-w-6xl px-6 py-28">
+        <div className="mb-16">
+          <h2 className="text-4xl font-bold" style={{ color: "var(--fg)" }}>
+            Nächste Auftritte & Events
+          </h2>
+          <p className="mt-3 text-lg" style={{ color: "var(--muted)" }}>
+            Was als Nächstes ansteht – komm vorbei und supporte uns.
+          </p>
+        </div>
+
+        <EventTimeline events={getUpcomingEvents(4)} variant="compact" />
+
+        <div className="mt-12 text-center">
+          <Link
+            href="/termine"
+            className="inline-flex items-center px-8 py-4 rounded-full font-semibold transition-all duration-300"
+            style={{
+              backgroundColor: "var(--accent)",
+              color: "#000",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.filter = "drop-shadow(0 12px 28px rgba(46,196,198,0.28))";
+              e.currentTarget.style.transform = "translateY(-2px) scale(1.02)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.filter = "none";
+              e.currentTarget.style.transform = "none";
+            }}
+          >
+            Alle Termine ansehen →
+          </Link>
         </div>
       </section>
 
