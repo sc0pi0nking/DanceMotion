@@ -34,6 +34,11 @@ export async function PUT(
     const { id } = await params
     const event: Partial<Event> = await req.json()
 
+    // Fix: Convert empty time string to null
+    if (event.time === '') {
+      event.time = null as any
+    }
+
     const { data, error } = await supabaseServer
       .from('events')
       .update({

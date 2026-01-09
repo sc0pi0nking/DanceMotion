@@ -33,6 +33,11 @@ export async function POST(req: Request) {
   try {
     const event: Omit<Event, 'id' | 'created_at' | 'updated_at' | 'updated_by'> = await req.json()
 
+    // Fix: Convert empty time string to null
+    if (event.time === '') {
+      event.time = null as any
+    }
+
     console.log('Creating event:', event);
 
     const { data, error } = await supabaseServer
