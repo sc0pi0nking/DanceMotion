@@ -1,0 +1,14 @@
+Logos für DanceMotion:
+
+1. DanceMotion Event-Studio Logo - Komplettes Logo mit Schriftzug
+2. Little-Joys Showtanzgruppe Logo - Diamond-Shape mit Strahlen
+3. Smileys Showtanzgruppe Logo - Dreieck mit Smiley
+4. Emotion Showtanzgruppe Logo - Schriftzug mit Strahlen-Effekt
+5. DanceMotion Eschweiler Logo - Tänzerin-Silhouette
+
+Bitte als SVG-Dateien im public/ Ordner speichern:
+- logo-studio.svg
+- logo-littlejoys.svg (diamond)
+- logo-smileys.svg (smiley)
+- logo-emotion.svg (emotion)
+- logo-dancemotion.svg (main)
