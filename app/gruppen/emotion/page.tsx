@@ -33,7 +33,7 @@ export default function EmotionPage() {
       />
       
       <div className="mt-16 space-y-12">
-        <section>
+        <section className="glass rounded-2xl p-8 md:p-12">
           <h2 className="text-2xl font-semibold mb-3" style={{ color: "var(--fg)" }}>Für wen?</h2>
           <EditableContent
             contentKey="emotion.for_whom"
@@ -44,7 +44,7 @@ export default function EmotionPage() {
           />
         </section>
 
-        <section>
+        <section className="glass rounded-2xl p-8 md:p-12">
           <h2 className="text-2xl font-semibold mb-3" style={{ color: "var(--fg)" }}>Was erwartet dich?</h2>
           <EditableContent
             contentKey="emotion.what_to_expect"
@@ -60,7 +60,7 @@ export default function EmotionPage() {
           />
         </section>
 
-        <section>
+        <section className="glass rounded-2xl p-8 md:p-12">
           <h2 className="text-2xl font-semibold mb-3" style={{ color: "var(--fg)" }}>Kontakt & Anmeldung</h2>
           <EditableContent
             contentKey="emotion.contact_text"
