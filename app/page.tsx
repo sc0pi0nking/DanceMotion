@@ -33,8 +33,17 @@ export default function Home() {
     <div className="min-h-screen">
       <HeroScene />
 
+      {/* Decorative gradient background under header */}
+      <div 
+        className="h-32 -mt-16 pointer-events-none relative z-0"
+        style={{
+          background: "linear-gradient(180deg, rgba(46,196,198,0.1) 0%, rgba(46,196,198,0.05) 50%, transparent 100%)",
+          backdropFilter: "blur(10px)"
+        }}
+      />
+
       {/* Groups Section - Alternating Layout */}
-      <section id="groups" className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
+      <section id="groups" className="mx-auto max-w-6xl px-6 py-20 sm:py-24 relative z-10">
         <div className="mb-16">
           <h2 className="text-4xl font-bold" style={{ color: "var(--fg)" }}>
             Unsere Gruppen
