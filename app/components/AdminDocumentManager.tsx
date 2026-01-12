@@ -266,6 +266,49 @@ export default function AdminDocumentManager() {
           </button>
         </form>
       </div>
+              className="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+              rows={3}
+              placeholder="Optionale Beschreibung..."
+            />
+          </div>
+
+          {/* Kategorie */}
+          <div>
+            <label className="block font-medium mb-2 text-gray-900 dark:text-gray-100">
+              Kategorie <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+              required
+            >
+              {CATEGORIES.map((cat) => (
+                <option key={cat.value} value={cat.value}>
+                  {cat.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Error */}
+          {error && (
+            <div className="flex items-center gap-2 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400">
+              <AlertCircle className="w-5 h-5" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={uploading || !selectedFile || !title}
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+          >
+            {uploading ? 'Wird hochgeladen...' : 'Dokument hochladen'}
+          </button>
+        </form>
+      </div>
 
       {/* Dokumente Liste */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
@@ -360,111 +403,5 @@ export default function AdminDocumentManager() {
     </div>
   );
 }
-              className="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
-              rows={3}
-              placeholder="Optionale Beschreibung..."
-            />
-          </div>
-
-          {/* Kategorie */}
-          <div>
-            <label className="block font-medium mb-2 text-gray-900 dark:text-gray-100">
-              Kategorie <span className="text-red-500">*</span>
-            </label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
-              required
-            >
-              {CATEGORIES.map((cat) => (
-                <option key={cat.value} value={cat.value}>
-                  {cat.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Error */}
-          {error && (
-            <div className="flex items-center gap-2 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400">
-              <AlertCircle className="w-5 h-5" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={uploading || !selectedFile || !title}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
-          >
-            {uploading ? 'Wird hochgeladen...' : 'Dokument hochladen'}
-          </button>
-        </form>
-      </div>
-
-      {/* Dokumente Liste */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <h2 className="text-2xl font-bold mb-6">
-          Hochgeladene Dokumente ({documents.length})
-        </h2>
-
-        {documents.length === 0 ? (
-          <p className="text-center text-gray-500 py-8">
-            Noch keine Dokumente hochgeladen
-          </p>
-        ) : (
-          <div className="space-y-4">
-            {documents.map((doc) => (
-              <div
-                key={doc.id}
-                className="flex items-start gap-4 p-4 border rounded-lg dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-              >
-                <FileText className="w-8 h-8 text-red-500 flex-shrink-0 mt-1" />
-
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-lg">{doc.title}</h3>
-                  {doc.description && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      {doc.description}
-                    </p>
-                  )}
-                  <div className="flex flex-wrap gap-3 mt-2 text-sm text-gray-500">
-                    <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">
-                      {CATEGORIES.find((c) => c.value === doc.category)?.label ||
-                        doc.category}
-                    </span>
-                    <span>{formatFileSize(doc.file_size)}</span>
-                    <span>
-                      {new Date(doc.created_at).toLocaleDateString('de-DE')}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <a
-                    href={doc.file_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                    title="Herunterladen"
-                  >
-                    <Download className="w-5 h-5" />
-                  </a>
-                  <button
-                    onClick={() => handleDelete(doc.id, doc.title)}
-                    className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                    title="Löschen"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
+}
 }
