@@ -12,9 +12,9 @@ export default function ParallaxBackground() {
   return (
     <motion.div
       style={{ y: bgY }}
-      className="fixed inset-0 pointer-events-none z-0 min-h-screen"
+      className="absolute inset-0 pointer-events-none z-0 w-full"
     >
-      {/* SVG background with waves and gradient - very tall ViewBox to cover entire page */}
+      {/* SVG background with waves and gradient - covers entire scrollable area */}
       <svg
         className="w-full h-full pointer-events-none"
         viewBox="0 0 1200 3000"
