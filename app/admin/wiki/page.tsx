@@ -15,7 +15,7 @@ import {
   HelpCircle,
   Folder,
   GitBranch,
-  Docker,
+  Container,
   Server,
   Zap,
   ChevronRight,
