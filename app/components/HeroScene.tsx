@@ -103,6 +103,7 @@ export default function HeroScene() {
           transition={{ duration: 16, repeat: Infinity, ease: "easeInOut", delay: 2 } as any}
         />
       </svg>
+      </motion.div>
 
       {/* Content overlay */}
       <motion.div
