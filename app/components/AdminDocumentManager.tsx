@@ -266,49 +266,6 @@ export default function AdminDocumentManager() {
           </button>
         </form>
       </div>
-              className="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
-              rows={3}
-              placeholder="Optionale Beschreibung..."
-            />
-          </div>
-
-          {/* Kategorie */}
-          <div>
-            <label className="block font-medium mb-2 text-gray-900 dark:text-gray-100">
-              Kategorie <span className="text-red-500">*</span>
-            </label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
-              required
-            >
-              {CATEGORIES.map((cat) => (
-                <option key={cat.value} value={cat.value}>
-                  {cat.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Error */}
-          {error && (
-            <div className="flex items-center gap-2 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400">
-              <AlertCircle className="w-5 h-5" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={uploading || !selectedFile || !title}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
-          >
-            {uploading ? 'Wird hochgeladen...' : 'Dokument hochladen'}
-          </button>
-        </form>
-      </div>
 
       {/* Dokumente Liste */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
@@ -402,6 +359,4 @@ export default function AdminDocumentManager() {
       </div>
     </div>
   );
-}
-}
 }
