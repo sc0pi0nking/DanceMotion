@@ -154,7 +154,9 @@ export default function TerminePage() {
         style={{
           backgroundColor: "var(--panel)",
           border: "1px solid var(--border)",
-          margin: "0 24px 24px 24px",
+          marginLeft: "auto",
+          marginRight: "auto",
+          marginBottom: "24px",
         }}
       >
         <h3

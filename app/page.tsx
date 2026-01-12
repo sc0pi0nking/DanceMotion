@@ -49,22 +49,22 @@ export default function Home() {
           {tiles.map((tile, index) => (
             <div
               key={tile.slug}
-              className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center"
+              className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center group"
               style={{
                 direction: index % 2 === 1 ? "rtl" : "ltr",
               }}
             >
               {/* Image/Visual Side */}
-              <div className="relative h-64 lg:h-80 rounded-2xl overflow-hidden">
+              <div className="relative h-64 lg:h-80 rounded-2xl overflow-hidden transition-all duration-500 group-hover:shadow-2xl">
                 <div
-                  className="absolute inset-0 rounded-2xl"
+                  className="absolute inset-0 rounded-2xl transition-all duration-500"
                   style={{
                     background: `linear-gradient(135deg, rgba(46,196,198,0.2), rgba(46,196,198,0.08))`,
                     backdropFilter: "blur(10px)",
                     border: "1px solid rgba(46,196,198,0.15)",
                   }}
                 >
-                  <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="absolute inset-0 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
                     <div className="text-center">
                       {tile.logo ? (
                         <Image
@@ -72,10 +72,10 @@ export default function Home() {
                           alt={tile.title}
                           width={120}
                           height={120}
-                          className="mx-auto opacity-70"
+                          className="mx-auto opacity-70 group-hover:opacity-100 transition-opacity duration-500"
                         />
                       ) : (
-                        <div className="text-5xl font-bold opacity-20" style={{ color: "var(--accent)" }}>
+                        <div className="text-5xl font-bold opacity-20 group-hover:opacity-40 transition-opacity duration-500" style={{ color: "var(--accent)" }}>
                           💃
                         </div>
                       )}
@@ -86,13 +86,13 @@ export default function Home() {
                   </div>
                   {/* Decorative circles */}
                   <div
-                    className="absolute top-4 right-4 h-20 w-20 rounded-full opacity-15"
+                    className="absolute top-4 right-4 h-20 w-20 rounded-full opacity-15 group-hover:opacity-25 transition-opacity duration-500"
                     style={{
                       background: "radial-gradient(circle, var(--accent), transparent)",
                     }}
                   ></div>
                   <div
-                    className="absolute bottom-4 left-4 h-28 w-28 rounded-full opacity-10"
+                    className="absolute bottom-4 left-4 h-28 w-28 rounded-full opacity-10 group-hover:opacity-20 transition-opacity duration-500"
                     style={{
                       background: "radial-gradient(circle, var(--accent), transparent)",
                     }}

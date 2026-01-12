@@ -58,19 +58,28 @@ export default async function FAQPage() {
       )}
 
       {/* Kontakt CTA */}
-      <div className="mt-12 p-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg text-white text-center">
-        <h2 className="text-2xl font-bold mb-2">Noch Fragen?</h2>
-        <p className="mb-4">Wir helfen Ihnen gerne weiter!</p>
+      <div className="mt-12 p-8 rounded-2xl text-center" style={{ backgroundColor: "var(--panel)", border: "1px solid var(--border)" }}>
+        <h2 className="text-2xl font-bold mb-2" style={{ color: "var(--fg)" }}>Noch Fragen?</h2>
+        <p className="mb-6" style={{ color: "var(--muted)" }}>Wir helfen Ihnen gerne weiter!</p>
         <div className="flex flex-wrap gap-4 justify-center">
           <a
             href="mailto:info@dancemotion-eschweiler.de"
-            className="px-6 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+            className="px-6 py-3 font-semibold rounded-full transition-all duration-300"
+            style={{
+              backgroundColor: "var(--accent)",
+              color: "var(--bg)",
+            }}
           >
             E-Mail senden
           </a>
           <a
             href="tel:02403555444"
-            className="px-6 py-3 bg-white/20 backdrop-blur font-semibold rounded-lg hover:bg-white/30 transition-colors"
+            className="px-6 py-3 font-semibold rounded-full transition-all duration-300"
+            style={{
+              backgroundColor: "rgba(46,196,198,0.1)",
+              color: "var(--accent)",
+              border: "1px solid rgba(46,196,198,0.3)",
+            }}
           >
             02403 555444
           </a>

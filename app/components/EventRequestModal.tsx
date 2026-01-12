@@ -84,17 +84,18 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div className="rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl" style={{ backgroundColor: "var(--bg)" }}>
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-t-2xl">
+        <div className="sticky top-0 p-6 rounded-t-2xl" style={{ backgroundColor: "var(--accent)" }}>
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-bold">Event-Anfrage</h2>
-              <p className="text-blue-100 mt-1">Wir melden uns schnellstmöglich bei Ihnen!</p>
+              <h2 className="text-2xl font-bold" style={{ color: "var(--bg)" }}>Event-Anfrage</h2>
+              <p className="mt-1" style={{ color: "rgba(10,10,10,0.7)" }}>Wir melden uns schnellstmöglich bei Ihnen!</p>
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+              className="p-2 rounded-lg transition-colors"
+              style={{ color: "var(--bg)" }}
             >
               <X size={24} />
             </button>
@@ -103,8 +104,8 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
 
         {/* Success Message */}
         {success && (
-          <div className="m-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-            <p className="text-green-800 dark:text-green-200 font-semibold text-center">
+          <div className="m-6 p-4 border rounded-lg" style={{ backgroundColor: "rgba(34,197,94,0.1)", borderColor: "rgba(34,197,94,0.3)", color: "rgba(34,197,94,0.8)" }}>
+            <p className="font-semibold text-center">
               ✓ Ihre Anfrage wurde erfolgreich gesendet!
             </p>
           </div>
@@ -114,15 +115,21 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Name */}
           <div>
-            <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">
+            <label className="block text-sm font-medium mb-2" style={{ color: "var(--fg)" }}>
               <User size={16} className="inline mr-2" />
-              Ihr Name <span className="text-red-500">*</span>
+              Ihr Name <span style={{ color: "var(--accent)" }}>*</span>
             </label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent"
+              style={{
+                backgroundColor: "var(--panel)",
+                color: "var(--fg)",
+                borderColor: "var(--border)",
+                "--tw-ring-color": "var(--accent)",
+              } as any}
               placeholder="Max Mustermann"
               required
             />
@@ -131,22 +138,28 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
           {/* Email & Phone */}
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">
+              <label className="block text-sm font-medium mb-2" style={{ color: "var(--fg)" }}>
                 <Mail size={16} className="inline mr-2" />
-                E-Mail <span className="text-red-500">*</span>
+                E-Mail <span style={{ color: "var(--accent)" }}>*</span>
               </label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent"
+                style={{
+                  backgroundColor: "var(--panel)",
+                  color: "var(--fg)",
+                  borderColor: "var(--border)",
+                  "--tw-ring-color": "var(--accent)",
+                } as any}
                 placeholder="max@beispiel.de"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">
+              <label className="block text-sm font-medium mb-2" style={{ color: "var(--fg)" }}>
                 <Phone size={16} className="inline mr-2" />
                 Telefon
               </label>
@@ -154,7 +167,13 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent"
+                style={{
+                  backgroundColor: "var(--panel)",
+                  color: "var(--fg)",
+                  borderColor: "var(--border)",
+                  "--tw-ring-color": "var(--accent)",
+                } as any}
                 placeholder="+49 123 456789"
               />
             </div>
@@ -163,13 +182,19 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
           {/* Event Type & Date */}
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">
-                Event-Art <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium mb-2" style={{ color: "var(--fg)" }}>
+                Event-Art <span style={{ color: "var(--accent)" }}>*</span>
               </label>
               <select
                 value={formData.event_type}
                 onChange={(e) => setFormData({ ...formData, event_type: e.target.value })}
-                className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent"
+                style={{
+                  backgroundColor: "var(--panel)",
+                  color: "var(--fg)",
+                  borderColor: "var(--border)",
+                  "--tw-ring-color": "var(--accent)",
+                } as any}
                 required
               >
                 {EVENT_TYPES.map((type) => (
@@ -181,7 +206,7 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">
+              <label className="block text-sm font-medium mb-2" style={{ color: "var(--fg)" }}>
                 <Calendar size={16} className="inline mr-2" />
                 Wunschdatum
               </label>
@@ -189,14 +214,20 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
                 type="date"
                 value={formData.event_date}
                 onChange={(e) => setFormData({ ...formData, event_date: e.target.value })}
-                className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent"
+                style={{
+                  backgroundColor: "var(--panel)",
+                  color: "var(--fg)",
+                  borderColor: "var(--border)",
+                  "--tw-ring-color": "var(--accent)",
+                } as any}
               />
             </div>
           </div>
 
           {/* Guest Count */}
           <div>
-            <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">
+            <label className="block text-sm font-medium mb-2" style={{ color: "var(--fg)" }}>
               <Users size={16} className="inline mr-2" />
               Anzahl Gäste (ca.)
             </label>
@@ -204,7 +235,13 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
               type="number"
               value={formData.guest_count}
               onChange={(e) => setFormData({ ...formData, guest_count: e.target.value })}
-              className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent"
+              style={{
+                backgroundColor: "var(--panel)",
+                color: "var(--fg)",
+                borderColor: "var(--border)",
+                "--tw-ring-color": "var(--accent)",
+              } as any}
               placeholder="z.B. 100"
               min="1"
             />
@@ -212,37 +249,47 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
 
           {/* Message */}
           <div>
-            <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">
+            <label className="block text-sm font-medium mb-2" style={{ color: "var(--fg)" }}>
               <MessageSquare size={16} className="inline mr-2" />
               Ihre Nachricht
             </label>
             <textarea
               value={formData.message}
               onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-              className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"
+              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent resize-y"
+              style={{
+                backgroundColor: "var(--panel)",
+                color: "var(--fg)",
+                borderColor: "var(--border)",
+                "--tw-ring-color": "var(--accent)",
+              } as any}
               rows={4}
               placeholder="Beschreiben Sie Ihr Event und Ihre Wünsche..."
             />
           </div>
 
           {/* DSGVO: Datenschutz-Checkbox */}
-          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <div className="p-4 border rounded-lg" style={{ backgroundColor: "rgba(46,196,198,0.08)", borderColor: "rgba(46,196,198,0.3)" }}>
             <div className="flex items-start gap-3">
               <input
                 type="checkbox"
                 id="privacy-consent"
                 checked={privacyAccepted}
                 onChange={(e) => setPrivacyAccepted(e.target.checked)}
-                className="mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                className="mt-1 w-4 h-4 rounded focus:outline-none focus:ring-2"
+                style={{
+                  accentColor: "var(--accent)",
+                }}
                 required
               />
-              <label htmlFor="privacy-consent" className="text-sm text-gray-700 dark:text-gray-200">
+              <label htmlFor="privacy-consent" className="text-sm" style={{ color: "var(--muted)" }}>
                 Ich habe die{' '}
                 <a 
                   href="/datenschutz" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                  className="hover:underline font-medium"
+                  style={{ color: "var(--accent)" }}
                 >
                   Datenschutzerklärung
                 </a>{' '}
@@ -251,7 +298,7 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
                 per E-Mail an info@dancemotion-eschweiler.de widerrufen.</span>
               </label>
             </div>
-            <p className="mt-2 text-xs text-gray-600 dark:text-gray-400">
+            <p className="mt-2 text-xs" style={{ color: "var(--muted)" }}>
               Ihre Daten werden verschlüsselt übertragen und ausschließlich zur Bearbeitung Ihrer Anfrage verwendet. 
               Nach 90 Tagen ohne Aktivität werden Ihre Daten automatisch gelöscht.
             </p>
@@ -259,8 +306,8 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
 
           {/* Error */}
           {error && (
-            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-              <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
+            <div className="p-4 border rounded-lg" style={{ backgroundColor: "rgba(239,68,68,0.1)", borderColor: "rgba(239,68,68,0.3)", color: "rgba(239,68,68,0.8)" }}>
+              <p className="text-sm">{error}</p>
             </div>
           )}
 
@@ -269,14 +316,23 @@ export default function EventRequestModal({ isOpen, onClose }: EventRequestModal
             <button
               type="submit"
               disabled={submitting || success}
-              className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 transition-all shadow-lg"
+              className="flex-1 font-semibold py-3 px-6 rounded-full transition-all shadow-lg hover:scale-105 active:scale-95 disabled:opacity-50"
+              style={{
+                backgroundColor: "var(--accent)",
+                color: "var(--bg)",
+              }}
             >
               {submitting ? 'Wird gesendet...' : success ? '✓ Gesendet!' : 'Anfrage senden'}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100"
+              className="px-6 py-3 rounded-full transition-colors"
+              style={{
+                backgroundColor: "var(--panel)",
+                color: "var(--fg)",
+                border: "1px solid var(--border)",
+              }}
             >
               Abbrechen
             </button>

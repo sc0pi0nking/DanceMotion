@@ -79,7 +79,7 @@ export default function TeamPage() {
             >
               <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
                 {/* Image */}
-                <div className="relative h-80 bg-gradient-to-br from-blue-500 to-purple-600 overflow-hidden">
+                <div className="relative h-80 overflow-hidden" style={{ backgroundColor: "var(--panel)", backgroundImage: "linear-gradient(135deg, rgba(46,196,198,0.2), rgba(46,196,198,0.08))" }}>
                   {member.image_url ? (
                     <Image
                       src={member.image_url}
@@ -89,8 +89,8 @@ export default function TeamPage() {
                     />
                   ) : (
                     <div className="h-full flex items-center justify-center">
-                      <div className="w-32 h-32 bg-white/20 rounded-full flex items-center justify-center">
-                        <span className="text-6xl font-bold text-white">
+                      <div className="w-32 h-32 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(46,196,198,0.2)" }}>
+                        <span className="text-6xl font-bold" style={{ color: "var(--accent)" }}>
                           {member.name.charAt(0)}
                         </span>
                       </div>

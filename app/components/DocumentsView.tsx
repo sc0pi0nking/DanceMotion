@@ -78,8 +78,8 @@ export default function DocumentsView() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Lädt Dokumente...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{ borderColor: "var(--accent)" }}></div>
+          <p style={{ color: "var(--muted)" }}>Lädt Dokumente...</p>
         </div>
       </div>
     );
@@ -88,9 +88,9 @@ export default function DocumentsView() {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center text-red-600 dark:text-red-400">
-          <p className="text-xl font-semibold">Fehler beim Laden</p>
-          <p className="mt-2">{error}</p>
+        <div className="text-center">
+          <p className="text-xl font-semibold" style={{ color: "var(--fg)" }}>Fehler beim Laden</p>
+          <p className="mt-2" style={{ color: "var(--muted)" }}>{error}</p>
         </div>
       </div>
     );
@@ -101,36 +101,48 @@ export default function DocumentsView() {
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: "var(--fg)" }}>
             Formulare & Dokumente
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400">
+          <p className="text-xl" style={{ color: "var(--muted)" }}>
             Alle wichtigen Unterlagen zum Download
           </p>
         </div>
 
         {/* Suche & Filter */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
+        <div className="rounded-lg shadow-lg p-6 mb-8" style={{ backgroundColor: "var(--panel)", border: "1px solid var(--border)" }}>
           <div className="grid md:grid-cols-2 gap-4">
             {/* Suchfeld */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: "var(--muted)" }} />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Dokument suchen..."
-                className="w-full pl-10 pr-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent"
+                style={{
+                  backgroundColor: "var(--bg)",
+                  color: "var(--fg)",
+                  borderColor: "var(--border)",
+                  "--tw-ring-color": "var(--accent)",
+                } as any}
               />
             </div>
 
             {/* Kategorie Filter */}
             <div className="relative">
-              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: "var(--muted)" }} />
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent"
+                style={{
+                  backgroundColor: "var(--bg)",
+                  color: "var(--fg)",
+                  borderColor: "var(--border)",
+                  "--tw-ring-color": "var(--accent)",
+                } as any}
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat.value} value={cat.value}>
@@ -142,7 +154,7 @@ export default function DocumentsView() {
           </div>
 
           {/* Ergebnis-Counter */}
-          <p className="text-sm text-gray-500 mt-4">
+          <p className="text-sm mt-4" style={{ color: "var(--muted)" }}>
             {filteredDocuments.length} Dokument(e) gefunden
           </p>
         </div>
@@ -150,9 +162,9 @@ export default function DocumentsView() {
         {/* Dokumente Liste */}
         {filteredDocuments.length === 0 ? (
           <div className="text-center py-12">
-            <FileText className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-            <p className="text-xl text-gray-500">Keine Dokumente gefunden</p>
-            <p className="text-sm text-gray-400 mt-2">
+            <FileText className="w-16 h-16 mx-auto mb-4" style={{ color: "var(--muted)", opacity: 0.3 }} />
+            <p className="text-xl" style={{ color: "var(--fg)" }}>Keine Dokumente gefunden</p>
+            <p className="text-sm mt-2" style={{ color: "var(--muted)" }}>
               {searchQuery || selectedCategory !== 'all'
                 ? 'Versuchen Sie eine andere Suche oder Kategorie'
                 : 'Es wurden noch keine Dokumente hochgeladen'}
@@ -164,8 +176,8 @@ export default function DocumentsView() {
               (group) =>
                 group.documents.length > 0 && (
                   <div key={group.category.value}>
-                    <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                      <div className="w-1 h-8 bg-blue-600 rounded"></div>
+                    <h2 className="text-2xl font-bold mb-4 flex items-center gap-2" style={{ color: "var(--fg)" }}>
+                      <div className="w-1 h-8 rounded" style={{ backgroundColor: "var(--accent)" }}></div>
                       {group.category.label}
                     </h2>
 
@@ -176,25 +188,29 @@ export default function DocumentsView() {
                           href={doc.file_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="group bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-blue-500"
+                          className="group rounded-lg shadow-lg p-6 hover:shadow-xl transition-all duration-300"
+                          style={{
+                            backgroundColor: "var(--panel)",
+                            border: "2px solid var(--border)",
+                          }}
                         >
                           <div className="flex items-start gap-4">
                             {/* PDF Icon */}
-                            <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                              <FileText className="w-8 h-8 text-red-500" />
+                            <div className="w-16 h-16 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform" style={{ backgroundColor: "rgba(46,196,198,0.15)" }}>
+                              <FileText className="w-8 h-8" style={{ color: "var(--accent)" }} />
                             </div>
 
                             {/* Content */}
                             <div className="flex-1 min-w-0">
-                              <h3 className="text-xl font-semibold mb-2 group-hover:text-blue-600 transition-colors">
+                              <h3 className="text-xl font-semibold mb-2 transition-colors" style={{ color: "var(--fg)" }}>
                                 {doc.title}
                               </h3>
                               {doc.description && (
-                                <p className="text-gray-600 dark:text-gray-400 mb-3">
+                                <p className="mb-3" style={{ color: "var(--muted)" }}>
                                   {doc.description}
                                 </p>
                               )}
-                              <div className="flex flex-wrap gap-3 text-sm text-gray-500">
+                              <div className="flex flex-wrap gap-3 text-sm" style={{ color: "var(--muted)" }}>
                                 <span className="flex items-center gap-1">
                                   <FileText className="w-4 h-4" />
                                   PDF
@@ -210,8 +226,8 @@ export default function DocumentsView() {
 
                             {/* Download Button */}
                             <div className="flex-shrink-0">
-                              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center group-hover:bg-blue-600 group-hover:scale-110 transition-all">
-                                <Download className="w-6 h-6 text-blue-600 group-hover:text-white transition-colors" />
+                              <div className="w-12 h-12 rounded-lg flex items-center justify-center group-hover:scale-110 transition-all" style={{ backgroundColor: "rgba(46,196,198,0.15)" }}>
+                                <Download className="w-6 h-6 transition-colors" style={{ color: "var(--accent)" }} />
                               </div>
                             </div>
                           </div>
