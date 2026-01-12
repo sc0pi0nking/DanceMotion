@@ -12,21 +12,21 @@ export const tiles: Tile[] = [
     slug: "little-joys",
     shortDescription: "Tanzen für die Kleinsten — spielerisch und mit viel Freude.",
     href: "/gruppen/little-joys",
-    logo: "/logo-littlejoys.svg",
+    logo: "/logos/littlejoys.png",
   },
   {
     title: "Smileys",
     slug: "smileys",
     shortDescription: "Fröhliche Gruppe für Kinder mit Bewegung und Musik.",
     href: "/gruppen/smileys",
-    logo: "/logo-smileys.svg",
+    logo: "/logos/smileys.png",
   },
   {
     title: "Emotion",
     slug: "emotion",
     shortDescription: "Ausdrucksstarker Tanz für Jugendliche und Erwachsene.",
     href: "/gruppen/emotion",
-    logo: "/logo-emotion.svg",
+    logo: "/logos/emotion.png",
   },
 ];
 
