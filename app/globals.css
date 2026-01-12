@@ -322,7 +322,9 @@ html[data-theme="light"] .btn-accent:hover {
   }
 
   .btn-secondary {
-    @apply border-2 border-border text-fg hover:border-accent hover:bg-accent/5 active:scale-95;
+    @apply border-2 hover:border-accent hover:bg-accent/5 active:scale-95;
+    color: var(--fg);
+    border-color: var(--border);
   }
 
   .btn-ghost {
