@@ -74,7 +74,7 @@ export default function ParallaxBackground() {
         {/* Wave layer 1 - slow */}
         <motion.path
           d="M -50 300 Q 300 200, 600 280 T 1300 300 L 1300 1200 L -50 1200 Z"
-          fill="rgba(46,196,198,0.08)"
+          fill="rgba(46,196,198,0.18)"
           animate={{ d: "M -50 350 Q 300 220, 600 320 T 1300 350 L 1300 1200 L -50 1200 Z" }}
           transition={{ duration: 12, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
         />
@@ -82,7 +82,7 @@ export default function ParallaxBackground() {
         {/* Wave layer 2 - medium */}
         <motion.path
           d="M -50 450 Q 300 350, 600 450 T 1300 450 L 1300 1200 L -50 1200 Z"
-          fill="rgba(46,196,198,0.06)"
+          fill="rgba(46,196,198,0.14)"
           animate={{ d: "M -50 480 Q 300 370, 600 480 T 1300 480 L 1300 1200 L -50 1200 Z" }}
           transition={{ duration: 10, repeat: Infinity, repeatType: "reverse", ease: "easeInOut", delay: 0.5 }}
         />
@@ -90,7 +90,7 @@ export default function ParallaxBackground() {
         {/* Wave layer 3 - fast */}
         <motion.path
           d="M -50 550 Q 300 480, 600 550 T 1300 550 L 1300 1200 L -50 1200 Z"
-          fill="rgba(46,196,198,0.05)"
+          fill="rgba(46,196,198,0.10)"
           animate={{ d: "M -50 570 Q 300 500, 600 570 T 1300 570 L 1300 1200 L -50 1200 Z" }}
           transition={{ duration: 8, repeat: Infinity, repeatType: "reverse", ease: "easeInOut", delay: 1 }}
         />
