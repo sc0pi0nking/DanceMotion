@@ -329,10 +329,13 @@ export default function TeamManager() {
         {members.map((member, index) => (
           <div
             key={member.id}
-            className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden ${
+            className={`flip-card group bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden h-80 ${
               !member.published ? 'opacity-60 border-2 border-yellow-500' : ''
             }`}
           >
+            <div className="flip-card-inner h-full flex flex-col">
+              {/* Front - Image and Name */}
+              <div className="flip-card-front w-full h-full flex flex-col bg-white dark:bg-gray-800">
             {/* Image */}
             <div className="relative h-64 bg-gray-200 dark:bg-gray-700">
               {member.image_url ? (
@@ -447,6 +450,49 @@ export default function TeamManager() {
                 >
                   <Trash2 size={20} />
                 </button>
+              </div>
+              </div>
+              </div>
+
+              {/* Back - Bio and Social Links (Flipped) */}
+              <div className="flip-card-back w-full h-full flex flex-col bg-white dark:bg-gray-800 p-4 justify-center">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{member.name}</h3>
+                {member.bio && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">{member.bio}</p>
+                )}
+                {member.social_links && Object.keys(member.social_links).length > 0 && (
+                  <div className="flex gap-3">
+                    {member.social_links.instagram && (
+                      <a
+                        href={`https://instagram.com/${member.social_links.instagram}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-pink-100 dark:hover:bg-pink-900/20 transition-colors"
+                      >
+                        <Instagram size={20} className="text-pink-600" />
+                      </a>
+                    )}
+                    {member.social_links.facebook && (
+                      <a
+                        href={`https://facebook.com/${member.social_links.facebook}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/20 transition-colors"
+                      >
+                        <Facebook size={20} className="text-blue-600" />
+                      </a>
+                    )}
+                    {member.social_links.email && (
+                      <a
+                        href={`mailto:${member.social_links.email}`}
+                        className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                      >
+                        <Mail size={20} className="text-gray-600 dark:text-gray-400" />
+                      </a>
+                    )}
+                  </div>
+                )}
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-4 text-center">👆 Hover zum Zurückdrehen</p>
               </div>
             </div>
           </div>

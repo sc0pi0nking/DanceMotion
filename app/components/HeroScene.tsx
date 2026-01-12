@@ -1,14 +1,27 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { useRef } from "react";
 import EditableContent from "./EditableContent";
 
 export default function HeroScene() {
+  const containerRef = useRef(null);
+  const { scrollY } = useScroll();
+  
+  // Parallax effect: Background moves slower than scroll
+  const bgY = useTransform(scrollY, [0, 500], [0, -150]);
+  const contentY = useTransform(scrollY, [0, 500], [0, 50]);
+
   return (
-    <section className="hero-scene relative min-h-[700px] w-full overflow-hidden">
-      {/* SVG background layers with motion */}
-      <svg
+    <section ref={containerRef} className="hero-scene relative min-h-[700px] w-full overflow-hidden">
+      {/* Parallax Background */}
+      <motion.div
+        style={{ y: bgY }}
+        className="absolute inset-0 pointer-events-none"
+      >
+        {/* SVG background layers with motion */}
+        <svg
         className="absolute inset-0 h-full w-full opacity-60 pointer-events-none"
         viewBox="0 0 1200 700"
         preserveAspectRatio="xMidYMid slice"

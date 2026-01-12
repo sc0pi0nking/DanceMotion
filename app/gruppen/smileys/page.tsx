@@ -9,28 +9,30 @@ export const metadata = {
 export default function SmileysPage() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
-      <Link href="/" className="inline-flex items-center gap-2 text-sm hover:underline" style={{ color: "var(--accent)" }}>
+      <Link href="/" className="inline-flex items-center gap-2 text-sm hover:underline animated-heading" style={{ color: "var(--accent)" }}>
         <span>←</span> Zurück zur Startseite
       </Link>
       
-      {/* Logo */}
+      {/* Logo with glassmorphism background */}
       <div className="mt-8 mb-8 flex justify-center">
-        <img 
-          src="/logos/smileys.png" 
-          alt="Smileys Logo" 
-          className="h-32 w-32 object-contain"
-        />
+        <div className="glassmorphism p-8 rounded-2xl">
+          <img 
+            src="/logos/smileys.png" 
+            alt="Smileys Logo" 
+            className="h-32 w-32 object-contain mx-auto hover:scale-110 transition-transform duration-300"
+          />
+        </div>
       </div>
       
-      <h1 className="text-4xl font-bold text-center" style={{ color: "var(--fg)" }}>Smileys</h1>
+      <h1 className="text-4xl font-bold text-center animated-heading px-4" style={{ color: "var(--fg)" }}>Smileys</h1>
       <EditableContent
         contentKey="smileys.subtitle"
         defaultValue="Fröhliche Gruppe für Kinder mit Bewegung und Musik."
-        className="mt-4 text-lg text-center"
+        className="mt-6 text-lg text-center"
         style={{ color: "var(--muted)" }}
       />
       
-      <div className="mt-12 space-y-8">
+      <div className="mt-16 space-y-12">
         <section>
           <h2 className="text-2xl font-semibold mb-3" style={{ color: "var(--fg)" }}>Für wen?</h2>
           <EditableContent
