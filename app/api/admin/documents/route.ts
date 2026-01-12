@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase';
 
-// GET - Alle Dokumente abrufen (nur für Admins)
+// GET - Alle Dokumente abrufen (nur für Admins, auch inaktive)
 export async function GET() {
   try {
     const supabase = supabaseServer;
@@ -85,7 +85,8 @@ export async function POST(request: NextRequest) {
         file_url: publicUrl,
         file_name: fileName,
         file_size: file.size,
-        mime_type: file.type
+        mime_type: file.type,
+        is_active: true
       })
       .select()
       .single();

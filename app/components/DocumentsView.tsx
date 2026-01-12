@@ -11,6 +11,7 @@ interface Document {
   file_url: string;
   file_name: string;
   file_size: number;
+  is_active?: boolean;
   created_at: string;
 }
 

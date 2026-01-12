@@ -1,14 +1,25 @@
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase';
 
-// GET - Alle öffentlichen Dokumente abrufen
-export async function GET() {
+// GET - Alle öffentlichen Dokumente abrufen (nur aktive)
+export async function GET(request: Request) {
   try {
     const supabase = supabaseServer;
     
-    const { data: documents, error } = await supabase
+    // Query Parameter prüfen - wenn ?admin=true, zeige auch inaktive
+    const { searchParams } = new URL(request.url);
+    const showInactive = searchParams.get('admin') === 'true';
+    
+    let query = supabase
       .from('documents')
-      .select('*')
+      .select('*');
+    
+    // Nur aktive Dokumente für öffentliche API
+    if (!showInactive) {
+      query = query.eq('is_active', true);
+    }
+    
+    const { data: documents, error } = await query
       .order('created_at', { ascending: false });
 
     if (error) throw error;

@@ -5,9 +5,11 @@
 ### 1. **SQL Editor: Database Migration ausführen**
 
 1. Gehen Sie zu **SQL Editor** im Supabase Dashboard
-2. Fügen Sie den Inhalt von `supabase/migrations/002_create_documents.sql` ein
+2. Führen Sie folgende Migrationen nacheinander aus:
+   - `supabase/migrations/002_create_documents.sql` (Initialisierung)
+   - `supabase/migrations/008_add_document_versioning.sql` (Versionierung - **NEU!**)
 3. Klicken Sie auf **Run**
-4. ✅ Die `documents` Tabelle wurde erstellt
+4. ✅ Die `documents` Tabelle mit Versionierungsfunktionen wurde erstellt
 
 ### 2. **Storage Bucket für PDFs erstellen**
 
@@ -58,6 +60,39 @@ USING (
   AND auth.role() = 'authenticated'
 );
 ```
+
+---
+
+## 🎯 **NEU: Versionierungssystem für Dokumente**
+
+### Das Problem
+Vorher: Wenn "Mitgliedsantrag 2025" durch "Mitgliedsantrag 2026" ersetzt werden sollte, musste die alte Version gelöscht werden.
+
+### Die Lösung
+Jetzt können Sie Dokumente **verstecken** statt zu löschen:
+
+1. **Im Admin Panel** (`/admin/documents`):
+   - Alle Dokumente (aktiv & versteckt) sind sichtbar
+   - Mit Eye/Eye-Off Icon kann man Dokumente aktivieren/deaktivieren
+   - Versteckte Dokumente erhalten ein "Versteckt" Badge
+   - Gelöschte Dokumente können optional wiederhergestellt werden
+
+2. **Auf der öffentlichen Seite** (`/formulare`):
+   - Nur **aktive** Dokumente werden angezeigt
+   - Versteckte Dokumente sind nicht sichtbar
+
+### Beispiel-Workflow
+```
+1. "Mitgliedsantrag 2025" ist aktiv → zeigt auf /formulare
+2. Upload: "Mitgliedsantrag 2026"
+3. Im Admin: "Mitgliedsantrag 2025" mit Eye-Off Icon deaktivieren
+4. Ergebnis: Nur "2026" zeigt auf /formulare, "2025" bleibt aber für Admin sichtbar
+```
+
+### Technische Details
+- `is_active` Spalte in `documents` Tabelle (default: `true`)
+- PATCH `/api/admin/documents/[id]` mit `{ is_active: boolean }`
+- RLS Policy: Public sieht nur `is_active = true`, Admins sehen alles
 
 ---
 

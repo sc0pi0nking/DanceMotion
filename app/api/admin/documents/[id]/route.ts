@@ -54,3 +54,43 @@ export async function DELETE(
     );
   }
 }
+
+// PATCH - Dokument Status aktualisieren (z.B. is_active)
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const supabase = supabaseServer;
+    const body = await request.json();
+
+    // Nur is_active kann aktualisiert werden
+    const { is_active } = body;
+
+    if (typeof is_active !== 'boolean') {
+      return NextResponse.json(
+        { error: 'is_active must be a boolean' },
+        { status: 400 }
+      );
+    }
+
+    // Dokument aktualisieren
+    const { data: document, error } = await supabase
+      .from('documents')
+      .update({ is_active })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return NextResponse.json(document);
+  } catch (error: any) {
+    console.error('Error updating document:', error);
+    return NextResponse.json(
+      { error: error.message || 'Failed to update document' },
+      { status: 500 }
+    );
+  }
+}

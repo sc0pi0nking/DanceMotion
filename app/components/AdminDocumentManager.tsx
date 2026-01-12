@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { FileText, Upload, Trash2, Download, AlertCircle } from 'lucide-react';
+import { FileText, Upload, Trash2, Download, AlertCircle, Eye, EyeOff } from 'lucide-react';
 
 interface Document {
   id: string;
@@ -12,6 +12,7 @@ interface Document {
   file_url: string;
   file_name: string;
   file_size: number;
+  is_active: boolean;
   created_at: string;
 }
 
@@ -27,6 +28,7 @@ export default function AdminDocumentManager() {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
+  const [togglingId, setTogglingId] = useState<string | null>(null);
   
   // Upload Form State
   const [title, setTitle] = useState('');
@@ -107,6 +109,29 @@ export default function AdminDocumentManager() {
       setError(err.message);
     } finally {
       setUploading(false);
+    }
+  };
+
+  // Toggle Active Status
+  const handleToggleActive = async (id: string, currentStatus: boolean) => {
+    setTogglingId(id);
+    try {
+      const res = await fetch(`/api/admin/documents/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_active: !currentStatus }),
+      });
+
+      if (!res.ok) throw new Error('Update failed');
+
+      const updatedDoc = await res.json();
+      setDocuments(
+        documents.map((doc) => (doc.id === id ? updatedDoc : doc))
+      );
+    } catch (err: any) {
+      alert('Fehler beim Aktualisieren: ' + err.message);
+    } finally {
+      setTogglingId(null);
     }
   };
 
@@ -198,6 +223,143 @@ export default function AdminDocumentManager() {
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+              rows={3}
+              placeholder="Optionale Beschreibung..."
+            />
+          </div>
+
+          {/* Kategorie */}
+          <div>
+            <label className="block font-medium mb-2 text-gray-900 dark:text-gray-100">
+              Kategorie <span className="text-red-500">*</span>
+            </label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+              required
+            >
+              {CATEGORIES.map((cat) => (
+                <option key={cat.value} value={cat.value}>
+                  {cat.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Error */}
+          {error && (
+            <div className="flex items-center gap-2 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400">
+              <AlertCircle className="w-5 h-5" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={uploading || !selectedFile || !title}
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+          >
+            {uploading ? 'Wird hochgeladen...' : 'Dokument hochladen'}
+          </button>
+        </form>
+      </div>
+
+      {/* Dokumente Liste */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+        <h2 className="text-2xl font-bold mb-6">
+          Hochgeladene Dokumente ({documents.length})
+        </h2>
+
+        {documents.length === 0 ? (
+          <p className="text-center text-gray-500 py-8">
+            Noch keine Dokumente hochgeladen
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {documents.map((doc) => (
+              <div
+                key={doc.id}
+                className={`flex items-start gap-4 p-4 border rounded-lg transition-colors ${
+                  !doc.is_active
+                    ? 'bg-gray-50 dark:bg-gray-700/30 border-gray-300 dark:border-gray-600 opacity-60'
+                    : 'dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                }`}
+              >
+                <FileText className={`w-8 h-8 flex-shrink-0 mt-1 ${
+                  !doc.is_active ? 'text-gray-400' : 'text-red-500'
+                }`} />
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-lg">{doc.title}</h3>
+                    {!doc.is_active && (
+                      <span className="px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 text-xs font-semibold rounded">
+                        Versteckt
+                      </span>
+                    )}
+                  </div>
+                  {doc.description && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      {doc.description}
+                    </p>
+                  )}
+                  <div className="flex flex-wrap gap-3 mt-2 text-sm text-gray-500">
+                    <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">
+                      {CATEGORIES.find((c) => c.value === doc.category)?.label ||
+                        doc.category}
+                    </span>
+                    <span>{formatFileSize(doc.file_size)}</span>
+                    <span>
+                      {new Date(doc.created_at).toLocaleDateString('de-DE')}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleToggleActive(doc.id, doc.is_active)}
+                    disabled={togglingId === doc.id}
+                    className={`p-2 rounded-lg transition-colors ${
+                      doc.is_active
+                        ? 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
+                        : 'text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
+                    } disabled:opacity-50`}
+                    title={doc.is_active ? 'Verstecken' : 'Anzeigen'}
+                  >
+                    {doc.is_active ? (
+                      <Eye className="w-5 h-5" />
+                    ) : (
+                      <EyeOff className="w-5 h-5" />
+                    )}
+                  </button>
+                  <a
+                    href={doc.file_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                    title="Herunterladen"
+                  >
+                    <Download className="w-5 h-5" />
+                  </a>
+                  <button
+                    onClick={() => handleDelete(doc.id, doc.title)}
+                    className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    title="Löschen"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
               className="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
               rows={3}
               placeholder="Optionale Beschreibung..."
