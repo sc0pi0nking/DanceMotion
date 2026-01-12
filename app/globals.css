@@ -81,12 +81,12 @@ html[data-theme="dark"] {
 }
 
 body {
-  background: transparent;
+  background: var(--bg);
   color: var(--fg);
 }
 
 html[data-theme="light"] body {
-  background: transparent;
+  background: var(--bg);
 }
 
 html[data-theme="dark"] body {
