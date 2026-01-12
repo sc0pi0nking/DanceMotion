@@ -16,7 +16,7 @@ export default function LittleJoysPage() {
       {/* Logo */}
       <div className="mt-8 mb-8 flex justify-center">
         <img 
-          src="/logos/littlejoys.svg" 
+          src="/logos/littlejoys.png" 
           alt="Little Joys Logo" 
           className="h-32 w-32 object-contain"
         />

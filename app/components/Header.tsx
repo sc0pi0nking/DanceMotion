@@ -74,7 +74,7 @@ export default function Header() {
               aria-label="Zur Startseite"
             >
               <img 
-                src="/logos/dancemotion-eschweiler.svg" 
+                src="/logos/dancemotion-eschweiler.png" 
                 alt="DanceMotion Eschweiler" 
                 className="h-12 w-12 hover:scale-110 transition-transform"
               />

@@ -237,7 +237,7 @@ export default function Home() {
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center">
                       <img
-                        src="/logos/dancemotion-event-studio.svg"
+                        src="/logos/dancemotion-event-studio.png"
                         alt="DanceMotion Eventstudio"
                         className="mx-auto h-40 w-auto opacity-80 hover:opacity-100 transition-opacity"
                       />

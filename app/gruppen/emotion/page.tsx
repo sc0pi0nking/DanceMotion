@@ -16,7 +16,7 @@ export default function EmotionPage() {
       {/* Logo */}
       <div className="mt-8 mb-8 flex justify-center">
         <img 
-          src="/logos/emotion.svg" 
+          src="/logos/emotion.png" 
           alt="Emotion Logo" 
           className="h-32 w-32 object-contain"
         />

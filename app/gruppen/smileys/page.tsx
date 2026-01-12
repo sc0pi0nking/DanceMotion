@@ -16,7 +16,7 @@ export default function SmileysPage() {
       {/* Logo */}
       <div className="mt-8 mb-8 flex justify-center">
         <img 
-          src="/logos/smileys.svg" 
+          src="/logos/smileys.png" 
           alt="Smileys Logo" 
           className="h-32 w-32 object-contain"
         />
