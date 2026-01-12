@@ -17,7 +17,7 @@ export default function LittleJoysPage() {
       <div className="mt-8 mb-8 flex justify-center">
         <div className="glassmorphism p-8 rounded-2xl">
           <img 
-            src="/logos/littlejoys.png" 
+            src="/logos/litteljoys.png" 
             alt="Little Joys Logo" 
             className="h-32 w-32 object-contain mx-auto hover:scale-110 transition-transform duration-300"
           />
