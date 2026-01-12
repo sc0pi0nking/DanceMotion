@@ -318,7 +318,7 @@ html[data-theme="light"] .btn-accent:hover {
   }
 
   .btn-primary {
-    @apply bg-accent text-bg hover:shadow-lg hover:scale-105 active:scale-95;
+    @apply bg-accent text-white hover:shadow-lg hover:scale-105 active:scale-95;
   }
 
   .btn-secondary {
