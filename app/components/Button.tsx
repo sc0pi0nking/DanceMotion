@@ -72,5 +72,3 @@ export const LinkButton = React.forwardRef<HTMLAnchorElement, LinkButtonProps>(
 );
 
 LinkButton.displayName = 'LinkButton';
-
-export default Button;

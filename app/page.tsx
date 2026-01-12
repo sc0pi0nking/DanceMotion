@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import HeroScene from "./components/HeroScene";
 import EventTimeline from "./components/EventTimeline";
 import EditableContent from "./components/EditableContent";
-import Button from "./components/Button";
+import { Button, LinkButton } from "./components/Button";
 import { tiles } from "../lib/site-data";
 import { fetchUpcomingEvents } from "../lib/events-db";
 import type { Event } from "../lib/supabase";
@@ -123,14 +123,13 @@ export default function Home() {
                 />
 
                 <div className="mt-8 flex gap-3">
-                  <Button
-                    as="link"
+                  <LinkButton
                     href={`/gruppen/${tile.slug}`}
                     variant="primary"
                     size="md"
                   >
                     Mehr erfahren →
-                  </Button>
+                  </LinkButton>
                 </div>
               </div>
             </div>
@@ -152,14 +151,13 @@ export default function Home() {
         <EventTimeline events={upcomingEvents} variant="compact" />
 
         <div className="mt-12 text-center">
-          <Button
-            as="link"
+          <LinkButton
             href="/termine"
             variant="primary"
             size="lg"
           >
             Alle Termine ansehen →
-          </Button>
+          </LinkButton>
         </div>
       </section>
 
@@ -214,14 +212,13 @@ export default function Home() {
               </div>
 
               <div className="mt-12">
-                <Button
-                  as="link"
+                <LinkButton
                   href="/eventstudio"
                   variant="primary"
                   size="lg"
                 >
                   Studio erkunden →
-                </Button>
+                </LinkButton>
               </div>
             </div>
 
