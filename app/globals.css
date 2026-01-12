@@ -85,6 +85,14 @@ body {
   color: var(--fg);
 }
 
+html[data-theme="light"] body {
+  background: transparent;
+}
+
+html[data-theme="dark"] body {
+  background: var(--bg);
+}
+
 /* Header & Navigation */
 .site-header {
   position: sticky;
