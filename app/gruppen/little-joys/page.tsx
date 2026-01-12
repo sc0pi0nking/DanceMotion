@@ -12,11 +12,21 @@ export default function LittleJoysPage() {
       <Link href="/" className="inline-flex items-center gap-2 text-sm hover:underline" style={{ color: "var(--accent)" }}>
         <span>←</span> Zurück zur Startseite
       </Link>
-      <h1 className="mt-8 text-4xl font-bold" style={{ color: "var(--fg)" }}>Little Joys</h1>
+      
+      {/* Logo */}
+      <div className="mt-8 mb-8 flex justify-center">
+        <img 
+          src="/logos/littlejoys.svg" 
+          alt="Little Joys Logo" 
+          className="h-32 w-32 object-contain"
+        />
+      </div>
+      
+      <h1 className="text-4xl font-bold text-center" style={{ color: "var(--fg)" }}>Little Joys</h1>
       <EditableContent
         contentKey="little-joys.subtitle"
         defaultValue="Tanzen für die Kleinsten — spielerisch und mit viel Freude."
-        className="mt-4 text-lg"
+        className="mt-4 text-lg text-center"
         style={{ color: "var(--muted)" }}
       />
       

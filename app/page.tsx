@@ -236,16 +236,11 @@ export default function Home() {
                   {/* Large center circle */}
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center">
-                      <Image
-                        src="/logo-dms.svg"
+                      <img
+                        src="/logos/dancemotion-event-studio.svg"
                         alt="DanceMotion Eventstudio"
-                        width={140}
-                        height={140}
-                        className="mx-auto opacity-60"
+                        className="mx-auto h-40 w-auto opacity-80 hover:opacity-100 transition-opacity"
                       />
-                      <p className="mt-8 text-sm font-semibold" style={{ color: "var(--muted)" }}>
-                        Event Studio
-                      </p>
                     </div>
                   </div>
                   

@@ -73,14 +73,18 @@ export default function Header() {
               className="site-logo group flex items-center gap-3 no-underline"
               aria-label="Zur Startseite"
             >
-              <div className="site-logo-mark">DM</div>
-              <div className="flex flex-col leading-none">
-                <span className="font-bold text-base" style={{ color: "var(--fg)" }}>
+              <img 
+                src="/logos/dancemotion-eschweiler.svg" 
+                alt="DanceMotion Eschweiler" 
+                className="h-12 w-12 hover:scale-110 transition-transform"
+              />
+              <div className="flex-1">
+                <div className="font-bold text-base" style={{ color: "var(--fg)" }}>
                   DanceMotion
-                </span>
-                <span className="text-xs font-medium" style={{ color: "var(--muted)" }}>
+                </div>
+                <div className="text-xs font-medium" style={{ color: "var(--muted)" }}>
                   Eschweiler
-                </span>
+                </div>
               </div>
             </Link>
 
