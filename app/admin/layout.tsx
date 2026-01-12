@@ -106,11 +106,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   return (
-    <div className="flex h-screen bg-slate-900 text-slate-100">
+    <div className="flex h-screen" style={{ backgroundColor: "var(--bg)", color: "var(--fg)" }}>
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm lg:hidden z-40"
+          className="fixed inset-0 backdrop-blur-sm lg:hidden z-40"
+          style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -119,14 +120,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <aside
         className={`
           fixed lg:relative inset-y-0 left-0 z-50
-          w-72 lg:w-64 bg-slate-800 border-r border-slate-700 
-          flex flex-col h-screen
+          w-72 lg:w-64
+          border-r flex flex-col h-screen
           transform transition-transform duration-300 ease-in-out
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0 lg:w-20'}
         `}
+        style={{ backgroundColor: "var(--panel)", borderColor: "var(--border)" }}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between border-b border-slate-700 px-4">
+        <div className="h-16 flex items-center justify-between border-b px-4" style={{ borderColor: "var(--border)" }}>
           <Link href="/admin" className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center font-bold text-white text-sm flex-shrink-0">
               DM
@@ -136,7 +138,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           {/* Close button on mobile */}
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-2 hover:bg-slate-700 rounded-lg text-slate-300"
+            className="lg:hidden p-2 rounded-lg"
+            style={{ backgroundColor: "var(--border)", color: "var(--fg)" }}
           >
             <X size={24} />
           </button>

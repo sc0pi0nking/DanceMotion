@@ -63,7 +63,7 @@
 html[data-theme="light"] {
   --bg: #FAF5ED; /* Warmes beige-creme, nicht steril-weiß */
   --fg: #1A1410; /* Tiefer, reicherer Braun-Schwarzton statt bloß schwarz */
-  --muted: #8B7B6F; /* Wärmerer Beige-Grauton mit Tiefe */
+  --muted: #6B5B4F; /* Dunkler für WCAG AA Kontrast (~5.5:1) */
   --panel: #FEF8F0; /* Warmes off-white statt reines weiß */
   --border: #E8D9C8; /* Warmer, sichtbarer Border mit Substanz */
   --accent: #2EC4C6; /* Teal bleibt gleich */
@@ -198,11 +198,21 @@ html[data-theme="dark"] .site-header.scrolled {
   border: 1px solid var(--border);
   color: var(--fg);
   transition: box-shadow 160ms ease, transform 160ms ease, border-color 160ms ease;
+  animation: revealUp 640ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation-delay: calc(var(--idx) * 120ms);
+  opacity: 0;
 }
-.tile-card:hover {
-  box-shadow: 0 8px 24px rgba(46,196,198,0.06);
-  transform: translateY(-4px);
+
+.tile-card:hover,
+.tile-card:focus-within {
+  box-shadow: 0 12px 36px rgba(46,196,198,0.15);
+  transform: translateY(-6px);
   border-color: var(--accent);
+}
+
+.tile-card:active {
+  transform: translateY(-2px);
+  transition: all 100ms ease;
 }
 
 /* Accent button */
@@ -259,7 +269,86 @@ html[data-theme="light"] .btn-accent:hover {
   opacity: 1;
 }
 
-/* smooth staggered reveal for tiles */
+/* === === COMPONENT LAYER === === */
+@layer components {
+  /* Typography System */
+  .h1 {
+    @apply text-4xl sm:text-5xl font-bold leading-tight;
+    color: var(--fg);
+  }
+
+  .h2 {
+    @apply text-3xl sm:text-4xl font-bold leading-snug;
+    color: var(--fg);
+  }
+
+  .h3 {
+    @apply text-2xl sm:text-3xl font-semibold leading-snug;
+    color: var(--fg);
+  }
+
+  .h4 {
+    @apply text-xl font-semibold;
+    color: var(--fg);
+  }
+
+  .text-base-primary {
+    @apply text-base leading-relaxed;
+    color: var(--fg);
+  }
+
+  .text-base-muted {
+    @apply text-base leading-relaxed;
+    color: var(--muted);
+  }
+
+  .text-sm-primary {
+    @apply text-sm leading-relaxed;
+    color: var(--fg);
+  }
+
+  .text-sm-muted {
+    @apply text-sm leading-relaxed;
+    color: var(--muted);
+  }
+
+  /* Button Styles - Legacy support */
+  .btn {
+    @apply inline-flex items-center justify-center font-semibold transition-all duration-300 rounded-full cursor-pointer focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply bg-accent text-bg hover:shadow-lg hover:scale-105 active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply border-2 border-border text-fg hover:border-accent hover:bg-accent/5 active:scale-95;
+  }
+
+  .btn-ghost {
+    @apply text-accent hover:bg-accent/10 active:bg-accent/20;
+  }
+
+  /* Card Improvements */
+  .card {
+    @apply bg-panel border border-border rounded-lg p-4 transition-all duration-300;
+    color: var(--fg);
+  }
+
+  .card:hover,
+  .card:focus-within {
+    @apply border-accent shadow-lg;
+    box-shadow: var(--card-shadow);
+    transform: translateY(-4px);
+  }
+
+  .card:active {
+    @apply scale-95;
+    transition: all 100ms ease;
+  }
+}
+
+/* === === UTILITIES LAYER === === */
 @keyframes revealUp {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }

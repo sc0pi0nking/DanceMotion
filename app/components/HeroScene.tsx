@@ -9,7 +9,7 @@ export default function HeroScene() {
     <section className="hero-scene relative min-h-[700px] w-full overflow-hidden">
       {/* SVG background layers with motion */}
       <svg
-        className="absolute inset-0 h-full w-full opacity-0 pointer-events-none"
+        className="absolute inset-0 h-full w-full opacity-60 pointer-events-none"
         viewBox="0 0 1200 700"
         preserveAspectRatio="xMidYMid slice"
         xmlns="http://www.w3.org/2000/svg"

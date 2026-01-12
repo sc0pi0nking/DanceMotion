@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import HeroScene from "./components/HeroScene";
 import EventTimeline from "./components/EventTimeline";
 import EditableContent from "./components/EditableContent";
+import Button from "./components/Button";
 import { tiles } from "../lib/site-data";
 import { fetchUpcomingEvents } from "../lib/events-db";
 import type { Event } from "../lib/supabase";
@@ -33,7 +34,7 @@ export default function Home() {
       <HeroScene />
 
       {/* Groups Section - Alternating Layout */}
-      <section id="groups" className="mx-auto max-w-6xl px-6 py-28">
+      <section id="groups" className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
         <div className="mb-16">
           <h2 className="text-4xl font-bold" style={{ color: "var(--fg)" }}>
             Unsere Gruppen
@@ -122,16 +123,14 @@ export default function Home() {
                 />
 
                 <div className="mt-8 flex gap-3">
-                  <Link
+                  <Button
+                    as="link"
                     href={`/gruppen/${tile.slug}`}
-                    className="inline-flex items-center rounded-full px-6 py-3 font-semibold transition-all duration-300"
-                    style={{
-                      backgroundColor: "var(--accent)",
-                      color: "var(--bg)",
-                    }}
+                    variant="primary"
+                    size="md"
                   >
                     Mehr erfahren →
-                  </Link>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -140,7 +139,7 @@ export default function Home() {
       </section>
 
       {/* Events Timeline Section - NEW */}
-      <section id="events" className="mx-auto max-w-6xl px-6 py-28">
+      <section id="events" className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
         <div className="mb-16">
           <h2 className="text-4xl font-bold" style={{ color: "var(--fg)" }}>
             Nächste Auftritte & Events
@@ -153,24 +152,14 @@ export default function Home() {
         <EventTimeline events={upcomingEvents} variant="compact" />
 
         <div className="mt-12 text-center">
-          <Link
+          <Button
+            as="link"
             href="/termine"
-            className="inline-flex items-center px-8 py-4 rounded-full font-semibold transition-all duration-300"
-            style={{
-              backgroundColor: "var(--accent)",
-              color: "#000",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.filter = "drop-shadow(0 12px 28px rgba(46,196,198,0.28))";
-              e.currentTarget.style.transform = "translateY(-2px) scale(1.02)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.filter = "none";
-              e.currentTarget.style.transform = "none";
-            }}
+            variant="primary"
+            size="lg"
           >
             Alle Termine ansehen →
-          </Link>
+          </Button>
         </div>
       </section>
 
@@ -225,16 +214,14 @@ export default function Home() {
               </div>
 
               <div className="mt-12">
-                <Link
+                <Button
+                  as="link"
                   href="/eventstudio"
-                  className="inline-flex items-center rounded-full px-8 py-4 font-semibold transition-all duration-300 hover:shadow-lg"
-                  style={{
-                    backgroundColor: "var(--accent)",
-                    color: "#000",
-                  }}
+                  variant="primary"
+                  size="lg"
                 >
                   Studio erkunden →
-                </Link>
+                </Button>
               </div>
             </div>
 

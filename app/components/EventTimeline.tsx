@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { Calendar, MapPin, Users, Music } from "lucide-react";
 import { formatDateGerman, getGroupBadgeInfo, getCategoryColor } from "../../lib/events";
 import type { Event as EventType } from "../../lib/supabase";
 
@@ -118,7 +119,7 @@ function EventCard({
               boxShadow: "0 12px 32px rgba(46,196,198,0.12)",
             }}
           >
-            {/* Date chip */}
+            {/* Date chip with icon */}
             <div
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold mb-3"
               style={{
@@ -126,6 +127,7 @@ function EventCard({
                 color: "var(--accent)",
               }}
             >
+              <Calendar size={14} />
               <span>{formatDateGerman(event.date, showYear)}</span>
               {event.time && <span>·</span>}
               {event.time && <span>{event.time}</span>}
@@ -146,9 +148,10 @@ function EventCard({
               </p>
             )}
 
-            {/* Location */}
-            <p className="text-sm mb-4" style={{ color: "var(--muted)" }}>
-              📍 {event.location}, {event.city}
+            {/* Location with icon */}
+            <p className="flex items-center gap-2 text-sm mb-4" style={{ color: "var(--muted)" }}>
+              <MapPin size={14} style={{ color: "var(--accent)" }} />
+              <span>{event.location}, {event.city}</span>
             </p>
 
             {/* Category badge */}

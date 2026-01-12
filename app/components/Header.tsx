@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import ThemeToggle from "./ThemeToggle";
 import { Settings, Menu, X } from "lucide-react";
@@ -9,6 +10,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -88,15 +90,27 @@ export default function Header() {
               role="navigation" 
               aria-label="Hauptnavigation"
             >
-              {navLinks.map((link) => (
-                <a 
-                  key={link.href}
-                  href={link.href} 
-                  className="site-nav-link"
-                >
-                  {link.label}
-                </a>
-              ))}
+              {navLinks.map((link) => {
+                // Determine if this link is active
+                const isActive = pathname === link.href || 
+                  (link.href === "/#groups" && pathname === "/") ||
+                  (link.href !== "/#groups" && pathname.startsWith(link.href.replace(/\/$/, "")));
+                
+                return (
+                  <a 
+                    key={link.href}
+                    href={link.href} 
+                    className={`site-nav-link transition-all duration-200 ${
+                      isActive 
+                        ? "font-semibold" 
+                        : ""
+                    }`}
+                    style={isActive ? { color: "var(--accent)" } : {}}
+                  >
+                    {link.label}
+                  </a>
+                );
+              })}
               
               {/* Admin Button - nur für eingeloggte Admins */}
               {isAdmin && (
@@ -177,19 +191,30 @@ export default function Header() {
 
               {/* Navigation Links */}
               <div className="flex flex-col p-4">
-                {navLinks.map((link, index) => (
-                  <motion.a
-                    key={link.href}
-                    href={link.href}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="px-4 py-3 rounded-lg text-base font-medium transition-all hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-900 dark:text-white"
-                  >
-                    {link.label}
-                  </motion.a>
-                ))}
+                {navLinks.map((link, index) => {
+                  const isActive = pathname === link.href || 
+                    (link.href === "/#groups" && pathname === "/") ||
+                    (link.href !== "/#groups" && pathname.startsWith(link.href.replace(/\/$/, "")));
+                  
+                  return (
+                    <motion.a
+                      key={link.href}
+                      href={link.href}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`px-4 py-3 rounded-lg text-base font-medium transition-all ${
+                        isActive 
+                          ? "font-bold" 
+                          : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                      }`}
+                      style={isActive ? { color: "var(--accent)" } : { color: "var(--fg)" }}
+                    >
+                      {link.label}
+                    </motion.a>
+                  );
+                })}
 
                 {/* Admin Link (Mobile) */}
                 {isAdmin && (
