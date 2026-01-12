@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function LittleJoysPage() {
   return (
-    <div className="mx-auto max-w-3xl px-6 py-16">
+    <div className="mx-auto max-w-3xl px-6 py-16 relative z-10">
       <Link href="/" className="inline-flex items-center gap-2 text-sm hover:underline animated-heading" style={{ color: "var(--accent)" }}>
         <span>←</span> Zurück zur Startseite
       </Link>

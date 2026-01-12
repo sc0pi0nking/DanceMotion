@@ -81,7 +81,7 @@ html[data-theme="dark"] {
 }
 
 body {
-  background: var(--bg);
+  background: transparent;
   color: var(--fg);
 }
 

@@ -6,18 +6,19 @@ import { motion, useScroll, useTransform } from "framer-motion";
 export default function ParallaxBackground() {
   const { scrollY } = useScroll();
   
-  // Parallax effect: Background moves at 40% of scroll speed
-  const bgY = useTransform(scrollY, [0, 1000], [0, -400]);
+  // Parallax effect: Background moves at 40% of scroll speed - extended range
+  const bgY = useTransform(scrollY, [0, 2000], [0, -800]);
 
   return (
     <motion.div
       style={{ y: bgY }}
-      className="fixed inset-0 pointer-events-none z-0"
+      className="fixed inset-0 pointer-events-none z-0 h-screen overflow-hidden"
     >
-      {/* SVG background with waves and gradient */}
+      {/* SVG background with waves and gradient - increased height */}
       <svg
-        className="absolute inset-0 h-full w-full opacity-50 pointer-events-none"
-        viewBox="0 0 1200 900"
+        className="absolute inset-0 w-full pointer-events-none"
+        style={{ minHeight: "200vh" }}
+        viewBox="0 0 1200 1200"
         preserveAspectRatio="xMidYMid slice"
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -40,7 +41,7 @@ export default function ParallaxBackground() {
         </defs>
 
         {/* Main gradient background */}
-        <rect width="1200" height="900" fill="url(#bgGradientMain)" />
+        <rect width="1200" height="1200" fill="url(#bgGradientMain)" />
 
         {/* Radial glow center-left */}
         <motion.circle
@@ -72,25 +73,25 @@ export default function ParallaxBackground() {
 
         {/* Wave layer 1 - slow */}
         <motion.path
-          d="M -50 300 Q 300 200, 600 280 T 1300 300 L 1300 900 L -50 900 Z"
+          d="M -50 300 Q 300 200, 600 280 T 1300 300 L 1300 1200 L -50 1200 Z"
           fill="rgba(46,196,198,0.08)"
-          animate={{ d: "M -50 350 Q 300 220, 600 320 T 1300 350 L 1300 900 L -50 900 Z" }}
+          animate={{ d: "M -50 350 Q 300 220, 600 320 T 1300 350 L 1300 1200 L -50 1200 Z" }}
           transition={{ duration: 12, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
         />
 
         {/* Wave layer 2 - medium */}
         <motion.path
-          d="M -50 450 Q 300 350, 600 450 T 1300 450 L 1300 900 L -50 900 Z"
+          d="M -50 450 Q 300 350, 600 450 T 1300 450 L 1300 1200 L -50 1200 Z"
           fill="rgba(46,196,198,0.06)"
-          animate={{ d: "M -50 480 Q 300 370, 600 480 T 1300 480 L 1300 900 L -50 900 Z" }}
+          animate={{ d: "M -50 480 Q 300 370, 600 480 T 1300 480 L 1300 1200 L -50 1200 Z" }}
           transition={{ duration: 10, repeat: Infinity, repeatType: "reverse", ease: "easeInOut", delay: 0.5 }}
         />
 
         {/* Wave layer 3 - fast */}
         <motion.path
-          d="M -50 550 Q 300 480, 600 550 T 1300 550 L 1300 900 L -50 900 Z"
+          d="M -50 550 Q 300 480, 600 550 T 1300 550 L 1300 1200 L -50 1200 Z"
           fill="rgba(46,196,198,0.05)"
-          animate={{ d: "M -50 570 Q 300 500, 600 570 T 1300 570 L 1300 900 L -50 900 Z" }}
+          animate={{ d: "M -50 570 Q 300 500, 600 570 T 1300 570 L 1300 1200 L -50 1200 Z" }}
           transition={{ duration: 8, repeat: Infinity, repeatType: "reverse", ease: "easeInOut", delay: 1 }}
         />
 
