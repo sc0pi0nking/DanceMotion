@@ -25,23 +25,23 @@ const ParallaxBackgroundContent = memo(() => {
         <defs>
           {/* Mesh gradient for organic feel */}
           <linearGradient id="meshGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="rgba(46,196,198,0.08)" />
-            <stop offset="50%" stopColor="rgba(46,196,198,0.04)" />
-            <stop offset="100%" stopColor="rgba(46,196,198,0.02)" />
+            <stop offset="0%" stopColor="rgba(46,196,198,0.16)" />
+            <stop offset="50%" stopColor="rgba(46,196,198,0.08)" />
+            <stop offset="100%" stopColor="rgba(46,196,198,0.05)" />
           </linearGradient>
           
           <radialGradient id="meshRadial1" cx="20%" cy="30%">
-            <stop offset="0%" stopColor="rgba(46,196,198,0.12)" />
+            <stop offset="0%" stopColor="rgba(46,196,198,0.22)" />
             <stop offset="100%" stopColor="rgba(46,196,198,0)" />
           </radialGradient>
 
           <radialGradient id="meshRadial2" cx="80%" cy="70%">
-            <stop offset="0%" stopColor="rgba(46,196,198,0.10)" />
+            <stop offset="0%" stopColor="rgba(46,196,198,0.20)" />
             <stop offset="100%" stopColor="rgba(46,196,198,0)" />
           </radialGradient>
 
           <filter id="meshBlur">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="60" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation="50" />
           </filter>
         </defs>
 
@@ -80,10 +80,10 @@ const ParallaxBackgroundContent = memo(() => {
           cx={600}
           cy={600}
           r={400}
-          fill="rgba(46,196,198,0.06)"
+          fill="rgba(46,196,198,0.12)"
           filter="url(#meshBlur)"
           animate={{
-            opacity: [0.06, 0.10, 0.06],
+            opacity: [0.12, 0.16, 0.12],
           }}
           transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
         />
@@ -92,10 +92,10 @@ const ParallaxBackgroundContent = memo(() => {
           cx={600}
           cy={1500}
           r={500}
-          fill="rgba(46,196,198,0.05)"
+          fill="rgba(46,196,198,0.10)"
           filter="url(#meshBlur)"
           animate={{
-            opacity: [0.05, 0.08, 0.05],
+            opacity: [0.10, 0.14, 0.10],
           }}
           transition={{ duration: 22, repeat: Infinity, ease: "easeInOut", delay: 2 }}
         />

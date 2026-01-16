@@ -21,6 +21,15 @@
   --backdrop-blur-light: blur(10px);
   --backdrop-blur-medium: blur(8px);
 
+  /* Panel backgrounds - theme-aware */
+  --panel: var(--bg);
+  --panel-semi: rgba(18, 18, 18, 0.5);
+
+  /* Light mode overrides for panel-semi */
+  @media (prefers-color-scheme: light) {
+    --panel-semi: rgba(240, 240, 240, 0.6);
+  }
+
   /* Border colors - darker for contrast */
   --border-accent: 1px solid rgba(46,196,198,0.2);
   --border-accent-bright: 1px solid rgba(46,196,198,0.4);

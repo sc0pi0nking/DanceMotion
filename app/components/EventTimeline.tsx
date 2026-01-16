@@ -88,7 +88,7 @@ function EventCard({
     >
       {/* Timeline dot with glow */}
       <motion.div
-        className="absolute left-0 lg:left-1/2 top-4 w-3 h-3 lg:w-4 lg:h-4 rounded-full transform lg:-translate-x-1/2 lg:translate-x-1/2"
+        className="absolute left-1 lg:left-1/2 top-5 w-3 h-3 lg:w-4 lg:h-4 rounded-full transform lg:-translate-x-2"
         style={{
           background: "var(--accent)",
           boxShadow: "0 0 0 4px var(--bg), 0 0 12px rgba(46,196,198,0.4)",
@@ -110,7 +110,7 @@ function EventCard({
           <motion.div
             className="p-6 rounded-2xl border transition-all duration-300 backdrop-blur-md"
             style={{
-              backgroundColor: "rgba(18, 18, 18, 0.5)",
+              backgroundColor: "var(--panel-semi)",
               borderColor: "rgba(46,196,198,0.25)",
               borderWidth: "1px",
               boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(46,196,198,0.1)",
