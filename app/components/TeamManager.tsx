@@ -36,6 +36,7 @@ interface TeamMember {
 export default function TeamManager() {
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
@@ -56,16 +57,24 @@ export default function TeamManager() {
 
   const fetchMembers = async () => {
     try {
+      setError(null);
       const res = await fetch('/api/admin/team');
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(`API returned ${res.status}: ${errorData.error || 'Unknown error'}`);
+        const errorMsg = `API returned ${res.status}: ${errorData.error || 'Unknown error'}`;
+        console.error('❌ ' + errorMsg);
+        setError(errorMsg);
+        setMembers([]);
+        return;
       }
       const data = await res.json();
-      console.log('Loaded team members:', data);
+      console.log('✅ Loaded team members:', data?.length || 0, data);
       setMembers(data);
-    } catch (error) {
-      console.error('Failed to load team members:', error);
+      setError(null);
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to load team members';
+      console.error('❌ ' + errorMsg, err);
+      setError(errorMsg);
       setMembers([]);
     } finally {
       setLoading(false);
@@ -188,6 +197,27 @@ export default function TeamManager() {
 
   if (loading) {
     return <div className="p-8 text-center text-gray-500 dark:text-gray-400">Lädt Team-Mitglieder...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="p-8">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+          <h2 className="text-lg font-bold text-red-700 dark:text-red-400 mb-2">Fehler beim Laden der Team-Mitglieder</h2>
+          <p className="text-red-600 dark:text-red-300 mb-4">{error}</p>
+          <button
+            onClick={() => {
+              setError(null);
+              setLoading(true);
+              fetchMembers();
+            }}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          >
+            Erneut versuchen
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -329,7 +359,20 @@ export default function TeamManager() {
       )}
 
       {/* Team Members Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {members.length === 0 ? (
+        <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+          <User size={48} className="mx-auto mb-4 text-gray-400" />
+          <p className="text-gray-600 dark:text-gray-400 mb-4">Keine Team-Mitglieder vorhanden</p>
+          <button
+            onClick={() => setShowAddForm(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            <Plus size={16} className="inline mr-2" />
+            Erstes Mitglied hinzufügen
+          </button>
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {members.map((member, index) => (
           <div
             key={member.id}
@@ -501,13 +544,6 @@ export default function TeamManager() {
             </div>
           </div>
         ))}
-      </div>
-
-      {members.length === 0 && (
-        <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-          <User size={48} className="mx-auto mb-4 text-gray-300 dark:text-gray-600" />
-          <p>Noch keine Team-Mitglieder vorhanden.</p>
-          <p className="text-sm">Klicken Sie auf "Mitglied hinzufügen" um zu starten.</p>
         </div>
       )}
     </div>
