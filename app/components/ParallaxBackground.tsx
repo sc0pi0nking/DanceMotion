@@ -7,107 +7,104 @@ import { motion, useScroll, useTransform } from "framer-motion";
 const ParallaxBackgroundContent = memo(() => {
   const { scrollY } = useScroll();
   
-  // Optimized: Reduced scroll range, smoother parallax effect (30% speed instead of 40%)
-  const bgY = useTransform(scrollY, [0, 2000], [0, -600]);
+  // Optimized: Slower parallax (20% speed) für subtileren Effekt
+  const bgY = useTransform(scrollY, [0, 3000], [0, -400]);
 
   return (
     <motion.div
       style={{ y: bgY }}
-      className="fixed inset-0 pointer-events-none z-0 w-screen h-screen will-change-transform"
+      className="absolute inset-0 pointer-events-none z-0 w-full will-change-transform"
     >
-      {/* Optimized SVG: Darker gradients for better visibility, full coverage */}
+      {/* Subtler SVG background with gradient mesh effect - NOT like hero */}
       <svg
         className="w-full h-full pointer-events-none"
-        viewBox="0 0 1200 1500"
+        viewBox="0 0 1200 2000"
         preserveAspectRatio="xMidYMid slice"
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          <linearGradient id="bgGradientMain" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="rgba(46,196,198,0.18)" />
-            <stop offset="50%" stopColor="rgba(46,196,198,0.08)" />
-            <stop offset="100%" stopColor="rgba(46,196,198,0.04)" />
+          {/* Mesh gradient for organic feel */}
+          <linearGradient id="meshGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="rgba(46,196,198,0.08)" />
+            <stop offset="50%" stopColor="rgba(46,196,198,0.04)" />
+            <stop offset="100%" stopColor="rgba(46,196,198,0.02)" />
           </linearGradient>
-          <radialGradient id="bgRadial" cx="40%" cy="20%">
-            <stop offset="0%" stopColor="rgba(46,196,198,0.22)" />
+          
+          <radialGradient id="meshRadial1" cx="20%" cy="30%">
+            <stop offset="0%" stopColor="rgba(46,196,198,0.12)" />
             <stop offset="100%" stopColor="rgba(46,196,198,0)" />
           </radialGradient>
-          <filter id="bgBlur1">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="25" />
-          </filter>
-          <filter id="bgBlur2">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="40" />
+
+          <radialGradient id="meshRadial2" cx="80%" cy="70%">
+            <stop offset="0%" stopColor="rgba(46,196,198,0.10)" />
+            <stop offset="100%" stopColor="rgba(46,196,198,0)" />
+          </radialGradient>
+
+          <filter id="meshBlur">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="60" />
           </filter>
         </defs>
 
-        {/* Main gradient background - darker for visibility */}
-        <rect width="1200" height="1500" fill="url(#bgGradientMain)" />
+        {/* Base gradient */}
+        <rect width="1200" height="2000" fill="url(#meshGradient1)" />
 
-        {/* Radial glow center-left - more prominent */}
+        {/* Mesh points - slow animation for organic feel */}
         <motion.circle
-          cx={200}
-          cy={250}
-          r={500}
-          fill="url(#bgRadial)"
-          filter="url(#bgBlur2)"
+          cx={150}
+          cy={300}
+          r={600}
+          fill="url(#meshRadial1)"
+          filter="url(#meshBlur)"
           animate={{
-            cx: [200, 220, 200],
-            cy: [250, 270, 250],
+            cx: [150, 180, 150],
+            cy: [300, 350, 300],
           }}
-          transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
         />
 
-        {/* Radial glow right side */}
         <motion.circle
-          cx={1000}
+          cx={1050}
+          cy={1200}
+          r={550}
+          fill="url(#meshRadial2)"
+          filter="url(#meshBlur)"
+          animate={{
+            cx: [1050, 1020, 1050],
+            cy: [1200, 1250, 1200],
+          }}
+          transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}
+        />
+
+        {/* Subtle accent circles */}
+        <motion.circle
+          cx={600}
           cy={600}
           r={400}
-          fill="rgba(46,196,198,0.12)"
-          filter="url(#bgBlur1)"
+          fill="rgba(46,196,198,0.06)"
+          filter="url(#meshBlur)"
           animate={{
-            cx: [1000, 980, 1000],
-            cy: [600, 620, 600],
+            opacity: [0.06, 0.10, 0.06],
           }}
           transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
         />
 
-        {/* Wave layer 1 - optimized and darker */}
-        <motion.path
-          d="M -50 150 Q 300 100, 600 140 T 1300 150 L 1300 1500 L -50 1500 Z"
-          fill="rgba(46,196,198,0.24)"
-          animate={{ d: "M -50 170 Q 300 110, 600 160 T 1300 170 L 1300 1500 L -50 1500 Z" }}
-          transition={{ duration: 12, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
-        />
-
-        {/* Wave layer 2 - medium, darker */}
-        <motion.path
-          d="M -50 350 Q 300 280, 600 360 T 1300 350 L 1300 1500 L -50 1500 Z"
-          fill="rgba(46,196,198,0.18)"
-          animate={{ d: "M -50 370 Q 300 300, 600 380 T 1300 370 L 1300 1500 L -50 1500 Z" }}
-          transition={{ duration: 10, repeat: Infinity, repeatType: "reverse", ease: "easeInOut", delay: 0.5 }}
-        />
-
-        {/* Wave layer 3 - optimized and darker */}
-        <motion.path
-          d="M -50 550 Q 300 480, 600 560 T 1300 550 L 1300 1500 L -50 1500 Z"
-          fill="rgba(46,196,198,0.14)"
-          animate={{ d: "M -50 570 Q 300 500, 600 580 T 1300 570 L 1300 1500 L -50 1500 Z" }}
-          transition={{ duration: 8, repeat: Infinity, repeatType: "reverse", ease: "easeInOut", delay: 1 }}
-        />
-
-        {/* Additional accent wave for more depth */}
-        <motion.path
-          d="M -50 750 Q 300 700, 600 760 T 1300 750 L 1300 1500 L -50 1500 Z"
-          fill="rgba(46,196,198,0.08)"
-          animate={{ d: "M -50 770 Q 300 720, 600 780 T 1300 770 L 1300 1500 L -50 1500 Z" }}
-          transition={{ duration: 14, repeat: Infinity, repeatType: "reverse", ease: "easeInOut", delay: 1.5 }}
+        <motion.circle
+          cx={600}
+          cy={1500}
+          r={500}
+          fill="rgba(46,196,198,0.05)"
+          filter="url(#meshBlur)"
+          animate={{
+            opacity: [0.05, 0.08, 0.05],
+          }}
+          transition={{ duration: 22, repeat: Infinity, ease: "easeInOut", delay: 2 }}
         />
       </svg>
     </motion.div>
   );
 });
 
-ParallaxBackgroundContent.displayName = "ParallexBackgroundContent";
+ParallaxBackgroundContent.displayName = "ParallaxBackgroundContent";
 
 export default memo(function ParallaxBackground() {
   return <ParallaxBackgroundContent />;

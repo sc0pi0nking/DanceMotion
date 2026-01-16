@@ -32,17 +32,22 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen relative">
-      {/* Parallax Background Layer */}
-      <ParallaxBackground />
+    <div className="min-h-screen">
+      {/* Hero - Fixed at top */}
+      <div className="fixed inset-0 z-0 w-screen h-screen pointer-events-none">
+        <HeroScene />
+      </div>
       
-      <HeroScene />
-
-      {/* Decorative gradient background under header */}
-      <div 
-        className="h-32 -mt-16 pointer-events-none relative z-0"
-        style={{ background: "var(--gradient-hero-fade)" }}
-      />
+      {/* Content wrapper - starts below hero, with parallax background */}
+      <div className="relative z-10 w-full">
+        {/* Parallax Background Layer - only for content area */}
+        <ParallaxBackground />
+        
+        {/* Decorative gradient background under header */}
+        <div 
+          className="h-32 pointer-events-none relative"
+          style={{ background: "var(--gradient-hero-fade)" }}
+        />
 
       {/* Groups Section - Alternating Layout */}
       <section id="groups" className="mx-auto max-w-6xl px-6 py-20 sm:py-24 relative z-10">
@@ -288,6 +293,7 @@ export default function Home() {
           ></div>
         </div>
       </section>
+      </div>
     </div>
   );
 }
