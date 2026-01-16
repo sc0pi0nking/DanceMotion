@@ -49,8 +49,21 @@ export default function TeamPage() {
   });
 
   useEffect(() => {
+    initializeStorage();
     loadMembers();
   }, []);
+
+  const initializeStorage = async () => {
+    try {
+      const res = await fetch('/api/admin/storage/init', { method: 'POST' });
+      if (res.ok) {
+        console.log('✅ Storage initialized');
+      }
+    } catch (err) {
+      console.error('Storage init warning:', err);
+      // Non-blocking error
+    }
+  };
 
   const loadMembers = async () => {
     try {
@@ -62,7 +75,10 @@ export default function TeamPage() {
         .select('*')
         .order('order_index', { ascending: true });
 
-      if (err) throw err;
+      if (err) {
+        console.error('❌ Load error:', err);
+        throw err;
+      }
       setMembers(data || []);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Fehler beim Laden';
@@ -84,16 +100,26 @@ export default function TeamPage() {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
 
+      console.log(`📤 Uploading ${fileName} to team-images bucket...`);
+
       const { error: uploadError } = await supabase.storage
         .from('team-images')
         .upload(fileName, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('❌ Upload error:', uploadError);
+        throw new Error(`Upload failed: ${uploadError.message}`);
+      }
+
+      console.log('✅ Upload successful');
 
       const { data } = supabase.storage.from('team-images').getPublicUrl(fileName);
+      console.log('✅ Public URL generated:', data.publicUrl);
+      
       setFormData({ ...formData, image_url: data.publicUrl });
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Fehler beim Upload';
+      console.error('❌ Upload error:', err);
       setError(msg);
     } finally {
       setUploading(false);
@@ -110,39 +136,52 @@ export default function TeamPage() {
       setError(null);
       const maxOrder = members.length > 0 ? Math.max(...members.map(m => m.order_index)) : 0;
 
+      const memberData = {
+        name: formData.name,
+        role: formData.role,
+        bio: formData.bio || null,
+        image_url: formData.image_url || null,
+        social_links: formData.social_links,
+      };
+
       if (editingId) {
+        console.log(`✏️ Updating member ${editingId}:`, memberData);
+        
         const { error: err } = await supabase
           .from('team_members')
-          .update({
-            name: formData.name,
-            role: formData.role,
-            bio: formData.bio || null,
-            image_url: formData.image_url || null,
-            social_links: formData.social_links,
-          })
+          .update(memberData)
           .eq('id', editingId);
 
-        if (err) throw err;
+        if (err) {
+          console.error('❌ Update error:', err);
+          throw new Error(`Update failed: ${err.message}`);
+        }
+        
+        console.log('✅ Member updated successfully');
       } else {
+        console.log('➕ Creating new member:', memberData);
+        
         const { error: err } = await supabase
           .from('team_members')
           .insert({
-            name: formData.name,
-            role: formData.role,
-            bio: formData.bio || null,
-            image_url: formData.image_url || null,
+            ...memberData,
             order_index: maxOrder + 1,
-            social_links: formData.social_links,
             published: true,
           });
 
-        if (err) throw err;
+        if (err) {
+          console.error('❌ Insert error:', err);
+          throw new Error(`Insert failed: ${err.message}`);
+        }
+        
+        console.log('✅ Member created successfully');
       }
 
       resetForm();
       loadMembers();
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Fehler beim Speichern';
+      console.error('❌ Save error:', err);
       setError(msg);
     }
   };
