@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { Calendar, FileText, BarChart3, Images, LogOut, Menu, X, FileDown, MessageCircle, HelpCircle, Users, Book, Home } from 'lucide-react'
+import { Calendar, FileText, BarChart3, Images, LogOut, Menu, X, FileDown, HelpCircle, Users, Book, Home } from 'lucide-react'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -83,7 +83,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const allNavItems = [
     { icon: BarChart3, label: 'Dashboard', href: '/admin', roles: ['admin'] },
     { icon: Calendar, label: 'Termine', href: '/admin/events', roles: ['admin'] },
-    { icon: MessageCircle, label: 'Event-Anfragen', href: '/admin/event-requests', roles: ['admin', 'event-manager'] },
     { icon: FileText, label: 'Inhalte', href: '/admin/content', roles: ['admin', 'editor'] },
     { icon: Images, label: 'Galerie', href: '/admin/gallery', roles: ['admin', 'editor'] },
     { icon: FileDown, label: 'Dokumente', href: '/admin/documents', roles: ['admin', 'editor'] },
