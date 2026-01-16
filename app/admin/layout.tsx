@@ -55,19 +55,37 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   useEffect(() => {
     // Check if user is authenticated
     checkAuth()
+    
+    // Prüfe Session regelmäßig (z.B. wenn Tab im Hintergrund war)
+    const interval = setInterval(() => {
+      checkAuth()
+    }, 30000) // Alle 30 Sekunden
+    
+    return () => clearInterval(interval)
   }, [])
 
   const checkAuth = async () => {
     try {
       const res = await fetch('/api/admin/auth/session')
       if (!res.ok) {
+        setUser(null)
+        setUserRole('')
         router.push('/admin/login')
         return
       }
       const data = await res.json()
+      if (!data.user || !data.user.id) {
+        setUser(null)
+        setUserRole('')
+        router.push('/admin/login')
+        return
+      }
       setUser(data.user)
       setUserRole(data.user.role || '')
-    } catch {
+    } catch (error) {
+      console.error('Auth check failed:', error)
+      setUser(null)
+      setUserRole('')
       router.push('/admin/login')
     }
   }
@@ -75,8 +93,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const handleLogout = async () => {
     try {
       await fetch('/api/admin/auth/logout', { method: 'POST' })
-      router.push('/admin/login')
-    } catch {}
+      setUser(null)
+      setUserRole('')
+      // Force a hard redirect to login page
+      window.location.href = '/admin/login'
+    } catch (error) {
+      console.error('Logout failed:', error)
+      window.location.href = '/admin/login'
+    }
   }
 
   // Alle verfügbaren Navigation Items
