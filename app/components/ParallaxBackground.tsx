@@ -1,24 +1,25 @@
 "use client";
 
-import React from "react";
+import React, { memo } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 
-export default function ParallaxBackground() {
+// Memoized component to prevent unnecessary re-renders
+const ParallaxBackgroundContent = memo(() => {
   const { scrollY } = useScroll();
   
-  // Parallax effect: Background moves at 40% of scroll speed - extended range for longer effect
-  const bgY = useTransform(scrollY, [0, 3500], [0, -1400]);
+  // Optimized: Reduced scroll range, smoother parallax effect (30% speed instead of 40%)
+  const bgY = useTransform(scrollY, [0, 2000], [0, -600]);
 
   return (
     <motion.div
       style={{ y: bgY }}
-      className="absolute inset-0 pointer-events-none z-0 w-full"
+      className="absolute inset-0 pointer-events-none z-0 w-full will-change-transform"
     >
-      {/* SVG background with waves and gradient - covers entire scrollable area */}
+      {/* Optimized SVG: Reduced complexity, better mobile performance */}
       <svg
         className="w-full h-full pointer-events-none"
-        viewBox="0 0 1200 3000"
-        preserveAspectRatio="none"
+        viewBox="0 0 1200 1500"
+        preserveAspectRatio="xMidYMid slice"
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -32,17 +33,17 @@ export default function ParallaxBackground() {
             <stop offset="100%" stopColor="rgba(46,196,198,0)" />
           </radialGradient>
           <filter id="bgBlur1">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="30" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation="25" />
           </filter>
           <filter id="bgBlur2">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="50" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation="40" />
           </filter>
         </defs>
 
         {/* Main gradient background */}
-        <rect width="1200" height="3000" fill="url(#bgGradientMain)" />
+        <rect width="1200" height="1500" fill="url(#bgGradientMain)" />
 
-        {/* Radial glow center-left */}
+        {/* Radial glow center-left - reduced animation complexity */}
         <motion.circle
           cx={200}
           cy={250}
@@ -50,79 +51,56 @@ export default function ParallaxBackground() {
           fill="url(#bgRadial)"
           filter="url(#bgBlur2)"
           animate={{
-            cx: [200, 250, 200],
-            cy: [250, 200, 250],
+            cx: [200, 220, 200],
+            cy: [250, 270, 250],
           }}
-          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
         />
 
         {/* Radial glow right side */}
         <motion.circle
           cx={1000}
-          cy={900}
+          cy={600}
           r={400}
           fill="rgba(46,196,198,0.08)"
           filter="url(#bgBlur1)"
           animate={{
-            cx: [1000, 950, 1000],
-            cy: [900, 950, 900],
+            cx: [1000, 980, 1000],
+            cy: [600, 620, 600],
           }}
-          transition={{ duration: 24, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
         />
 
-        {/* Wave layer 1 - slow */}
+        {/* Wave layer 1 - optimized */}
         <motion.path
-          d="M -50 150 Q 300 100, 600 140 T 1300 150 L 1300 3000 L -50 3000 Z"
+          d="M -50 150 Q 300 100, 600 140 T 1300 150 L 1300 1500 L -50 1500 Z"
           fill="rgba(46,196,198,0.18)"
-          animate={{ d: "M -50 180 Q 300 110, 600 170 T 1300 180 L 1300 3000 L -50 3000 Z" }}
+          animate={{ d: "M -50 170 Q 300 110, 600 160 T 1300 170 L 1300 1500 L -50 1500 Z" }}
           transition={{ duration: 12, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
         />
 
         {/* Wave layer 2 - medium */}
         <motion.path
-          d="M -50 350 Q 300 280, 600 360 T 1300 350 L 1300 3000 L -50 3000 Z"
+          d="M -50 350 Q 300 280, 600 360 T 1300 350 L 1300 1500 L -50 1500 Z"
           fill="rgba(46,196,198,0.14)"
-          animate={{ d: "M -50 380 Q 300 300, 600 390 T 1300 380 L 1300 3000 L -50 3000 Z" }}
+          animate={{ d: "M -50 370 Q 300 300, 600 380 T 1300 370 L 1300 1500 L -50 1500 Z" }}
           transition={{ duration: 10, repeat: Infinity, repeatType: "reverse", ease: "easeInOut", delay: 0.5 }}
         />
 
-        {/* Wave layer 3 - fast */}
+        {/* Wave layer 3 - optimized for performance */}
         <motion.path
-          d="M -50 550 Q 300 480, 600 560 T 1300 550 L 1300 3000 L -50 3000 Z"
+          d="M -50 550 Q 300 480, 600 560 T 1300 550 L 1300 1500 L -50 1500 Z"
           fill="rgba(46,196,198,0.10)"
-          animate={{ d: "M -50 570 Q 300 500, 600 580 T 1300 570 L 1300 3000 L -50 3000 Z" }}
+          animate={{ d: "M -50 570 Q 300 500, 600 580 T 1300 570 L 1300 1500 L -50 1500 Z" }}
           transition={{ duration: 8, repeat: Infinity, repeatType: "reverse", ease: "easeInOut", delay: 1 }}
-        />
-
-        {/* Wave layer 4 - very deep */}
-        <motion.path
-          d="M -50 800 Q 300 720, 600 820 T 1300 800 L 1300 3000 L -50 3000 Z"
-          fill="rgba(46,196,198,0.08)"
-          animate={{ d: "M -50 830 Q 300 740, 600 850 T 1300 830 L 1300 3000 L -50 3000 Z" }}
-          transition={{ duration: 14, repeat: Infinity, repeatType: "reverse", ease: "easeInOut", delay: 1.5 }}
-        />
-
-        {/* Accent elements */}
-        <motion.line
-          x1={150}
-          y1={400}
-          x2={500}
-          y2={350}
-          stroke="rgba(46,196,198,0.06)"
-          strokeWidth={2}
-          animate={{ opacity: [0.04, 0.1, 0.04] }}
-          transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-        />
-
-        <motion.path
-          d="M 800 200 L 850 300 L 820 380"
-          stroke="rgba(46,196,198,0.07)"
-          strokeWidth="1.5"
-          fill="none"
-          animate={{ opacity: [0.03, 0.08, 0.03] }}
-          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
         />
       </svg>
     </motion.div>
   );
-}
+});
+
+ParallaxBackgroundContent.displayName = "ParallaxBackgroundContent";
+
+export default memo(function ParallaxBackground() {
+  return <ParallaxBackgroundContent />;
+});
