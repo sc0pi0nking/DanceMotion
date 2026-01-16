@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import ThemeToggle from "./ThemeToggle";
 import { Settings, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -73,9 +74,12 @@ export default function Header() {
               className="site-logo group flex items-center gap-3 no-underline"
               aria-label="Zur Startseite"
             >
-              <img 
+              <Image 
                 src="/logos/dancemotion-eschweiler.png" 
                 alt="DanceMotion Eschweiler" 
+                width={48}
+                height={48}
+                priority
                 className="h-12 w-12 hover:scale-110 transition-transform"
               />
               <div className="flex-1">

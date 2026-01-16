@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import EditableContent from "@/app/components/EditableContent";
 
 export const metadata = {
@@ -16,9 +17,11 @@ export default function EmotionPage() {
       {/* Logo with glassmorphism background */}
       <div className="mt-8 mb-8 flex justify-center">
         <div className="glassmorphism p-8 rounded-2xl">
-          <img 
+          <Image 
             src="/logos/emotion.png" 
             alt="Emotion Logo" 
+            width={128}
+            height={128}
             className="h-32 w-32 object-contain mx-auto hover:scale-110 transition-transform duration-300"
           />
         </div>

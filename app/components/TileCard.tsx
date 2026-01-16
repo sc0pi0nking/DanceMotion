@@ -13,9 +13,11 @@ export default function TileCard({ tile, index }: { tile: Tile; index?: number }
         {/* Logo area (top-left) */}
         {tile.logo && (
           <div className="mb-4">
-            <img 
+            <Image 
               src={tile.logo} 
               alt={`${tile.title} logo`}
+              width={64}
+              height={64}
               className="h-16 w-16 object-contain"
             />
           </div>

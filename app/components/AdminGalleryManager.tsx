@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Upload, Trash2, Image as ImageIcon, X } from 'lucide-react'
 import { useDropzone } from 'react-dropzone'
+import Image from 'next/image'
 
 interface GalleryItem {
   id: string
@@ -167,7 +168,7 @@ export default function AdminGalleryManager() {
             <div className="grid grid-cols-3 gap-2">
               {gallery.images.slice(0, 3).map((img, i) => (
                 <div key={i} className="aspect-square bg-gray-100 rounded overflow-hidden">
-                  <img src={img} alt="" className="w-full h-full object-cover" />
+                  <Image src={img} alt="" width={100} height={100} className="w-full h-full object-cover" />
                 </div>
               ))}
             </div>
