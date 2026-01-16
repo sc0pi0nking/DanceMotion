@@ -33,24 +33,22 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero - Fixed at top */}
-      <div className="fixed inset-0 z-0 w-screen h-screen pointer-events-none">
-        <HeroScene />
-      </div>
-      
-      {/* Content wrapper - starts below hero, with parallax background */}
-      <div className="relative z-10 w-full">
-        {/* Parallax Background Layer - only for content area */}
+      {/* Hero - Normal, scrollable */}
+      <HeroScene />
+
+      {/* Content wrapper - with its own parallax background */}
+      <div className="relative w-full">
+        {/* Parallax Background Layer */}
         <ParallaxBackground />
         
         {/* Decorative gradient background under header */}
         <div 
-          className="h-32 pointer-events-none relative"
+          className="h-32 pointer-events-none relative z-10"
           style={{ background: "var(--gradient-hero-fade)" }}
         />
 
       {/* Groups Section - Alternating Layout */}
-      <section id="groups" className="mx-auto max-w-6xl px-6 py-20 sm:py-24 relative z-10">
+      <section id="groups" className="mx-auto max-w-6xl px-6 py-20 sm:py-24 relative z-20">
         <div className="mb-16">
           <h2 className="text-4xl font-bold" style={{ color: "var(--fg)" }}>
             Unsere Gruppen
@@ -153,7 +151,7 @@ export default function Home() {
       </section>
 
       {/* Events Timeline Section - NEW */}
-      <section id="events" className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
+      <section id="events" className="mx-auto max-w-6xl px-6 py-20 sm:py-24 relative z-20">
         <div className="mb-16">
           <h2 className="text-4xl font-bold" style={{ color: "var(--fg)" }}>
             Nächste Auftritte & Events
@@ -177,7 +175,7 @@ export default function Home() {
       </section>
 
       {/* Event Studio Section - VISUALLY DIFFERENT FROM GROUPS */}
-      <section className="mx-auto max-w-6xl px-6 py-28">
+      <section className="mx-auto max-w-6xl px-6 py-28 relative z-20">
         <div className="relative rounded-3xl p-12 lg:p-16 overflow-hidden transition-all duration-500 hover:shadow-lg"
              style={{
                background: "var(--gradient-card-subtle)",
