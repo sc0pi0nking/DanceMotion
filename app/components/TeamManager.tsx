@@ -57,12 +57,16 @@ export default function TeamManager() {
   const fetchMembers = async () => {
     try {
       const res = await fetch('/api/admin/team');
-      if (res.ok) {
-        const data = await res.json();
-        setMembers(data);
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(`API returned ${res.status}: ${errorData.error || 'Unknown error'}`);
       }
+      const data = await res.json();
+      console.log('Loaded team members:', data);
+      setMembers(data);
     } catch (error) {
       console.error('Failed to load team members:', error);
+      setMembers([]);
     } finally {
       setLoading(false);
     }

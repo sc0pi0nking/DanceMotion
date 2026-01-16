@@ -4,16 +4,22 @@ import { supabaseServer } from '@/lib/supabase';
 // GET - Alle Team-Mitglieder (inkl. unveröffentlichte)
 export async function GET() {
   try {
+    console.log('🔵 GET /api/admin/team - Fetching team members...');
+    
     const { data: members, error } = await supabaseServer
       .from('team_members')
       .select('*')
       .order('order_index', { ascending: true });
 
-    if (error) throw error;
+    if (error) {
+      console.error('❌ Supabase error:', error);
+      throw error;
+    }
 
+    console.log('✅ Successfully fetched team members:', members?.length || 0);
     return NextResponse.json(members || []);
   } catch (error: any) {
-    console.error('Error fetching team members:', error);
+    console.error('❌ Error fetching team members:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to fetch team members' },
       { status: 500 }
