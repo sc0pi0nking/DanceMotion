@@ -68,6 +68,7 @@ html[data-theme="light"] {
   --border: #E8D9C8; /* Warmer, sichtbarer Border mit Substanz */
   --accent: #2EC4C6; /* Teal bleibt gleich */
   --card-shadow: 0 8px 24px rgba(26,20,16,0.08);
+  --panel-semi: rgba(254, 248, 240, 0.7); /* Light mode: helle Semi-transparente Kacheln */
 }
 
 html[data-theme="dark"] {
@@ -78,6 +79,7 @@ html[data-theme="dark"] {
   --border: #2A2A2A;
   --accent: #2EC4C6;
   --card-shadow: 0 24px 60px rgba(46,196,198,0.12);
+  --panel-semi: rgba(18, 18, 18, 0.5); /* Dark mode: dunkle Semi-transparente Kacheln */
 }
 
 body {
