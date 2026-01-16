@@ -39,6 +39,7 @@ export default function TeamPage() {
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     role: '',
@@ -69,6 +70,33 @@ export default function TeamPage() {
       setError(msg);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setError(null);
+      setUploading(true);
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('team-images')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from('team-images').getPublicUrl(fileName);
+      setFormData({ ...formData, image_url: data.publicUrl });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Fehler beim Upload';
+      setError(msg);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -203,7 +231,7 @@ export default function TeamPage() {
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Team-Mitglieder</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Team-Mitglieder</h1>
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
@@ -228,8 +256,8 @@ export default function TeamPage() {
       {showForm && (
         <div className="mb-6 p-4 md:p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-blue-500 space-y-4">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold">{editingId ? 'Bearbeiten' : 'Neues Mitglied'}</h2>
-            <button onClick={resetForm} className="text-gray-500 hover:text-gray-700">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">{editingId ? 'Bearbeiten' : 'Neues Mitglied'}</h2>
+            <button onClick={resetForm} className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
               <X size={24} />
             </button>
           </div>
@@ -240,14 +268,14 @@ export default function TeamPage() {
               placeholder="Name *"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+              className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
             <input
               type="text"
               placeholder="Rolle *"
               value={formData.role}
               onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-              className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+              className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
           </div>
 
@@ -255,9 +283,21 @@ export default function TeamPage() {
             placeholder="Bio"
             value={formData.bio}
             onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-            className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none"
+            className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             rows={3}
           />
+
+          <div>
+            <label className="block text-sm font-semibold mb-2 text-gray-900 dark:text-white">Profilbild</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              disabled={uploading}
+              className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
+            />
+            {uploading && <p className="text-sm text-blue-600 dark:text-blue-400 mt-2">Lädt...</p>}
+          </div>
 
           <div className="grid md:grid-cols-3 gap-4">
             <input
@@ -270,7 +310,7 @@ export default function TeamPage() {
                   social_links: { ...formData.social_links, instagram: e.target.value },
                 })
               }
-              className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+              className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
             <input
               type="text"
@@ -282,7 +322,7 @@ export default function TeamPage() {
                   social_links: { ...formData.social_links, facebook: e.target.value },
                 })
               }
-              className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+              className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
             <input
               type="email"
@@ -294,7 +334,7 @@ export default function TeamPage() {
                   social_links: { ...formData.social_links, email: e.target.value },
                 })
               }
-              className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+              className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             />
           </div>
 
@@ -357,9 +397,9 @@ export default function TeamPage() {
 
               {/* Info */}
               <div className="flex-1 min-w-0">
-                <h3 className="font-bold truncate">{member.name}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{member.role}</p>
-                {member.bio && <p className="text-xs text-gray-500 dark:text-gray-500 line-clamp-1">{member.bio}</p>}
+                <h3 className="font-bold text-gray-900 dark:text-white truncate">{member.name}</h3>
+                <p className="text-sm text-gray-800 dark:text-gray-200 truncate font-medium">{member.role}</p>
+                {member.bio && <p className="text-xs text-gray-700 dark:text-gray-300 line-clamp-1">{member.bio}</p>}
               </div>
 
               {/* Status */}
