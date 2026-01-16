@@ -1,28 +1,40 @@
 /* Reusable gradient and style variables for page components */
 
 :root {
-  /* Gradient backgrounds */
-  --gradient-hero-fade: linear-gradient(180deg, rgba(46,196,198,0.1) 0%, rgba(46,196,198,0.05) 50%, transparent 100%);
-  --gradient-card-light: linear-gradient(135deg, rgba(46,196,198,0.2), rgba(46,196,198,0.08));
-  --gradient-card-subtle: linear-gradient(135deg, rgba(46,196,198,0.06), rgba(46,196,198,0.02));
+  /* Gradient backgrounds - darker for better visibility */
+  --gradient-hero-fade: linear-gradient(180deg, rgba(46,196,198,0.15) 0%, rgba(46,196,198,0.08) 50%, transparent 100%);
+  --gradient-card-light: linear-gradient(135deg, rgba(46,196,198,0.25), rgba(46,196,198,0.12));
+  --gradient-card-subtle: linear-gradient(135deg, rgba(46,196,198,0.09), rgba(46,196,198,0.04));
   --gradient-radial-accent: radial-gradient(circle, var(--accent), transparent);
-  --gradient-radial-glow: radial-gradient(circle at 60% 40%, rgba(46,196,198,0.15), rgba(46,196,198,0.02));
+  --gradient-radial-glow: radial-gradient(circle at 60% 40%, rgba(46,196,198,0.18), rgba(46,196,198,0.03));
   --gradient-radial-soft: radial-gradient(circle, rgba(46,196,198,0.15), rgba(46,196,198,0.02));
+
+  /* Box shadows for depth and layering */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.16);
+  --shadow-xl: 0 16px 40px rgba(0, 0, 0, 0.2);
+  --shadow-glow: 0 0 20px rgba(46,196,198,0.15);
 
   /* Backdrop and blur effects */
   --backdrop-light: rgba(255, 255, 255, 0.7);
   --backdrop-blur-light: blur(10px);
   --backdrop-blur-medium: blur(8px);
 
-  /* Border colors */
-  --border-accent: 1px solid rgba(46,196,198,0.15);
-  --border-accent-bright: 1px solid rgba(46,196,198,0.3);
-  --border-accent-glow: 1px solid rgba(46,196,198,0.2);
+  /* Border colors - darker for contrast */
+  --border-accent: 1px solid rgba(46,196,198,0.2);
+  --border-accent-bright: 1px solid rgba(46,196,198,0.4);
+  --border-accent-glow: 1px solid rgba(46,196,198,0.25);
 
-  /* Badge backgrounds */
-  --badge-bg-subtle: rgba(46,196,198,0.1);
-  --badge-bg-medium: rgba(46,196,198,0.15);
+  /* Badge backgrounds - darker */
+  --badge-bg-subtle: rgba(46,196,198,0.12);
+  --badge-bg-medium: rgba(46,196,198,0.18);
 
   /* Accent dot color */
   --accent-dot: var(--accent);
+
+  /* Transitions for smooth interactions */
+  --transition-fast: 150ms ease-in-out;
+  --transition-smooth: 300ms ease-in-out;
+  --transition-slow: 500ms ease-in-out;
 }

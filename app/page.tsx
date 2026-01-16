@@ -66,9 +66,9 @@ export default function Home() {
               }}
             >
               {/* Image/Visual Side */}
-              <div className="relative h-64 lg:h-80 rounded-2xl overflow-hidden transition-all duration-500 group-hover:shadow-2xl">
+              <div className="relative h-64 lg:h-80 rounded-2xl overflow-hidden transition-all duration-500 group-hover:shadow-2xl group">
                 <div
-                  className="absolute inset-0 rounded-2xl transition-all duration-500"
+                  className="absolute inset-0 rounded-2xl transition-all duration-500 group-hover:border-accent-bright"
                   style={{
                     background: "var(--gradient-card-light)",
                     backdropFilter: "var(--backdrop-blur-medium)",
@@ -85,6 +85,7 @@ export default function Home() {
                           height={120}
                           className="mx-auto opacity-70 group-hover:opacity-100 transition-opacity duration-500"
                           loading="lazy"
+                          priority={false}
                         />
                       ) : (
                         <div className="text-5xl font-bold opacity-20 group-hover:opacity-40 transition-opacity duration-500" style={{ color: "var(--accent)" }}>
@@ -96,13 +97,13 @@ export default function Home() {
                       </p>
                     </div>
                   </div>
-                  {/* Decorative circles */}
+                  {/* Decorative circles - more prominent on hover */}
                   <div
-                    className="absolute top-4 right-4 h-20 w-20 rounded-full opacity-15 group-hover:opacity-25 transition-opacity duration-500"
+                    className="absolute top-4 right-4 h-20 w-20 rounded-full opacity-15 group-hover:opacity-35 transition-opacity duration-500"
                     style={{ background: "var(--gradient-radial-accent)" }}
                   ></div>
                   <div
-                    className="absolute bottom-4 left-4 h-28 w-28 rounded-full opacity-10 group-hover:opacity-20 transition-opacity duration-500"
+                    className="absolute bottom-4 left-4 h-28 w-28 rounded-full opacity-10 group-hover:opacity-25 transition-opacity duration-500"
                     style={{ background: "var(--gradient-radial-accent)" }}
                   ></div>
                 </div>
@@ -171,19 +172,20 @@ export default function Home() {
 
       {/* Event Studio Section - VISUALLY DIFFERENT FROM GROUPS */}
       <section className="mx-auto max-w-6xl px-6 py-28">
-        <div className="relative rounded-3xl p-12 lg:p-16 overflow-hidden"
+        <div className="relative rounded-3xl p-12 lg:p-16 overflow-hidden transition-all duration-500 hover:shadow-lg"
              style={{
                background: "var(--gradient-card-subtle)",
                border: "var(--border-accent)",
                backdropFilter: "var(--backdrop-blur-medium)",
+               boxShadow: "var(--shadow-md)",
              }}>
           
           <div className="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:items-center relative z-10">
             {/* Left: Text Content */}
             <div className="flex flex-col justify-center">
-              <div className="mb-2 inline-flex w-fit items-center gap-2 rounded-full px-4 py-2" 
+              <div className="mb-2 inline-flex w-fit items-center gap-2 rounded-full px-4 py-2 transition-all duration-300 hover:shadow-md" 
                    style={{ backgroundColor: "var(--badge-bg-medium)", border: "var(--border-accent-bright)" }}>
-                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: "var(--accent-dot)" }}></span>
+                <span className="h-2 w-2 rounded-full animate-pulse" style={{ backgroundColor: "var(--accent-dot)" }}></span>
                 <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--accent)" }}>Spezialangebot</span>
               </div>
               
@@ -196,21 +198,21 @@ export default function Home() {
               </p>
 
               <div className="mt-10 flex flex-col gap-4">
-                <div className="flex gap-4 items-start">
+                <div className="flex gap-4 items-start transition-all duration-300 hover:translate-x-1">
                   <div className="mt-1.5 h-1 w-1 rounded-full flex-shrink-0" style={{ backgroundColor: "var(--accent-dot)" }}></div>
                   <div>
                     <p className="font-semibold" style={{ color: "var(--fg)" }}>Stundenvermietung</p>
                     <p className="text-sm" style={{ color: "var(--muted)" }}>Tagsüber bis abends, flexibel buchbar</p>
                   </div>
                 </div>
-                <div className="flex gap-4 items-start">
+                <div className="flex gap-4 items-start transition-all duration-300 hover:translate-x-1">
                   <div className="mt-1.5 h-1 w-1 rounded-full flex-shrink-0" style={{ backgroundColor: "var(--accent-dot)" }}></div>
                   <div>
                     <p className="font-semibold" style={{ color: "var(--fg)" }}>Professionelle Ausstattung</p>
                     <p className="text-sm" style={{ color: "var(--muted)" }}>Großer Spiegel, Soundanlage, Klimaanlage</p>
                   </div>
                 </div>
-                <div className="flex gap-4 items-start">
+                <div className="flex gap-4 items-start transition-all duration-300 hover:translate-x-1">
                   <div className="mt-1.5 h-1 w-1 rounded-full flex-shrink-0" style={{ backgroundColor: "var(--accent-dot)" }}></div>
                   <div>
                     <p className="font-semibold" style={{ color: "var(--fg)" }}>Event-Hosting</p>
@@ -233,12 +235,13 @@ export default function Home() {
             {/* Right: Visual Element - DIFFERENT STYLE */}
             <div className="relative h-80 hidden lg:flex items-center justify-center">
               <div className="relative w-full h-full">
-                {/* Background blob */}
+                {/* Background blob with enhanced glow */}
                 <div
-                  className="absolute inset-0 rounded-2xl"
+                  className="absolute inset-0 rounded-2xl transition-all duration-500 hover:shadow-xl"
                   style={{
                     background: "var(--gradient-radial-glow)",
                     border: "var(--border-accent-glow)",
+                    boxShadow: "var(--shadow-glow)",
                   }}
                 >
                   {/* Large center circle */}
@@ -247,25 +250,26 @@ export default function Home() {
                       <img
                         src="/logos/dancemotion-event-studio.png"
                         alt="DanceMotion Eventstudio"
-                        className="mx-auto h-40 w-auto opacity-80 hover:opacity-100 transition-opacity"
+                        className="mx-auto h-40 w-auto opacity-80 hover:opacity-100 transition-opacity duration-300"
                         loading="lazy"
                       />
                     </div>
                   </div>
                   
-                  {/* Decorative elements */}
+                  {/* Decorative elements - animated on hover */}
                   <div
-                    className="absolute top-8 right-8 h-16 w-16 rounded-full"
+                    className="absolute top-8 right-8 h-16 w-16 rounded-full animate-pulse"
                     style={{
-                      background: "radial-gradient(circle, rgba(46,196,198,0.25), transparent)",
+                      background: "radial-gradient(circle, rgba(46,196,198,0.3), transparent)",
                       filter: "blur(24px)",
                     }}
                   ></div>
                   <div
                     className="absolute bottom-12 left-12 h-24 w-24 rounded-full"
                     style={{
-                      background: "radial-gradient(circle, rgba(46,196,198,0.2), transparent)",
+                      background: "radial-gradient(circle, rgba(46,196,198,0.25), transparent)",
                       filter: "blur(28px)",
+                      animation: "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) 1s infinite"
                     }}
                   ></div>
                 </div>
@@ -273,11 +277,11 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Background decorative element for eventstudio section */}
+          {/* Background decorative element for eventstudio section - enhanced */}
           <div
-            className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-20 blur-3xl pointer-events-none"
+            className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-30 blur-3xl pointer-events-none"
             style={{
-              background: "radial-gradient(circle, rgba(46,196,198,0.4), transparent)",
+              background: "radial-gradient(circle, rgba(46,196,198,0.5), transparent)",
               transform: "translate(100px, -100px)",
             }}
           ></div>
