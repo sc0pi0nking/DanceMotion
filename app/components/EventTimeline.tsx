@@ -108,15 +108,16 @@ function EventCard({
         {/* Card content */}
         <div className="ml-16 lg:ml-0 lg:w-1/2">
           <motion.div
-            className="p-6 rounded-2xl border transition-all duration-300"
+            className="p-6 rounded-2xl border transition-all duration-300 backdrop-blur-md"
             style={{
-              backgroundColor: "var(--panel)",
-              borderColor: "var(--border)",
+              backgroundColor: "rgba(18, 18, 18, 0.5)",
+              borderColor: "rgba(46,196,198,0.25)",
               borderWidth: "1px",
+              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(46,196,198,0.1)",
             }}
             whileHover={{
-              borderColor: "var(--accent)",
-              boxShadow: "0 12px 32px rgba(46,196,198,0.12)",
+              borderColor: "rgba(46,196,198,0.5)",
+              boxShadow: "0 12px 40px rgba(46,196,198,0.15), inset 0 1px 1px rgba(46,196,198,0.15)",
             }}
           >
             {/* Date chip with icon */}

@@ -68,11 +68,12 @@ export default function Home() {
               {/* Image/Visual Side */}
               <div className="relative h-64 lg:h-80 rounded-2xl overflow-hidden transition-all duration-500 group-hover:shadow-2xl group">
                 <div
-                  className="absolute inset-0 rounded-2xl transition-all duration-500 group-hover:border-accent-bright"
+                  className="absolute inset-0 rounded-2xl transition-all duration-500 group-hover:border-accent-bright backdrop-blur-sm"
                   style={{
                     background: "var(--gradient-card-light)",
                     backdropFilter: "var(--backdrop-blur-medium)",
                     border: "var(--border-accent)",
+                    boxShadow: "inset 0 1px 2px rgba(46,196,198,0.1)",
                   }}
                 >
                   <div className="absolute inset-0 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">

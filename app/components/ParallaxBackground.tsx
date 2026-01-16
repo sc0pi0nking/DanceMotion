@@ -13,7 +13,7 @@ const ParallaxBackgroundContent = memo(() => {
   return (
     <motion.div
       style={{ y: bgY }}
-      className="absolute inset-0 pointer-events-none z-0 w-full h-full min-h-screen will-change-transform"
+      className="fixed inset-0 pointer-events-none z-0 w-screen h-screen will-change-transform"
     >
       {/* Optimized SVG: Darker gradients for better visibility, full coverage */}
       <svg
