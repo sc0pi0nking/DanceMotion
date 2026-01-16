@@ -106,16 +106,6 @@ export interface FormItem {
   updated_by?: string
 }
 
-export interface FormSubmission {
-  id: string
-  form_id: string
-  data: Record<string, any>
-  email?: string
-  status: 'new' | 'read' | 'archived'
-  created_at: string
-  updated_at: string
-}
-
 export interface AdminUser {
   id: string
   email: string
@@ -126,3 +116,4 @@ export interface AdminUser {
   created_at: string
   updated_at: string
 }
+
