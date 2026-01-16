@@ -1,18 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  Plus,
-  Trash2,
-  Eye,
-  EyeOff,
-  Save,
-  X,
-  Upload,
-  ArrowUp,
-  ArrowDown,
-  AlertCircle,
-} from 'lucide-react';
+import { Plus, Trash2, Eye, EyeOff, Save, X, Upload, ArrowUp, ArrowDown, AlertCircle, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
 
@@ -29,17 +18,18 @@ interface TeamMember {
     email?: string;
   };
   published: boolean;
-  created_at?: string;
-  updated_at?: string;
 }
 
-export default function TeamPage() {
+export default function TeamAdminPage() {
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  
   const [formData, setFormData] = useState({
     name: '',
     role: '',
@@ -49,26 +39,14 @@ export default function TeamPage() {
   });
 
   useEffect(() => {
-    initializeStorage();
     loadMembers();
   }, []);
 
-  const initializeStorage = async () => {
-    try {
-      const res = await fetch('/api/admin/storage/init', { method: 'POST' });
-      if (res.ok) {
-        console.log('✅ Storage initialized');
-      }
-    } catch (err) {
-      console.error('Storage init warning:', err);
-      // Non-blocking error
-    }
-  };
-
   const loadMembers = async () => {
     try {
-      setLoading(true);
       setError(null);
+      setLoading(true);
+      console.log('📥 Loading team members...');
       
       const { data, error: err } = await supabase
         .from('team_members')
@@ -79,6 +57,8 @@ export default function TeamPage() {
         console.error('❌ Load error:', err);
         throw err;
       }
+      
+      console.log('✅ Loaded:', data?.length || 0, 'members');
       setMembers(data || []);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Fehler beim Laden';
@@ -89,54 +69,53 @@ export default function TeamPage() {
     }
   };
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
     try {
       setError(null);
       setUploading(true);
+      console.log('📤 Uploading image:', file.name);
 
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-
-      console.log(`📤 Uploading ${fileName} to team-images bucket...`);
-
-      const { error: uploadError } = await supabase.storage
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${file.name.split('.').pop()}`;
+      
+      const { error: uploadErr } = await supabase.storage
         .from('team-images')
         .upload(fileName, file);
 
-      if (uploadError) {
-        console.error('❌ Upload error:', uploadError);
-        throw new Error(`Upload failed: ${uploadError.message}`);
+      if (uploadErr) {
+        console.error('❌ Upload error:', uploadErr);
+        throw uploadErr;
       }
 
-      console.log('✅ Upload successful');
-
       const { data } = supabase.storage.from('team-images').getPublicUrl(fileName);
-      console.log('✅ Public URL generated:', data.publicUrl);
+      console.log('✅ Upload successful:', data.publicUrl);
       
-      setFormData({ ...formData, image_url: data.publicUrl });
+      setFormData(prev => ({ ...prev, image_url: data.publicUrl }));
+      setSuccess('Bild hochgeladen!');
+      setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Fehler beim Upload';
-      console.error('❌ Upload error:', err);
+      const msg = err instanceof Error ? err.message : 'Fehler beim Hochladen';
+      console.error('Upload error:', err);
       setError(msg);
     } finally {
       setUploading(false);
     }
   };
 
-  const saveMember = async () => {
+  const handleSave = async () => {
     if (!formData.name || !formData.role) {
       setError('Name und Rolle sind erforderlich');
       return;
     }
 
     try {
+      setSaving(true);
       setError(null);
-      const maxOrder = members.length > 0 ? Math.max(...members.map(m => m.order_index)) : 0;
+      setSuccess(null);
 
-      const memberData = {
+      const data = {
         name: formData.name,
         role: formData.role,
         bio: formData.bio || null,
@@ -145,100 +124,122 @@ export default function TeamPage() {
       };
 
       if (editingId) {
-        console.log(`✏️ Updating member ${editingId}:`, memberData);
-        
+        console.log('✏️ Updating member:', editingId);
         const { error: err } = await supabase
           .from('team_members')
-          .update(memberData)
+          .update(data)
           .eq('id', editingId);
 
-        if (err) {
-          console.error('❌ Update error:', err);
-          throw new Error(`Update failed: ${err.message}`);
-        }
-        
-        console.log('✅ Member updated successfully');
+        if (err) throw err;
+        console.log('✅ Updated');
+        setSuccess('Team-Mitglied aktualisiert!');
       } else {
-        console.log('➕ Creating new member:', memberData);
+        console.log('➕ Creating new member');
+        const maxOrder = members.length > 0 ? Math.max(...members.map(m => m.order_index)) : 0;
         
         const { error: err } = await supabase
           .from('team_members')
           .insert({
-            ...memberData,
+            ...data,
             order_index: maxOrder + 1,
             published: true,
           });
 
-        if (err) {
-          console.error('❌ Insert error:', err);
-          throw new Error(`Insert failed: ${err.message}`);
-        }
-        
-        console.log('✅ Member created successfully');
+        if (err) throw err;
+        console.log('✅ Created');
+        setSuccess('Team-Mitglied hinzugefügt!');
       }
 
       resetForm();
-      loadMembers();
+      setTimeout(() => {
+        loadMembers();
+        setSuccess(null);
+      }, 500);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Fehler beim Speichern';
-      console.error('❌ Save error:', err);
+      console.error('Save error:', err);
       setError(msg);
+    } finally {
+      setSaving(false);
     }
   };
 
-  const deleteMember = async (id: string) => {
+  const handleDelete = async (id: string) => {
     if (!confirm('Wirklich löschen?')) return;
 
     try {
       setError(null);
-      const { error: err } = await supabase.from('team_members').delete().eq('id', id);
+      console.log('🗑️ Deleting member:', id);
+
+      const { error: err } = await supabase
+        .from('team_members')
+        .delete()
+        .eq('id', id);
+
       if (err) throw err;
-      loadMembers();
+      console.log('✅ Deleted');
+      
+      setSuccess('Team-Mitglied gelöscht!');
+      setTimeout(() => {
+        loadMembers();
+        setSuccess(null);
+      }, 500);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Fehler beim Löschen';
+      console.error('Delete error:', err);
       setError(msg);
     }
   };
 
-  const togglePublished = async (member: TeamMember) => {
+  const handleTogglePublished = async (member: TeamMember) => {
     try {
       setError(null);
+      console.log('🔄 Toggling published:', member.id);
+
       const { error: err } = await supabase
         .from('team_members')
         .update({ published: !member.published })
         .eq('id', member.id);
 
       if (err) throw err;
-      loadMembers();
+      
+      setMembers(members.map(m => 
+        m.id === member.id ? { ...m, published: !m.published } : m
+      ));
+      console.log('✅ Toggled');
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Fehler beim Aktualisieren';
+      console.error('Toggle error:', err);
       setError(msg);
     }
   };
 
-  const moveOrder = async (member: TeamMember, direction: 'up' | 'down') => {
+  const handleMove = async (member: TeamMember, direction: 'up' | 'down') => {
     try {
       setError(null);
-      const index = members.findIndex(m => m.id === member.id);
-      if ((direction === 'up' && index === 0) || (direction === 'down' && index === members.length - 1)) {
+      const idx = members.findIndex(m => m.id === member.id);
+      
+      if ((direction === 'up' && idx === 0) || (direction === 'down' && idx === members.length - 1)) {
         return;
       }
 
-      const targetIndex = direction === 'up' ? index - 1 : index + 1;
-      const targetMember = members[targetIndex];
+      const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+      const target = members[targetIdx];
 
-      // Swap order_index
-      await supabase.from('team_members').update({ order_index: targetMember.order_index }).eq('id', member.id);
-      await supabase.from('team_members').update({ order_index: member.order_index }).eq('id', targetMember.id);
+      console.log('↕️ Moving:', direction);
+
+      await supabase.from('team_members').update({ order_index: target.order_index }).eq('id', member.id);
+      await supabase.from('team_members').update({ order_index: member.order_index }).eq('id', target.id);
 
       loadMembers();
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Fehler beim Verschieben';
+      console.error('Move error:', err);
       setError(msg);
     }
   };
 
-  const editMember = (member: TeamMember) => {
+  const handleEdit = (member: TeamMember) => {
     const socialLinks = member.social_links || { instagram: '', facebook: '', email: '' };
     setFormData({
       name: member.name,
@@ -267,227 +268,217 @@ export default function TeamPage() {
     setShowForm(false);
   };
 
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <Loader2 className="animate-spin mx-auto mb-4 text-blue-600" size={32} />
+          <p className="text-gray-600 dark:text-gray-400">Lädt Team-Mitglieder...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4 md:p-6 max-w-6xl mx-auto">
+    <div className="p-4 md:p-6 max-w-5xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Team-Mitglieder</h1>
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
           >
-            <Plus size={20} />
-            Hinzufügen
+            <Plus size={20} /> Hinzufügen
           </button>
         )}
       </div>
 
       {error && (
         <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex gap-3">
-          <AlertCircle className="text-red-600 dark:text-red-400 flex-shrink-0" size={20} />
-          <div>
-            <p className="font-bold text-red-700 dark:text-red-300">Fehler</p>
-            <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
-          </div>
+          <AlertCircle className="text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" size={20} />
+          <p className="text-red-700 dark:text-red-300">{error}</p>
         </div>
       )}
 
+      {success && (
+        <div className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+          <p className="text-green-700 dark:text-green-300">✅ {success}</p>
+        </div>
+      )}
+
+      {/* Formular */}
       {showForm && (
-        <div className="mb-6 p-4 md:p-6 bg-white dark:bg-gray-800 rounded-lg border-2 border-blue-500 space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">{editingId ? 'Bearbeiten' : 'Neues Mitglied'}</h2>
-            <button onClick={resetForm} className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
-              <X size={24} />
-            </button>
-          </div>
+        <div className="mb-6 p-4 md:p-6 bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            {editingId ? 'Bearbeiten' : 'Neues Team-Mitglied'}
+          </h2>
 
-          <div className="grid md:grid-cols-2 gap-4">
-            <input
-              type="text"
-              placeholder="Name *"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-            />
-            <input
-              type="text"
-              placeholder="Rolle *"
-              value={formData.role}
-              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-              className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-            />
-          </div>
+          <div className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name *</label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Rolle *</label>
+                <input
+                  type="text"
+                  value={formData.role}
+                  onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+            </div>
 
-          <textarea
-            placeholder="Bio"
-            value={formData.bio}
-            onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-            className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 resize-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-            rows={3}
-          />
-
-          <div>
-            <label className="block text-sm font-semibold mb-2 text-gray-900 dark:text-white">Profilbild</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              disabled={uploading}
-              className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white"
-            />
-            {uploading && <p className="text-sm text-blue-600 dark:text-blue-400 mt-2">Lädt...</p>}
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-4">
-            <input
-              type="text"
-              placeholder="Instagram"
-              value={formData.social_links.instagram}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  social_links: { ...formData.social_links, instagram: e.target.value },
-                })
-              }
-              className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-            />
-            <input
-              type="text"
-              placeholder="Facebook"
-              value={formData.social_links.facebook}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  social_links: { ...formData.social_links, facebook: e.target.value },
-                })
-              }
-              className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-            />
-            <input
-              type="email"
-              placeholder="E-Mail"
-              value={formData.social_links.email}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  social_links: { ...formData.social_links, email: e.target.value },
-                })
-              }
-              className="px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-            />
-          </div>
-
-          {formData.image_url && (
-            <div className="relative w-24 h-24">
-              <Image
-                src={formData.image_url}
-                alt="Preview"
-                fill
-                className="rounded-lg object-cover"
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Biografie</label>
+              <textarea
+                value={formData.bio}
+                onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
-          )}
 
-          <div className="flex gap-2 justify-end">
-            <button
-              onClick={resetForm}
-              className="px-4 py-2 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              Abbrechen
-            </button>
-            <button
-              onClick={saveMember}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-            >
-              <Save size={20} />
-              Speichern
-            </button>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Profilbild</label>
+              <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition w-fit">
+                <Upload size={18} />
+                <span>{uploading ? 'Lädt...' : 'Wählen'}</span>
+                <input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} hidden />
+              </label>
+              {formData.image_url && (
+                <div className="mt-3 relative w-20 h-20 rounded-lg overflow-hidden border">
+                  <Image src={formData.image_url} alt="Preview" fill className="object-cover" />
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Social Media</label>
+              <input
+                type="text"
+                placeholder="Instagram"
+                value={formData.social_links.instagram}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  social_links: { ...prev.social_links, instagram: e.target.value }
+                }))}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+              />
+              <input
+                type="text"
+                placeholder="Facebook"
+                value={formData.social_links.facebook}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  social_links: { ...prev.social_links, facebook: e.target.value }
+                }))}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+              />
+              <input
+                type="email"
+                placeholder="E-Mail"
+                value={formData.social_links.email}
+                onChange={(e) => setFormData(prev => ({
+                  ...prev,
+                  social_links: { ...prev.social_links, email: e.target.value }
+                }))}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:bg-blue-400"
+              >
+                {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
+                {saving ? 'Speichert...' : 'Speichern'}
+              </button>
+              <button
+                onClick={resetForm}
+                className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+              >
+                <X size={18} /> Abbrechen
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {loading ? (
-        <div className="text-center py-8">Lädt...</div>
-      ) : members.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">Keine Team-Mitglieder vorhanden</div>
+      {/* Team-Mitglieder Liste */}
+      {members.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-gray-500 dark:text-gray-400 mb-4">Keine Team-Mitglieder vorhanden</p>
+          <button
+            onClick={() => setShowForm(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          >
+            Erstes Team-Mitglied hinzufügen
+          </button>
+        </div>
       ) : (
         <div className="space-y-3">
-          {members.map((member, index) => (
+          {members.map((member) => (
             <div
               key={member.id}
-              className="flex items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow"
+              className="p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg flex gap-4 items-start"
             >
-              {/* Bild */}
-              <div className="w-16 h-16 flex-shrink-0 rounded-lg bg-gray-200 dark:bg-gray-700 overflow-hidden">
-                {member.image_url ? (
-                  <Image
-                    src={member.image_url}
-                    alt={member.name}
-                    width={64}
-                    height={64}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    <Upload size={24} />
-                  </div>
-                )}
-              </div>
+              {member.image_url && (
+                <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200 dark:border-gray-700">
+                  <Image src={member.image_url} alt={member.name} fill className="object-cover" />
+                </div>
+              )}
 
-              {/* Info */}
               <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-gray-900 dark:text-white truncate">{member.name}</h3>
-                <p className="text-sm text-gray-800 dark:text-gray-200 truncate font-medium">{member.role}</p>
-                {member.bio && <p className="text-xs text-gray-700 dark:text-gray-300 line-clamp-1">{member.bio}</p>}
+                <h3 className="font-bold text-gray-900 dark:text-white">{member.name}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{member.role}</p>
+                {member.bio && <p className="text-sm text-gray-500 dark:text-gray-500 line-clamp-2">{member.bio}</p>}
               </div>
 
-              {/* Status */}
-              <button
-                onClick={() => togglePublished(member)}
-                className={`p-2 rounded-lg transition-colors ${
-                  member.published
-                    ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
-                    : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
-                }`}
-                title={member.published ? 'Veröffentlicht' : 'Verborgen'}
-              >
-                {member.published ? <Eye size={20} /> : <EyeOff size={20} />}
-              </button>
-
-              {/* Order Controls */}
-              <div className="flex gap-1">
+              <div className="flex gap-1 flex-shrink-0">
                 <button
-                  onClick={() => moveOrder(member, 'up')}
-                  disabled={index === 0}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded disabled:opacity-30 transition-colors"
-                  title="Nach oben"
+                  onClick={() => handleMove(member, 'up')}
+                  disabled={members.indexOf(member) === 0}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <ArrowUp size={18} />
+                  <ArrowUp size={18} className="text-gray-600 dark:text-gray-400" />
                 </button>
                 <button
-                  onClick={() => moveOrder(member, 'down')}
-                  disabled={index === members.length - 1}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded disabled:opacity-30 transition-colors"
-                  title="Nach unten"
+                  onClick={() => handleMove(member, 'down')}
+                  disabled={members.indexOf(member) === members.length - 1}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <ArrowDown size={18} />
-                </button>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-2">
-                <button
-                  onClick={() => editMember(member)}
-                  className="px-3 py-1 text-sm bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50"
-                >
-                  Bearbeiten
+                  <ArrowDown size={18} className="text-gray-600 dark:text-gray-400" />
                 </button>
                 <button
-                  onClick={() => deleteMember(member.id)}
-                  className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                  title="Löschen"
+                  onClick={() => handleTogglePublished(member)}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
                 >
-                  <Trash2 size={18} />
+                  {member.published ? (
+                    <Eye size={18} className="text-green-600" />
+                  ) : (
+                    <EyeOff size={18} className="text-gray-400" />
+                  )}
+                </button>
+                <button
+                  onClick={() => handleEdit(member)}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                >
+                  <Save size={18} className="text-blue-600" />
+                </button>
+                <button
+                  onClick={() => handleDelete(member.id)}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                >
+                  <Trash2 size={18} className="text-red-600" />
                 </button>
               </div>
             </div>

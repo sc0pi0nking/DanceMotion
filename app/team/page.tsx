@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Instagram, Facebook, Mail } from 'lucide-react';
 import Image from 'next/image';
+import { supabase } from '@/lib/supabase';
 
 interface TeamMember {
   id: string;
@@ -28,11 +29,20 @@ export default function TeamPage() {
 
   const fetchMembers = async () => {
     try {
-      const res = await fetch('/api/team');
-      if (res.ok) {
-        const data = await res.json();
-        setMembers(data);
+      console.log('📥 Loading team members...');
+      const { data, error } = await supabase
+        .from('team_members')
+        .select('*')
+        .eq('published', true)
+        .order('order_index', { ascending: true });
+
+      if (error) {
+        console.error('❌ Error:', error);
+        throw error;
       }
+      
+      console.log('✅ Loaded:', data?.length || 0, 'members');
+      setMembers(data || []);
     } catch (error) {
       console.error('Failed to load team members:', error);
     } finally {
@@ -68,16 +78,21 @@ export default function TeamPage() {
         </motion.div>
 
         {/* Team Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {members.map((member, index) => (
-            <motion.div
-              key={member.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="group"
-            >
-              <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+        {members.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600 dark:text-gray-400">Keine Team-Mitglieder vorhanden</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {members.map((member, index) => (
+              <motion.div
+                key={member.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                className="group"
+              >
+                <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
                 {/* Image */}
                 <div className="relative h-80 overflow-hidden" style={{ backgroundColor: "var(--panel)", backgroundImage: "linear-gradient(135deg, rgba(46,196,198,0.2), rgba(46,196,198,0.08))" }}>
                   {member.image_url ? (
@@ -156,12 +171,6 @@ export default function TeamPage() {
               </div>
             </motion.div>
           ))}
-        </div>
-
-        {members.length === 0 && (
-          <div className="text-center py-16 text-gray-500 dark:text-gray-400">
-            <p className="text-xl">Unser Team-Bereich wird gerade aufgebaut.</p>
-            <p className="text-sm mt-2">Schauen Sie bald wieder vorbei!</p>
           </div>
         )}
       </div>
