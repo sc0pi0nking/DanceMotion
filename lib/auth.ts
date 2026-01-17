@@ -73,28 +73,87 @@ export async function requireAdminSession() {
 
 /**
  * Lädt den User mit allen Rollen-Informationen und Permissions
+ * Fallback: Wenn User admin@dancemotion.de ist und keine Rolle hat, bekommt er alle Permissions
  */
 export async function getAdminUserWithPermissions(): Promise<AdminUser | null> {
   try {
     const session = await getAdminSession()
     if (!session) return null
 
+    // Versuche zuerst die View (wenn Migration gelaufen ist)
     const { data, error } = await supabaseServer
       .from('admin_users_with_roles')
       .select('*')
       .eq('id', session.id)
       .single()
 
-    if (error || !data) {
-      // User existiert in auth aber nicht in admin_users - Fallback
+    if (!error && data) {
+      // Wenn User keine Rolle hat aber admin@dancemotion.de ist - gib alle Permissions
+      if (!data.role_id && session.email === 'admin@dancemotion.de') {
+        return {
+          ...data,
+          permissions: Object.values(PERMISSIONS)
+        } as AdminUser
+      }
+      
+      return {
+        ...data,
+        permissions: Array.isArray(data.permissions) ? data.permissions : []
+      } as AdminUser
+    }
+
+    // Fallback: View existiert noch nicht - lade direkt aus admin_users
+    const { data: userData, error: userError } = await supabaseServer
+      .from('admin_users')
+      .select('*')
+      .eq('id', session.id)
+      .single()
+
+    if (userError || !userData) {
       return null
     }
 
+    // Lade Rolle separat falls vorhanden
+    let permissions: Permission[] = []
+    let roleName: string | null = null
+    let roleDescription: string | null = null
+
+    if (userData.role_id) {
+      const { data: roleData } = await supabaseServer
+        .from('admin_roles')
+        .select('name, description, permissions')
+        .eq('id', userData.role_id)
+        .single()
+      
+      if (roleData) {
+        roleName = roleData.name
+        roleDescription = roleData.description
+        permissions = Array.isArray(roleData.permissions) ? roleData.permissions : []
+      }
+    }
+
+    // Super-Fallback für admin@dancemotion.de ohne Rolle
+    if (permissions.length === 0 && session.email === 'admin@dancemotion.de') {
+      permissions = Object.values(PERMISSIONS)
+    }
+
     return {
-      ...data,
-      permissions: Array.isArray(data.permissions) ? data.permissions : []
-    } as AdminUser
-  } catch {
+      id: userData.id,
+      email: userData.email,
+      name: userData.name,
+      avatar_url: userData.avatar_url || null,
+      phone: userData.phone || null,
+      is_active: userData.is_active,
+      last_login: userData.last_login,
+      created_at: userData.created_at,
+      updated_at: userData.updated_at,
+      role_id: userData.role_id,
+      role_name: roleName,
+      role_description: roleDescription,
+      permissions
+    }
+  } catch (err) {
+    console.error('getAdminUserWithPermissions error:', err)
     return null
   }
 }

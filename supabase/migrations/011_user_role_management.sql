@@ -119,10 +119,10 @@ CREATE TRIGGER trigger_admin_users_updated_at
 -- 10. Audit Log für User-Änderungen (optional aber empfohlen)
 CREATE TABLE IF NOT EXISTS public.admin_audit_log (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES public.admin_users(id),
+  user_id TEXT, -- TEXT weil admin_users.id als TEXT definiert ist (kommt aus auth.users)
   action TEXT NOT NULL, -- 'create', 'update', 'delete', 'login', 'logout', 'permission_change'
   target_type TEXT, -- 'user', 'role', 'content', etc.
-  target_id UUID,
+  target_id TEXT,
   details JSONB,
   ip_address TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
