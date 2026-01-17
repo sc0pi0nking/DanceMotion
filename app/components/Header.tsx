@@ -96,11 +96,11 @@ export default function Header() {
               {/* Eventstudio Logo */}
               <Link 
                 href="/eventstudio" 
-                className="hidden sm:flex items-center gap-2 no-underline opacity-80 hover:opacity-100 transition-opacity"
+                className="flex items-center gap-1 sm:gap-2 no-underline opacity-80 hover:opacity-100 transition-opacity"
                 aria-label="Zum Eventstudio"
               >
                 <div 
-                  className="h-px w-6" 
+                  className="h-px w-3 sm:w-6" 
                   style={{ backgroundColor: "var(--border)" }}
                 />
                 <Image 
@@ -108,7 +108,7 @@ export default function Header() {
                   alt="DanceMotion Eventstudio" 
                   width={40}
                   height={40}
-                  className="h-10 w-10 hover:scale-110 transition-transform"
+                  className="h-8 w-8 sm:h-10 sm:w-10 hover:scale-110 transition-transform"
                 />
               </Link>
             </div>
