@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { Calendar, FileText, BarChart3, Images, LogOut, Menu, X, FileDown, HelpCircle, Users, Book, Home, Share2, Repeat } from 'lucide-react'
+import { Calendar, FileText, BarChart3, Images, LogOut, Menu, X, FileDown, HelpCircle, Users, Book, Home, Share2, Repeat, Shield, Activity } from 'lucide-react'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -13,6 +13,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false) // Standardmäßig geschlossen auf Mobile
   const [user, setUser] = useState<any>(null)
   const [userRole, setUserRole] = useState<string>('')
+  const [userPermissions, setUserPermissions] = useState<string[]>([])
   const router = useRouter()
   const pathname = usePathname()
 
@@ -70,6 +71,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       if (!res.ok) {
         setUser(null)
         setUserRole('')
+        setUserPermissions([])
         router.push('/admin/login')
         return
       }
@@ -77,15 +79,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       if (!data.user || !data.user.id) {
         setUser(null)
         setUserRole('')
+        setUserPermissions([])
         router.push('/admin/login')
         return
       }
       setUser(data.user)
-      setUserRole(data.user.role || '')
+      setUserRole(data.user.role || data.user.role_name || '')
+      setUserPermissions(data.user.permissions || [])
     } catch (error) {
       console.error('Auth check failed:', error)
       setUser(null)
       setUserRole('')
+      setUserPermissions([])
       router.push('/admin/login')
     }
   }
@@ -95,6 +100,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       await fetch('/api/admin/auth/logout', { method: 'POST' })
       setUser(null)
       setUserRole('')
+      setUserPermissions([])
       // Force a hard redirect to login page
       window.location.href = '/admin/login'
     } catch (error) {
@@ -103,23 +109,26 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     }
   }
 
-  // Alle verfügbaren Navigation Items
+  // Alle verfügbaren Navigation Items mit Permission-Mapping
   const allNavItems = [
-    { icon: BarChart3, label: 'Dashboard', href: '/admin', roles: ['admin'] },
-    { icon: Calendar, label: 'Termine', href: '/admin/events', roles: ['admin'] },
-    { icon: Repeat, label: 'Wiederkehrend', href: '/admin/recurring', roles: ['admin'] },
-    { icon: FileText, label: 'Inhalte', href: '/admin/content', roles: ['admin', 'editor'] },
-    { icon: Images, label: 'Galerie', href: '/admin/gallery', roles: ['admin', 'editor'] },
-    { icon: FileDown, label: 'Dokumente', href: '/admin/documents', roles: ['admin', 'editor'] },
-    { icon: HelpCircle, label: 'FAQs', href: '/admin/faqs', roles: ['admin', 'editor'] },
-    { icon: Users, label: 'Team', href: '/admin/team', roles: ['admin', 'editor'] },
-    { icon: Share2, label: 'Social Media', href: '/admin/social', roles: ['admin'] },
-    { icon: Book, label: 'Wiki', href: '/admin/wiki', roles: ['admin', 'editor', 'event-manager'] },
+    { icon: BarChart3, label: 'Dashboard', href: '/admin', permission: 'dashboard' },
+    { icon: Calendar, label: 'Termine', href: '/admin/events', permission: 'events' },
+    { icon: Repeat, label: 'Wiederkehrend', href: '/admin/recurring', permission: 'recurring' },
+    { icon: FileText, label: 'Inhalte', href: '/admin/content', permission: 'content' },
+    { icon: Images, label: 'Galerie', href: '/admin/gallery', permission: 'gallery' },
+    { icon: FileDown, label: 'Dokumente', href: '/admin/documents', permission: 'documents' },
+    { icon: HelpCircle, label: 'FAQs', href: '/admin/faqs', permission: 'faqs' },
+    { icon: Users, label: 'Team', href: '/admin/team', permission: 'team' },
+    { icon: Share2, label: 'Social Media', href: '/admin/social', permission: 'social' },
+    { icon: Activity, label: 'Analytics', href: '/admin/analytics', permission: 'analytics' },
+    { icon: Users, label: 'Benutzer', href: '/admin/users', permission: 'users' },
+    { icon: Shield, label: 'Rollen', href: '/admin/roles', permission: 'roles' },
+    { icon: Book, label: 'Wiki', href: '/admin/wiki', permission: 'dashboard' },
   ]
 
-  // Filter Navigation Items basierend auf Rolle
+  // Filter Navigation Items basierend auf Permissions
   const navItems = allNavItems.filter(item => 
-    item.roles.includes(userRole) || userRole === 'admin'
+    userPermissions.includes(item.permission)
   )
 
   // Check if current path matches nav item
