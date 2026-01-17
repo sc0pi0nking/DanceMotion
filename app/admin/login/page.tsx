@@ -30,7 +30,8 @@ export default function AdminLoginPage() {
         return
       }
 
-      // Redirect to dashboard
+      // Refresh the router cache and redirect to dashboard
+      router.refresh()
       router.push('/admin')
     } catch (err) {
       setError('Ein Fehler ist aufgetreten')
