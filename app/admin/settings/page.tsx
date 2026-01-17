@@ -1,11 +1,16 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Settings, Save, AlertCircle, CheckCircle, Trash2, Lock, Eye, Database, Zap } from 'lucide-react'
+import { Settings, Save, AlertCircle, CheckCircle, Trash2, Lock, Eye, Database, Zap, Activity, Calendar } from 'lucide-react'
 
 interface SystemSettings {
   audit_retention_days: number
   enable_audit_logging: boolean
+}
+
+interface ActivitySummary {
+  action: string
+  count: number
 }
 
 export default function SettingsPage() {
@@ -16,10 +21,13 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [auditCount, setAuditCount] = useState(0)
+  const [lastCleanup, setLastCleanup] = useState<string | null>(null)
+  const [activitySummary, setActivitySummary] = useState<ActivitySummary[]>([])
 
   useEffect(() => {
     fetchSettings()
     fetchAuditCount()
+    fetchActivitySummary()
   }, [])
 
   const fetchSettings = () => {
@@ -41,8 +49,40 @@ export default function SettingsPage() {
       // Handle both response formats
       const total = data.total || data.pagination?.total || 0
       setAuditCount(total)
+
+      // Get last cleanup from localStorage (set when auto-delete runs)
+      const lastCleanupTime = localStorage.getItem('dm_last_audit_cleanup')
+      if (lastCleanupTime) {
+        setLastCleanup(new Date(lastCleanupTime).toLocaleString('de-DE'))
+      }
     } catch (err) {
       console.error('Failed to fetch audit count:', err)
+    }
+  }
+
+  const fetchActivitySummary = async () => {
+    try {
+      const res = await fetch('/api/admin/audit?pageSize=1000&page=1')
+      if (!res.ok) return
+
+      const data = await res.json()
+      const logs = data.data || []
+
+      // Count by action
+      const actionCounts: Record<string, number> = {}
+      logs.forEach((log: any) => {
+        actionCounts[log.action] = (actionCounts[log.action] || 0) + 1
+      })
+
+      // Sort by count descending, take top 5
+      const summary = Object.entries(actionCounts)
+        .map(([action, count]) => ({ action, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5)
+
+      setActivitySummary(summary)
+    } catch (err) {
+      console.error('Failed to fetch activity summary:', err)
     }
   }
 
@@ -258,7 +298,7 @@ export default function SettingsPage() {
             <Zap size={20} />
             🚀 Performance & Sicherheit
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
             <div className="p-3 rounded-lg bg-slate-700/50">
               <p className="text-slate-400">Audit-Einträge</p>
               <p className="text-xl font-bold text-teal-400 mt-1">{auditCount.toLocaleString()}</p>
@@ -268,12 +308,55 @@ export default function SettingsPage() {
               <p className="text-xl font-bold text-blue-400 mt-1">~{Math.ceil(auditCount * 0.5)} KB</p>
             </div>
             <div className="p-3 rounded-lg bg-slate-700/50">
-              <p className="text-slate-400">Lösch-Zyklus</p>
-              <p className="text-xl font-bold text-green-400 mt-1">Täglich</p>
+              <p className="text-slate-400">Aufbewahrung</p>
+              <p className="text-xl font-bold text-green-400 mt-1">{settings.audit_retention_days} Tage</p>
+            </div>
+            <div className="p-3 rounded-lg bg-slate-700/50">
+              <p className="text-slate-400">Nächste Löschung ca.</p>
+              <p className="text-xl font-bold text-amber-400 mt-1">{settings.audit_retention_days} Tage</p>
             </div>
           </div>
+          {lastCleanup && (
+            <div className="mt-4 pt-4 border-t border-slate-600">
+              <p className="text-xs text-slate-400">
+                ✅ Letzte automatische Löschung: <span className="text-slate-300">{lastCleanup}</span>
+              </p>
+            </div>
+          )}
         </div>
-      </div>
+
+        {/* Activity Summary Card */}
+        <div
+          className="lg:col-span-2 rounded-lg border p-6"
+          style={{ backgroundColor: "var(--panel)", borderColor: "var(--border)" }}
+        >
+          <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+            <Activity size={20} />
+            📊 Top Aktivitäten (Top 5)
+          </h3>
+          {activitySummary.length > 0 ? (
+            <div className="space-y-2">
+              {activitySummary.map((item, idx) => (
+                <div key={idx} className="flex items-center justify-between p-2 rounded bg-slate-700/50">
+                  <span className="text-sm text-slate-300 capitalize">{item.action.replace('_', ' ')}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-32 bg-slate-600 rounded h-2">
+                      <div
+                        className="bg-teal-500 h-2 rounded transition-all"
+                        style={{
+                          width: `${(item.count / (activitySummary[0]?.count || 1)) * 100}%`,
+                        }}
+                      />
+                    </div>
+                    <span className="text-sm font-bold text-teal-400 min-w-12 text-right">{item.count}×</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-slate-400">Keine Aktivitäten vorhanden</p>
+          )}
+        </div>      </div>
     </div>
   )
 }

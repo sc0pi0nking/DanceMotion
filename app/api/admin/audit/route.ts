@@ -5,15 +5,26 @@ import { NextRequest, NextResponse } from 'next/server'
 function convertToCSV(data: any[]): string {
   if (data.length === 0) return ''
 
-  const headers = Object.keys(data[0])
+  // Custom formatting: flatten details, extract only useful fields
+  const flatData = data.map(row => ({
+    'Action': row.action || '',
+    'Target Type': row.target_type || '',
+    'Target ID': row.target_id || '',
+    'User ID': row.user_id || '',
+    'IP Address': row.ip_address || 'N/A',
+    'Details': typeof row.details === 'object' ? JSON.stringify(row.details) : row.details || '',
+    'Timestamp': new Date(row.created_at).toLocaleString('de-DE'),
+  }))
+
+  const headers = Object.keys(flatData[0])
   const csvHeaders = headers.map(h => `"${h}"`).join(',')
 
-  const csvRows = data.map(row => {
+  const csvRows = flatData.map(row => {
     return headers
       .map(header => {
-        const value = row[header]
+        const value = row[header as keyof typeof row]
         if (value === null || value === undefined) return '""'
-        if (typeof value === 'object') return `"${JSON.stringify(value).replace(/"/g, '""')}"`
+        // Only escape quotes in string values
         return `"${String(value).replace(/"/g, '""')}"`
       })
       .join(',')
