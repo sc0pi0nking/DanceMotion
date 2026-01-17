@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo, useMemo } from "react";
+import React, { memo, useMemo, useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 
 // Generate subtle floating particles
@@ -31,6 +31,12 @@ const generateFloatingBubbles = (count: number) => {
 // Memoized component to prevent unnecessary re-renders
 const ParallaxBackgroundContent = memo(() => {
   const { scrollY } = useScroll();
+  const [isMounted, setIsMounted] = useState(false);
+  
+  // Only generate particles on client to avoid hydration mismatch
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   
   // Individual element parallax - POSITIVE values = elements move DOWN (slower than scroll)
   // This creates depth without leaving gaps - multiple layers for rich effect
@@ -43,11 +49,11 @@ const ParallaxBackgroundContent = memo(() => {
   const orb7Y = useTransform(scrollY, [0, 3000], [0, 250]);
   const orb8Y = useTransform(scrollY, [0, 3000], [0, 60]);
 
-  // Memoize particles
-  const particles = useMemo(() => generateMeshParticles(12), []);
+  // Memoize particles - only generate on client
+  const particles = useMemo(() => isMounted ? generateMeshParticles(12) : [], [isMounted]);
   
   // Memoize floating bubbles - Hero-style animated bubbles
-  const floatingBubbles = useMemo(() => generateFloatingBubbles(40), []);
+  const floatingBubbles = useMemo(() => isMounted ? generateFloatingBubbles(40) : [], [isMounted]);
   
   // Parallax transform for bubbles layer
   const bubblesY = useTransform(scrollY, [0, 3000], [0, 180]);
