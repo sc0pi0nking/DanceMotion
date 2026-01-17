@@ -5,6 +5,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import ParallaxBackground from "./components/ParallaxBackground";
 import AnalyticsTracker from "./components/AnalyticsTracker";
+import CookieBanner from "./components/CookieBanner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -77,6 +78,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
         {/* Analytics Tracking (DSGVO-konform) */}
         <AnalyticsTracker />
+        {/* Cookie Banner */}
+        <CookieBanner />
         {/* Global Parallax Background - fixed, behind everything */}
         <ParallaxBackground />
         <Header />
