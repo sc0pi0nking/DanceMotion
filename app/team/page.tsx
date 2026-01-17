@@ -96,11 +96,10 @@ export default function TeamPage() {
                 {/* Image */}
                 <div className="relative h-80 overflow-hidden" style={{ backgroundColor: "var(--panel)", backgroundImage: "linear-gradient(135deg, rgba(46,196,198,0.2), rgba(46,196,198,0.08))" }}>
                   {member.image_url ? (
-                    <Image
+                    <img
                       src={member.image_url}
                       alt={member.name}
-                      fill
-                      className="object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
                   ) : (
                     <div className="h-full flex items-center justify-center">

@@ -117,6 +117,41 @@ export default function TeamAdminPage() {
     }
   };
 
+  const handleDeleteImage = async () => {
+    if (!formData.image_url) return;
+    
+    try {
+      setError(null);
+      setUploading(true);
+      console.log('🗑️ Deleting image:', formData.image_url);
+
+      // Extrahiere Filename aus URL
+      const urlParts = formData.image_url.split('/');
+      const fileName = urlParts[urlParts.length - 1];
+
+      // Lösche aus Storage
+      const { error: deleteErr } = await supabase.storage
+        .from('team-images')
+        .remove([fileName]);
+
+      if (deleteErr) {
+        console.error('❌ Delete error:', deleteErr);
+        throw deleteErr;
+      }
+
+      console.log('✅ Image deleted');
+      setFormData(prev => ({ ...prev, image_url: '' }));
+      setSuccess('Bild gelöscht!');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Fehler beim Löschen';
+      console.error('❌ Delete error:', err);
+      setError(msg);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSave = async () => {
     if (!formData.name || !formData.role) {
       setError('Name und Rolle sind erforderlich');
@@ -360,14 +395,46 @@ export default function TeamAdminPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Profilbild</label>
-              <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition w-fit">
-                <Upload size={18} />
-                <span>{uploading ? 'Lädt...' : 'Wählen'}</span>
-                <input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} hidden />
-              </label>
+              <div className="flex gap-3 items-start">
+                <div className="flex-1">
+                  <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition w-fit">
+                    <Upload size={18} />
+                    <span>{uploading ? 'Lädt...' : 'Neues Bild'}</span>
+                    <input type="file" accept="image/*" onChange={handleImageUpload} disabled={uploading} hidden />
+                  </label>
+                  {formData.image_url && (
+                    <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 break-all">
+                      URL: {formData.image_url}
+                    </div>
+                  )}
+                </div>
+                {formData.image_url && (
+                  <button
+                    onClick={handleDeleteImage}
+                    disabled={uploading}
+                    type="button"
+                    className="mt-2 px-3 py-2 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition text-sm disabled:opacity-50"
+                    title="Bild löschen"
+                  >
+                    <Trash2 size={16} className="inline mr-1" />
+                    Löschen
+                  </button>
+                )}
+              </div>
               {formData.image_url && (
-                <div className="mt-3 relative w-20 h-20 rounded-lg overflow-hidden border">
-                  <Image src={formData.image_url} alt="Preview" fill className="object-cover" />
+                <div className="mt-3">
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">Vorschau:</p>
+                  <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700">
+                    <img 
+                      src={formData.image_url} 
+                      alt="Preview" 
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error('❌ Image load error:', e);
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
                 </div>
               )}
             </div>
@@ -445,8 +512,13 @@ export default function TeamAdminPage() {
               className="p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg flex gap-4 items-start"
             >
               {member.image_url && (
-                <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200 dark:border-gray-700">
-                  <Image src={member.image_url} alt={member.name} fill className="object-cover" />
+                <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700">
+                  <img 
+                    src={member.image_url} 
+                    alt={member.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => console.error('Image load failed:', member.image_url)}
+                  />
                 </div>
               )}
 
