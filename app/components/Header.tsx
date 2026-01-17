@@ -69,28 +69,49 @@ export default function Header() {
         <div className="mx-auto max-w-7xl px-4 md:px-8 py-4">
           <div className="flex items-center justify-between gap-4">
             {/* Logo & Brand */}
-            <Link 
-              href="/" 
-              className="site-logo group flex items-center gap-3 no-underline"
-              aria-label="Zur Startseite"
-            >
-              <Image 
-                src="/logos/dancemotion-eschweiler.png" 
-                alt="DanceMotion Eschweiler" 
-                width={48}
-                height={48}
-                priority
-                className="h-12 w-12 hover:scale-110 transition-transform"
-              />
-              <div className="flex-1">
-                <div className="font-bold text-base" style={{ color: "var(--fg)" }}>
-                  DanceMotion
+            <div className="flex items-center gap-4">
+              <Link 
+                href="/" 
+                className="site-logo group flex items-center gap-3 no-underline"
+                aria-label="Zur Startseite"
+              >
+                <Image 
+                  src="/logos/dancemotion-eschweiler.png" 
+                  alt="DanceMotion Eschweiler" 
+                  width={48}
+                  height={48}
+                  priority
+                  className="h-12 w-12 hover:scale-110 transition-transform"
+                />
+                <div className="flex-1">
+                  <div className="font-bold text-base" style={{ color: "var(--fg)" }}>
+                    DanceMotion
+                  </div>
+                  <div className="text-xs font-medium" style={{ color: "var(--muted)" }}>
+                    Eschweiler
+                  </div>
                 </div>
-                <div className="text-xs font-medium" style={{ color: "var(--muted)" }}>
-                  Eschweiler
-                </div>
-              </div>
-            </Link>
+              </Link>
+              
+              {/* Eventstudio Logo */}
+              <Link 
+                href="/eventstudio" 
+                className="hidden sm:flex items-center gap-2 no-underline opacity-80 hover:opacity-100 transition-opacity"
+                aria-label="Zum Eventstudio"
+              >
+                <div 
+                  className="h-px w-6" 
+                  style={{ backgroundColor: "var(--border)" }}
+                />
+                <Image 
+                  src="/logos/dancemotion-event-studio.png" 
+                  alt="DanceMotion Eventstudio" 
+                  width={40}
+                  height={40}
+                  className="h-10 w-10 hover:scale-110 transition-transform"
+                />
+              </Link>
+            </div>
 
             {/* Desktop Navigation */}
             <nav 
@@ -144,7 +165,10 @@ export default function Header() {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="lg:hidden p-2 rounded-lg transition-colors"
+                style={{ backgroundColor: "transparent" }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(46,196,198,0.1)"}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
                 aria-label={mobileMenuOpen ? "Menü schließen" : "Menü öffnen"}
                 aria-expanded={mobileMenuOpen}
               >
