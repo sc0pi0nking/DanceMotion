@@ -6,8 +6,14 @@ import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
 export async function GET() {
   try {
     const currentUser = await getAdminUserWithPermissions()
-    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.USERS)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    console.log('Users API - currentUser:', currentUser ? { id: currentUser.id, email: currentUser.email, permissions: currentUser.permissions } : 'null')
+    
+    if (!currentUser) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+    
+    if (!currentUser.permissions.includes(PERMISSIONS.USERS)) {
+      return NextResponse.json({ error: 'Missing users permission', userPermissions: currentUser.permissions }, { status: 403 })
     }
 
     const { data, error } = await supabaseServer

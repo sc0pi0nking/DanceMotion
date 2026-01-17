@@ -6,8 +6,14 @@ import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
 export async function GET() {
   try {
     const currentUser = await getAdminUserWithPermissions()
-    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.ROLES)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    console.log('Roles API - currentUser:', currentUser ? { id: currentUser.id, email: currentUser.email, permissions: currentUser.permissions } : 'null')
+    
+    if (!currentUser) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+    
+    if (!currentUser.permissions.includes(PERMISSIONS.ROLES)) {
+      return NextResponse.json({ error: 'Missing roles permission', userPermissions: currentUser.permissions }, { status: 403 })
     }
 
     // Rollen mit User-Count laden
