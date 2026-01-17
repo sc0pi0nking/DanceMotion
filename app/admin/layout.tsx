@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { Calendar, FileText, BarChart3, Images, LogOut, Menu, X, FileDown, HelpCircle, Users, Book, Home, Share2, Repeat, Shield, Activity, LogIn } from 'lucide-react'
+import { Calendar, FileText, BarChart3, Images, LogOut, Menu, X, FileDown, HelpCircle, Users, Book, Home, Share2, Repeat, Shield, Activity, LogIn, Settings } from 'lucide-react'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -125,6 +125,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { icon: LogIn, label: 'Audit', href: '/admin/audit', permission: 'audit' },
     { icon: Users, label: 'Benutzer', href: '/admin/users', permission: 'users' },
     { icon: Shield, label: 'Rollen', href: '/admin/roles', permission: 'roles' },
+    { icon: Settings, label: 'Einstellungen', href: '/admin/settings', permission: 'settings' },
   ]
 
   // Filter Navigation Items basierend auf Permissions

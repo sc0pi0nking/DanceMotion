@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, Edit2, Trash2, User, Shield, Check, X, Eye, EyeOff, RefreshCw } from 'lucide-react'
+import { Plus, Edit2, Trash2, User, Shield, Check, X, Eye, EyeOff, RefreshCw, Trash, Lock, UserCheck } from 'lucide-react'
 
 interface Role {
   id: string
@@ -40,6 +40,73 @@ export default function UsersPage() {
     role_id: '',
   })
   const [saving, setSaving] = useState(false)
+  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set())
+  const [bulkAction, setBulkAction] = useState<'deactivate' | 'delete' | 'role' | null>(null)
+  const [bulkRole, setBulkRole] = useState('')
+
+  const toggleUserSelection = (userId: string) => {
+    const newSelected = new Set(selectedUsers)
+    if (newSelected.has(userId)) {
+      newSelected.delete(userId)
+    } else {
+      newSelected.add(userId)
+    }
+    setSelectedUsers(newSelected)
+  }
+
+  const toggleAllUsers = () => {
+    if (selectedUsers.size === users.length) {
+      setSelectedUsers(new Set())
+    } else {
+      setSelectedUsers(new Set(users.map(u => u.id)))
+    }
+  }
+
+  const handleBulkAction = async () => {
+    if (selectedUsers.size === 0) return
+    
+    if (!window.confirm(`Sollen diese ${selectedUsers.size} Benutzer wirklich ${
+      bulkAction === 'deactivate' ? 'deaktiviert' : 
+      bulkAction === 'delete' ? 'gelöscht' : 
+      'zur neuen Rolle hinzugefügt'
+    } werden?`)) return
+
+    setSaving(true)
+    let successCount = 0
+
+    for (const userId of selectedUsers) {
+      try {
+        if (bulkAction === 'deactivate') {
+          await fetch(`/api/admin/users/${userId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ is_active: false }),
+          })
+          successCount++
+        } else if (bulkAction === 'delete') {
+          await fetch(`/api/admin/users/${userId}`, {
+            method: 'DELETE',
+          })
+          successCount++
+        } else if (bulkAction === 'role' && bulkRole) {
+          await fetch(`/api/admin/users/${userId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role_id: bulkRole }),
+          })
+          successCount++
+        }
+      } catch (err) {
+        console.error('Bulk action error:', err)
+      }
+    }
+
+    setSaving(false)
+    setSelectedUsers(new Set())
+    setBulkAction(null)
+    alert(`${successCount} Benutzer wurden aktualisiert`)
+    fetchData()
+  }
 
   useEffect(() => {
     fetchData()
@@ -222,11 +289,75 @@ export default function UsersPage() {
         </div>
       )}
 
+      {/* Bulk Actions Bar */}
+      {selectedUsers.size > 0 && (
+        <div
+          className="p-4 rounded-lg border flex items-center justify-between flex-wrap gap-4"
+          style={{ backgroundColor: 'var(--panel)', borderColor: 'var(--accent)' }}
+        >
+          <div>
+            <p style={{ color: 'var(--fg)' }} className="font-medium">
+              {selectedUsers.size} Benutzer ausgewählt
+            </p>
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            <select
+              value={bulkRole}
+              onChange={(e) => setBulkRole(e.target.value)}
+              className="px-3 py-2 rounded-lg text-slate-900 text-sm"
+            >
+              <option value="">-- Rolle wählen --</option>
+              {roles.map(role => (
+                <option key={role.id} value={role.id}>{role.name}</option>
+              ))}
+            </select>
+            <button
+              onClick={() => { setBulkAction('role'); handleBulkAction(); }}
+              disabled={!bulkRole || saving}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white rounded-lg text-sm font-medium transition"
+            >
+              <UserCheck size={16} />
+              Rolle zuweisen
+            </button>
+            <button
+              onClick={() => { setBulkAction('deactivate'); handleBulkAction(); }}
+              disabled={saving}
+              className="flex items-center gap-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 disabled:bg-slate-600 text-white rounded-lg text-sm font-medium transition"
+            >
+              <Lock size={16} />
+              Deaktivieren
+            </button>
+            <button
+              onClick={() => { setBulkAction('delete'); handleBulkAction(); }}
+              disabled={saving}
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-slate-600 text-white rounded-lg text-sm font-medium transition"
+            >
+              <Trash size={16} />
+              Löschen
+            </button>
+            <button
+              onClick={() => setSelectedUsers(new Set())}
+              className="px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg text-sm font-medium transition"
+            >
+              Abbrechen
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Users Table */}
       <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--border)', backgroundColor: 'var(--panel)' }}>
         <table className="w-full">
           <thead>
             <tr style={{ borderBottom: '1px solid var(--border)', backgroundColor: 'rgba(46,196,198,0.05)' }}>
+              <th className="px-4 py-3 text-center">
+                <input
+                  type="checkbox"
+                  checked={selectedUsers.size === users.length && users.length > 0}
+                  onChange={toggleAllUsers}
+                  className="w-4 h-4 cursor-pointer"
+                />
+              </th>
               <th className="text-left px-4 py-3 text-sm font-semibold" style={{ color: 'var(--fg)' }}>Benutzer</th>
               <th className="text-left px-4 py-3 text-sm font-semibold" style={{ color: 'var(--fg)' }}>Rolle</th>
               <th className="text-left px-4 py-3 text-sm font-semibold hidden md:table-cell" style={{ color: 'var(--fg)' }}>Letzter Login</th>
@@ -239,8 +370,16 @@ export default function UsersPage() {
               <tr 
                 key={user.id} 
                 className="transition-colors hover:bg-opacity-50"
-                style={{ borderBottom: '1px solid var(--border)' }}
+                style={{ borderBottom: '1px solid var(--border)', backgroundColor: selectedUsers.has(user.id) ? 'rgba(46,196,198,0.1)' : 'transparent' }}
               >
+                <td className="px-4 py-3 text-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedUsers.has(user.id)}
+                    onChange={() => toggleUserSelection(user.id)}
+                    className="w-4 h-4 cursor-pointer"
+                  />
+                </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     <div 

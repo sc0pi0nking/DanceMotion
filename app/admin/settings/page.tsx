@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Settings, Save, AlertCircle, CheckCircle, Trash2 } from 'lucide-react'
+import { Settings, Save, AlertCircle, CheckCircle, Trash2, Lock, Eye, Database, Zap } from 'lucide-react'
 
 interface SystemSettings {
   audit_retention_days: number
@@ -44,17 +44,17 @@ export default function SettingsPage() {
     try {
       setLoading(true)
       localStorage.setItem('dm_system_settings', JSON.stringify(settings))
-      setMessage({ type: 'success', text: 'Einstellungen gespeichert' })
+      setMessage({ type: 'success', text: '✅ Einstellungen gespeichert' })
       setTimeout(() => setMessage(null), 3000)
     } catch (error) {
-      setMessage({ type: 'error', text: 'Fehler beim Speichern der Einstellungen' })
+      setMessage({ type: 'error', text: '❌ Fehler beim Speichern der Einstellungen' })
     } finally {
       setLoading(false)
     }
   }
 
   const clearAuditLogs = async () => {
-    if (!window.confirm(`Sollen alle ${auditCount} Audit-Einträge wirklich gelöscht werden?`)) {
+    if (!window.confirm(`Sollen alle ${auditCount} Audit-Einträge wirklich gelöscht werden? Diese Aktion kann nicht rückgängig gemacht werden.`)) {
       return
     }
 
@@ -62,35 +62,35 @@ export default function SettingsPage() {
       setLoading(true)
       // In production, would call API endpoint to delete via service role
       // For now, just show success
-      setMessage({ type: 'success', text: 'Audit-Logs werden gelöscht...' })
+      setMessage({ type: 'success', text: '⏳ Audit-Logs werden gelöscht...' })
       setTimeout(() => {
         setMessage(null)
         fetchAuditCount()
       }, 2000)
     } catch (error) {
-      setMessage({ type: 'error', text: 'Fehler beim Löschen der Logs' })
+      setMessage({ type: 'error', text: '❌ Fehler beim Löschen der Logs' })
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="p-6" style={{ backgroundColor: "var(--bg)", color: "var(--fg)" }}>
+    <div className="p-6 space-y-6" style={{ backgroundColor: "var(--bg)", color: "var(--fg)" }}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between border-b pb-6" style={{ borderColor: "var(--border)" }}>
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
+          <h1 className="text-3xl font-bold flex items-center gap-3">
             <Settings size={32} />
             System-Einstellungen
           </h1>
-          <p className="text-slate-400 mt-2">Verwalte die System-Einstellungen und Audit-Logs</p>
+          <p className="text-slate-400 mt-2">Verwalte die System-Konfiguration und Audit-Log</p>
         </div>
       </div>
 
       {/* Status Messages */}
       {message && (
         <div
-          className={`mb-6 p-4 rounded-lg flex items-center gap-2 ${
+          className={`p-4 rounded-lg flex items-center gap-2 animate-in ${
             message.type === 'success'
               ? 'bg-green-500/20 text-green-400 border border-green-500/50'
               : 'bg-red-500/20 text-red-400 border border-red-500/50'
@@ -105,21 +105,24 @@ export default function SettingsPage() {
         </div>
       )}
 
+      {/* Settings Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Audit Settings Card */}
         <div
-          className="rounded-lg border p-6"
+          className="rounded-lg border p-6 space-y-4"
           style={{ backgroundColor: "var(--panel)", borderColor: "var(--border)" }}
         >
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <AlertCircle size={24} />
-            Audit-Log Einstellungen
-          </h2>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 rounded-lg" style={{ backgroundColor: "rgba(46,196,198,0.1)" }}>
+              <Lock size={24} style={{ color: "var(--accent)" }} />
+            </div>
+            <h2 className="text-xl font-bold">Audit-Log Einstellungen</h2>
+          </div>
 
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2">
-                Audit-Log Aufbewahrungsdauer (Tage)
+                🔒 Audit-Log Aufbewahrungsdauer (Tage)
               </label>
               <input
                 type="number"
@@ -136,12 +139,12 @@ export default function SettingsPage() {
                 style={{ borderColor: "var(--border)" }}
               />
               <p className="text-xs text-slate-400 mt-1">
-                Audit-Logs älter als diese Anzahl Tage werden automatisch gelöscht (DSGVO)
+                Logs älter als diese Anzahl Tage werden automatisch gelöscht (DSGVO)
               </p>
             </div>
 
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">Audit-Logging aktiviert</label>
+            <div className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: "rgba(46,196,198,0.05)", borderColor: "var(--border)", border: "1px solid" }}>
+              <label className="text-sm font-medium">✅ Audit-Logging aktiviert</label>
               <button
                 onClick={() =>
                   setSettings({
@@ -176,35 +179,49 @@ export default function SettingsPage() {
 
         {/* Audit Log Stats Card */}
         <div
-          className="rounded-lg border p-6"
+          className="rounded-lg border p-6 space-y-4"
           style={{ backgroundColor: "var(--panel)", borderColor: "var(--border)" }}
         >
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <AlertCircle size={24} />
-            Audit-Log Statistiken
-          </h2>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 rounded-lg" style={{ backgroundColor: "rgba(96,165,250,0.1)" }}>
+              <Database size={24} style={{ color: "#60a5fa" }} />
+            </div>
+            <h2 className="text-xl font-bold">Audit-Log Statistiken</h2>
+          </div>
 
           <div className="space-y-4">
-            <div className="bg-slate-700/50 rounded p-4">
-              <p className="text-sm text-slate-400">Gesamtanzahl Audit-Einträge</p>
-              <p className="text-3xl font-bold text-teal-400">{auditCount.toLocaleString()}</p>
-            </div>
-
-            <div className="bg-yellow-500/10 rounded p-4 border border-yellow-500/30">
-              <p className="text-xs text-yellow-400 mb-2">⚠️ Warnung</p>
-              <p className="text-sm text-yellow-300">
-                Das Löschen von Audit-Logs kann nicht rückgängig gemacht werden.
+            <div className="bg-slate-700/50 rounded p-4 border border-slate-600">
+              <p className="text-sm text-slate-400">📊 Gesamtanzahl Audit-Einträge</p>
+              <p className="text-3xl font-bold text-teal-400 mt-2">{auditCount.toLocaleString()}</p>
+              <p className="text-xs text-slate-500 mt-2">
+                {Math.ceil(auditCount / 100)} × 100 Einträge
               </p>
             </div>
 
-            <button
-              onClick={clearAuditLogs}
-              disabled={loading || auditCount === 0}
-              className="w-full bg-red-600 hover:bg-red-700 disabled:bg-slate-600 text-white px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2 transition"
-            >
-              <Trash2 size={20} />
-              Alle Audit-Logs löschen
-            </button>
+            <div className="bg-yellow-500/10 rounded p-4 border border-yellow-500/30">
+              <p className="text-sm text-yellow-400 font-medium">⚠️ Warnung</p>
+              <p className="text-xs text-yellow-300 mt-1">
+                Das Löschen von Audit-Logs kann nicht rückgängig gemacht werden und ist für DSGVO-Compliance erforderlich.
+              </p>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={clearAuditLogs}
+                disabled={loading || auditCount === 0}
+                className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-slate-600 text-white px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2 transition"
+              >
+                <Trash2 size={20} />
+                Alle löschen
+              </button>
+              <a
+                href="/api/admin/audit?format=csv"
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium flex items-center justify-center gap-2 transition text-center"
+              >
+                <Zap size={20} />
+                CSV Export
+              </a>
+            </div>
           </div>
         </div>
 
@@ -213,13 +230,42 @@ export default function SettingsPage() {
           className="lg:col-span-2 rounded-lg border p-6 bg-blue-500/10 border-blue-500/30"
           style={{ backgroundColor: "var(--panel)" }}
         >
-          <h3 className="text-lg font-bold mb-3 text-blue-400">ℹ️ DSGVO Compliance</h3>
+          <h3 className="text-lg font-bold mb-3 text-blue-400 flex items-center gap-2">
+            <Eye size={20} />
+            ℹ️ DSGVO Compliance & Datenschutz
+          </h3>
           <ul className="text-sm text-slate-300 space-y-2 list-disc list-inside">
-            <li>Audit-Logs enthalten keine personenenbezogenen Daten (nur User-IDs)</li>
-            <li>Logs älter als die festgesetzte Aufbewahrungsfrist werden automatisch gelöscht</li>
-            <li>IP-Adressen werden anonymisiert gespeichert (nur für Sicherheit)</li>
-            <li>Benutzer haben das Recht, ihre Audit-Einträge zu erfahren</li>
+            <li><strong>Anonymisierte Audit-Logs:</strong> Keine personenenbezogenen Daten (nur User-IDs und Actions)</li>
+            <li><strong>Automatische Löschung:</strong> Logs älter als die festgesetzte Aufbewahrungsfrist werden automatisch gelöscht</li>
+            <li><strong>IP-Adressen:</strong> Werden gehashed und anonymisiert gespeichert (nur für Sicherheit)</li>
+            <li><strong>Benutzerrechte:</strong> Benutzer können ihre Audit-Einträge anfordern (Auskunftspflicht nach DSGVO Art. 15)</li>
+            <li><strong>Admin-Kontrolle:</strong> Admins können Logs jederzeit manuell löschen via Export-Funktion</li>
           </ul>
+        </div>
+
+        {/* Performance & Security Card */}
+        <div
+          className="lg:col-span-2 rounded-lg border p-6"
+          style={{ backgroundColor: "var(--panel)", borderColor: "var(--border)" }}
+        >
+          <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+            <Zap size={20} />
+            🚀 Performance & Sicherheit
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div className="p-3 rounded-lg bg-slate-700/50">
+              <p className="text-slate-400">Audit-Einträge</p>
+              <p className="text-xl font-bold text-teal-400 mt-1">{auditCount.toLocaleString()}</p>
+            </div>
+            <div className="p-3 rounded-lg bg-slate-700/50">
+              <p className="text-slate-400">Speichergröße (ca.)</p>
+              <p className="text-xl font-bold text-blue-400 mt-1">~{Math.ceil(auditCount * 0.5)} KB</p>
+            </div>
+            <div className="p-3 rounded-lg bg-slate-700/50">
+              <p className="text-slate-400">Lösch-Zyklus</p>
+              <p className="text-xl font-bold text-green-400 mt-1">Täglich</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

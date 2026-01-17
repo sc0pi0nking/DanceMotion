@@ -2,7 +2,7 @@
 
 import { getAdminSession } from '@/lib/auth'
 import { useEffect, useState } from 'react'
-import { ChevronLeft, ChevronRight, Filter, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Filter, X, Download, AlertCircle } from 'lucide-react'
 
 interface AuditLog {
   id: string
@@ -48,6 +48,41 @@ export default function AuditPage() {
   const [typeFilter, setTypeFilter] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [exporting, setExporting] = useState(false)
+
+  const handleExport = async (format: 'csv' | 'json') => {
+    try {
+      setExporting(true)
+      const params = new URLSearchParams({
+        format,
+      })
+
+      if (actionFilter) params.append('action', actionFilter)
+      if (typeFilter) params.append('targetType', typeFilter)
+      if (startDate) params.append('startDate', startDate)
+      if (endDate) params.append('endDate', endDate)
+
+      const res = await fetch(`/api/admin/audit?${params}`)
+      
+      if (!res.ok) {
+        throw new Error('Export failed')
+      }
+
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.${format}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      alert('Export failed')
+    } finally {
+      setExporting(false)
+    }
+  }
 
   useEffect(() => {
     fetchLogs()
@@ -110,20 +145,38 @@ export default function AuditPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-3xl font-bold">Audit Log</h1>
           <p className="text-gray-600 mt-1">
             Alle Aktivitäten und Änderungen im System
           </p>
         </div>
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-        >
-          <Filter size={18} />
-          Filter
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => handleExport('csv')}
+            disabled={exporting}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-slate-600 text-white rounded-lg transition"
+          >
+            <Download size={18} />
+            CSV Export
+          </button>
+          <button
+            onClick={() => handleExport('json')}
+            disabled={exporting}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white rounded-lg transition"
+          >
+            <Download size={18} />
+            JSON Export
+          </button>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition"
+          >
+            <Filter size={18} />
+            Filter
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
