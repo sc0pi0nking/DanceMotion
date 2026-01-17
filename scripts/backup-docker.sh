@@ -35,6 +35,7 @@ echo "   Database: $DB_NAME"
 echo "   File: $BACKUP_FILE"
 
 if docker run --rm \
+  --network host \
   -e PGPASSWORD=$DB_PASSWORD \
   postgres:15-alpine \
   pg_dump -h $DB_HOST \

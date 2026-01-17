@@ -50,6 +50,7 @@ echo ""
 echo "🔄 Restoring database using Docker..."
 
 if docker run --rm \
+  --network host \
   -e PGPASSWORD=$DB_PASSWORD \
   -i \
   postgres:15-alpine \
