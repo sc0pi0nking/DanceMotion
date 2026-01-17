@@ -13,10 +13,12 @@ const ALL_PERMISSIONS = [
   { key: 'documents', label: 'Dokumente', description: 'Dokumente verwalten' },
   { key: 'faqs', label: 'FAQs', description: 'FAQ verwalten' },
   { key: 'team', label: 'Team', description: 'Team-Mitglieder verwalten' },
+  { key: 'wiki', label: 'Wiki', description: 'Wiki verwalten' },
   { key: 'social', label: 'Social Media', description: 'Social Links verwalten' },
   { key: 'users', label: 'Benutzer', description: 'Benutzer verwalten' },
   { key: 'roles', label: 'Rollen', description: 'Rollen verwalten' },
   { key: 'analytics', label: 'Analytics', description: 'Statistiken einsehen' },
+  { key: 'audit', label: 'Audit Log', description: 'Audit Log einsehen' },
   { key: 'settings', label: 'Einstellungen', description: 'System-Einstellungen' },
 ]
 
