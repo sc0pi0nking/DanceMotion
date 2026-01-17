@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api
+
+# Sitemap
+Sitemap: https://dancemotion.org/sitemap.xml
+Sitemap: https://dancemotion.org/sitemap-de.xml
+
+# Crawl-delay (optional - respektiere Server)
+Crawl-delay: 1
+
+# Spezifische Rules für große Crawler
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
