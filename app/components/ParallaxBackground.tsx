@@ -20,10 +20,15 @@ const ParallaxBackgroundContent = memo(() => {
   const { scrollY } = useScroll();
   
   // Individual element parallax - POSITIVE values = elements move DOWN (slower than scroll)
-  // This creates depth without leaving gaps
+  // This creates depth without leaving gaps - multiple layers for rich effect
   const orb1Y = useTransform(scrollY, [0, 3000], [0, 150]);
   const orb2Y = useTransform(scrollY, [0, 3000], [0, 100]);
   const orb3Y = useTransform(scrollY, [0, 3000], [0, 200]);
+  const orb4Y = useTransform(scrollY, [0, 3000], [0, 80]);
+  const orb5Y = useTransform(scrollY, [0, 3000], [0, 180]);
+  const orb6Y = useTransform(scrollY, [0, 3000], [0, 120]);
+  const orb7Y = useTransform(scrollY, [0, 3000], [0, 250]);
+  const orb8Y = useTransform(scrollY, [0, 3000], [0, 60]);
 
   // Memoize particles
   const particles = useMemo(() => generateMeshParticles(12), []);
@@ -191,42 +196,185 @@ const ParallaxBackgroundContent = memo(() => {
         ))}
       </svg>
       
-      {/* Parallax overlay orbs - move at different speeds */}
+      {/* Parallax overlay orbs - move at different speeds for depth */}
+      {/* Layer 1: Top area - hero complement */}
       <motion.div 
         className="absolute inset-0 pointer-events-none"
         style={{ y: orb1Y }}
       >
         <div 
-          className="absolute top-[10%] left-[10%] w-[600px] h-[600px] rounded-full opacity-20"
+          className="absolute top-[5%] left-[5%] w-[500px] h-[500px] rounded-full opacity-25"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(80px)",
+            filter: "blur(60px)",
+          }}
+        />
+        <div 
+          className="absolute top-[8%] right-[15%] w-[400px] h-[400px] rounded-full opacity-20"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(70px)",
           }}
         />
       </motion.div>
       
+      {/* Layer 2: Upper-mid section */}
       <motion.div 
         className="absolute inset-0 pointer-events-none"
         style={{ y: orb2Y }}
       >
         <div 
-          className="absolute top-[40%] right-[5%] w-[500px] h-[500px] rounded-full opacity-15"
+          className="absolute top-[20%] right-[5%] w-[550px] h-[550px] rounded-full opacity-18"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(100px)",
+            filter: "blur(80px)",
+          }}
+        />
+        <div 
+          className="absolute top-[25%] left-[20%] w-[350px] h-[350px] rounded-full opacity-15"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(60px)",
           }}
         />
       </motion.div>
       
+      {/* Layer 3: Mid section */}
       <motion.div 
         className="absolute inset-0 pointer-events-none"
         style={{ y: orb3Y }}
       >
         <div 
-          className="absolute top-[70%] left-[30%] w-[700px] h-[700px] rounded-full opacity-10"
+          className="absolute top-[35%] left-[8%] w-[600px] h-[600px] rounded-full opacity-15"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(120px)",
+            filter: "blur(90px)",
+          }}
+        />
+        <div 
+          className="absolute top-[40%] right-[25%] w-[450px] h-[450px] rounded-full opacity-12"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(75px)",
+          }}
+        />
+      </motion.div>
+      
+      {/* Layer 4: Lower-mid section */}
+      <motion.div 
+        className="absolute inset-0 pointer-events-none"
+        style={{ y: orb4Y }}
+      >
+        <div 
+          className="absolute top-[50%] right-[10%] w-[500px] h-[500px] rounded-full opacity-18"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(85px)",
+          }}
+        />
+        <div 
+          className="absolute top-[55%] left-[35%] w-[400px] h-[400px] rounded-full opacity-14"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(70px)",
+          }}
+        />
+      </motion.div>
+      
+      {/* Layer 5: Lower section */}
+      <motion.div 
+        className="absolute inset-0 pointer-events-none"
+        style={{ y: orb5Y }}
+      >
+        <div 
+          className="absolute top-[65%] left-[5%] w-[550px] h-[550px] rounded-full opacity-16"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(80px)",
+          }}
+        />
+        <div 
+          className="absolute top-[70%] right-[20%] w-[380px] h-[380px] rounded-full opacity-12"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(65px)",
+          }}
+        />
+      </motion.div>
+      
+      {/* Layer 6: Bottom section */}
+      <motion.div 
+        className="absolute inset-0 pointer-events-none"
+        style={{ y: orb6Y }}
+      >
+        <div 
+          className="absolute top-[80%] right-[8%] w-[600px] h-[600px] rounded-full opacity-15"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(90px)",
+          }}
+        />
+        <div 
+          className="absolute top-[85%] left-[25%] w-[450px] h-[450px] rounded-full opacity-12"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(75px)",
+          }}
+        />
+      </motion.div>
+      
+      {/* Layer 7: Extra depth - scattered smaller orbs */}
+      <motion.div 
+        className="absolute inset-0 pointer-events-none"
+        style={{ y: orb7Y }}
+      >
+        <div 
+          className="absolute top-[15%] left-[45%] w-[300px] h-[300px] rounded-full opacity-20"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(50px)",
+          }}
+        />
+        <div 
+          className="absolute top-[45%] left-[60%] w-[280px] h-[280px] rounded-full opacity-18"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(45px)",
+          }}
+        />
+        <div 
+          className="absolute top-[75%] left-[50%] w-[320px] h-[320px] rounded-full opacity-15"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(55px)",
+          }}
+        />
+      </motion.div>
+      
+      {/* Layer 8: Accent smaller orbs for density */}
+      <motion.div 
+        className="absolute inset-0 pointer-events-none"
+        style={{ y: orb8Y }}
+      >
+        <div 
+          className="absolute top-[30%] right-[40%] w-[250px] h-[250px] rounded-full opacity-22"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(40px)",
+          }}
+        />
+        <div 
+          className="absolute top-[60%] left-[15%] w-[220px] h-[220px] rounded-full opacity-20"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(35px)",
+          }}
+        />
+        <div 
+          className="absolute top-[90%] right-[35%] w-[280px] h-[280px] rounded-full opacity-16"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(45px)",
           }}
         />
       </motion.div>

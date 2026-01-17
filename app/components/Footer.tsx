@@ -42,7 +42,16 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer className="site-footer w-full relative z-20" style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}>
+    <>
+      {/* Gradient overlay to fade out parallax before footer */}
+      <div 
+        className="relative z-10 w-full h-32 pointer-events-none"
+        style={{
+          background: "linear-gradient(to bottom, transparent 0%, var(--bg) 100%)",
+          marginBottom: "-1px",
+        }}
+      />
+      <footer className="site-footer w-full relative z-20" style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}>
       <div className="mx-auto max-w-6xl px-6 py-12 sm:py-16">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
@@ -154,5 +163,6 @@ export default function Footer() {
         </div>
       </div>
     </footer>
+    </>
   );
 }
