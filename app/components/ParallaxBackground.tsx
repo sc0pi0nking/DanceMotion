@@ -15,6 +15,19 @@ const generateMeshParticles = (count: number) => {
   }));
 };
 
+// Generate floating bubbles like in Hero - these animate up/down and fade in/out
+const generateFloatingBubbles = (count: number) => {
+  return Array.from({ length: count }, (_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    y: Math.random() * 300, // Spread across 300vh worth of content
+    size: Math.random() * 8 + 4, // Larger bubbles (4-12px)
+    duration: Math.random() * 12 + 10, // 10-22 seconds
+    delay: Math.random() * 8,
+    floatDistance: Math.random() * 25 + 15, // How far they float up (15-40%)
+  }));
+};
+
 // Memoized component to prevent unnecessary re-renders
 const ParallaxBackgroundContent = memo(() => {
   const { scrollY } = useScroll();
@@ -32,6 +45,12 @@ const ParallaxBackgroundContent = memo(() => {
 
   // Memoize particles
   const particles = useMemo(() => generateMeshParticles(12), []);
+  
+  // Memoize floating bubbles - Hero-style animated bubbles
+  const floatingBubbles = useMemo(() => generateFloatingBubbles(40), []);
+  
+  // Parallax transform for bubbles layer
+  const bubblesY = useTransform(scrollY, [0, 3000], [0, 180]);
 
   return (
     <div
@@ -433,6 +452,51 @@ const ParallaxBackgroundContent = memo(() => {
             filter: "blur(40px)",
           }}
         />
+      </motion.div>
+      
+      {/* Floating Bubbles Layer - Hero-style animated bubbles that float and fade */}
+      <motion.div 
+        className="absolute inset-0 pointer-events-none"
+        style={{ y: bubblesY }}
+      >
+        <svg
+          className="absolute inset-0 w-full h-[300vh] pointer-events-none"
+          viewBox="0 0 100 300"
+          preserveAspectRatio="xMidYMid slice"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <filter id="bubbleGlow">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="0.3" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          
+          {floatingBubbles.map((bubble) => (
+            <motion.circle
+              key={`bubble-${bubble.id}`}
+              cx={bubble.x}
+              cy={bubble.y}
+              r={bubble.size / 10}
+              fill="var(--accent)"
+              filter="url(#bubbleGlow)"
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: [0, 0.6, 0],
+                cy: [bubble.y, bubble.y - bubble.floatDistance, bubble.y],
+              }}
+              transition={{
+                duration: bubble.duration,
+                repeat: Infinity,
+                delay: bubble.delay,
+                ease: "easeInOut",
+              }}
+            />
+          ))}
+        </svg>
       </motion.div>
     </div>
   );
