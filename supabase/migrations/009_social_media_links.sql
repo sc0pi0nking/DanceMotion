@@ -23,15 +23,8 @@ ALTER TABLE public.social_links ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "social_links_public_read" ON public.social_links
   FOR SELECT USING (is_visible = true);
 
--- Admin full access
-CREATE POLICY "social_links_admin_all" ON public.social_links
-  FOR ALL USING (
-    EXISTS (
-      SELECT 1 FROM public.users
-      WHERE users.id = auth.uid()
-      AND users.role IN ('admin', 'superadmin')
-    )
-  );
+-- Admin operations use service_role key which bypasses RLS
+-- No additional policy needed for admin access
 
 -- Updated_at trigger
 CREATE OR REPLACE FUNCTION update_social_links_updated_at()

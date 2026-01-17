@@ -68,10 +68,8 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/favicon.ico",
-    shortcut: "/favicon-16x16.png",
-    apple: "/apple-touch-icon.png",
   },
-  manifest: "/site.webmanifest",
+  // manifest: "/site.webmanifest", // Aktivieren wenn Icons erstellt wurden
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

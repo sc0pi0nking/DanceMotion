@@ -1,54 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+import { supabaseServer } from '@/lib/supabase';
+import { getAdminSession } from '@/lib/auth';
 
 // POST - Generate events from recurring templates
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const authToken = cookieStore.get('sb-access-token')?.value;
-
-    if (!authToken) {
+    const session = await getAdminSession();
+    if (!session) {
       return NextResponse.json({ success: false, error: 'Nicht angemeldet' }, { status: 401 });
-    }
-
-    // Verify admin role
-    const authClient = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user }, error: authError } = await authClient.auth.getUser(authToken);
-
-    if (authError || !user) {
-      return NextResponse.json({ success: false, error: 'Nicht autorisiert' }, { status: 401 });
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    
-    const { data: userData } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-
-    if (!userData || !['admin', 'superadmin'].includes(userData.role)) {
-      return NextResponse.json({ success: false, error: 'Keine Admin-Berechtigung' }, { status: 403 });
     }
 
     // Get days ahead from request body (default 90)
     const body = await request.json().catch(() => ({}));
     const daysAhead = body.daysAhead || 90;
 
-    // Call the PostgreSQL function to generate events
-    const { data, error } = await supabase.rpc('generate_recurring_events', { days_ahead: daysAhead });
+    // Try to call the PostgreSQL function first
+    const { data, error } = await supabaseServer.rpc('generate_recurring_events', { days_ahead: daysAhead });
 
     if (error) {
       // If function doesn't exist yet, do it manually in JS
       console.warn('RPC function not available, generating manually:', error.message);
       
       // Fetch all active recurring events
-      const { data: recurringEvents, error: fetchError } = await supabase
+      const { data: recurringEvents, error: fetchError } = await supabaseServer
         .from('recurring_events')
         .select('*')
         .eq('is_active', true);
@@ -81,7 +55,7 @@ export async function POST(request: NextRequest) {
             // Advance and continue
           } else {
             // Check if event already exists
-            const { data: existing } = await supabase
+            const { data: existing } = await supabaseServer
               .from('events')
               .select('id')
               .eq('recurring_event_id', rec.id)
@@ -90,7 +64,7 @@ export async function POST(request: NextRequest) {
 
             if (!existing) {
               // Create the event
-              const { error: insertError } = await supabase
+              const { error: insertError } = await supabaseServer
                 .from('events')
                 .insert({
                   title: rec.title,

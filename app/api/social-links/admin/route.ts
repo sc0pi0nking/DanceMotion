@@ -1,48 +1,27 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+import { supabaseServer } from '@/lib/supabase';
+import { getAdminSession } from '@/lib/auth';
 
 // GET - fetch ALL social links for admin (including hidden)
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    const authToken = cookieStore.get('sb-access-token')?.value;
-
-    if (!authToken) {
+    const session = await getAdminSession();
+    if (!session) {
       return NextResponse.json({ success: false, error: 'Nicht angemeldet' }, { status: 401 });
     }
 
-    // Verify admin role
-    const authClient = createClient(supabaseUrl, supabaseAnonKey);
-    const { data: { user }, error: authError } = await authClient.auth.getUser(authToken);
-
-    if (authError || !user) {
-      return NextResponse.json({ success: false, error: 'Nicht autorisiert' }, { status: 401 });
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    
-    const { data: userData } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-
-    if (!userData || !['admin', 'superadmin'].includes(userData.role)) {
-      return NextResponse.json({ success: false, error: 'Keine Admin-Berechtigung' }, { status: 403 });
-    }
-
     // Fetch ALL links (including hidden) with service role
-    const { data, error } = await supabase
+    const { data, error } = await supabaseServer
       .from('social_links')
       .select('*')
       .order('sort_order', { ascending: true });
 
-    if (error) throw error;
+    if (error) {
+      if (error.message.includes("does not exist")) {
+        return NextResponse.json({ success: true, data: [] });
+      }
+      throw error;
+    }
 
     return NextResponse.json({ success: true, data: data || [] });
   } catch (error) {

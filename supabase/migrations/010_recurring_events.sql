@@ -42,15 +42,8 @@ ALTER TABLE public.recurring_events ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "recurring_events_public_read" ON public.recurring_events
   FOR SELECT USING (is_active = true);
 
--- Admin full access
-CREATE POLICY "recurring_events_admin_all" ON public.recurring_events
-  FOR ALL USING (
-    EXISTS (
-      SELECT 1 FROM public.users
-      WHERE users.id = auth.uid()
-      AND users.role IN ('admin', 'superadmin')
-    )
-  );
+-- Admin operations use service_role key which bypasses RLS
+-- No additional policy needed for admin access
 
 -- Updated_at trigger
 CREATE OR REPLACE FUNCTION update_recurring_events_updated_at()

@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+import { supabaseServer } from '@/lib/supabase';
+import { getAdminSession } from '@/lib/auth';
 
 export interface RecurringEvent {
   id: string;
@@ -17,7 +13,7 @@ export interface RecurringEvent {
   note: string | null;
   href: string | null;
   recurrence_type: 'weekly' | 'biweekly' | 'monthly';
-  day_of_week: number | null;  // 0=Sunday, 1=Monday, etc.
+  day_of_week: number | null;
   day_of_month: number | null;
   start_date: string;
   end_date: string | null;
@@ -27,55 +23,27 @@ export interface RecurringEvent {
   updated_at: string;
 }
 
-// Day names for display
 export const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
-
-// Verify admin authorization
-async function verifyAdmin(authToken: string) {
-  const authClient = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: { user }, error: authError } = await authClient.auth.getUser(authToken);
-
-  if (authError || !user) {
-    return { authorized: false, user: null };
-  }
-
-  const supabase = createClient(supabaseUrl, supabaseServiceKey);
-  const { data: userData } = await supabase
-    .from('users')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (!userData || !['admin', 'superadmin'].includes(userData.role)) {
-    return { authorized: false, user: null };
-  }
-
-  return { authorized: true, user };
-}
 
 // GET - fetch all recurring events (admin only)
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    const authToken = cookieStore.get('sb-access-token')?.value;
-
-    if (!authToken) {
+    const session = await getAdminSession();
+    if (!session) {
       return NextResponse.json({ success: false, error: 'Nicht angemeldet' }, { status: 401 });
     }
 
-    const { authorized } = await verifyAdmin(authToken);
-    if (!authorized) {
-      return NextResponse.json({ success: false, error: 'Keine Admin-Berechtigung' }, { status: 403 });
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    
-    const { data, error } = await supabase
+    const { data, error } = await supabaseServer
       .from('recurring_events')
       .select('*')
       .order('title', { ascending: true });
 
-    if (error) throw error;
+    if (error) {
+      if (error.message.includes("does not exist")) {
+        return NextResponse.json({ success: true, data: [] });
+      }
+      throw error;
+    }
 
     return NextResponse.json({ success: true, data: data || [] });
   } catch (error) {
@@ -90,16 +58,9 @@ export async function GET() {
 // POST - create new recurring event
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const authToken = cookieStore.get('sb-access-token')?.value;
-
-    if (!authToken) {
+    const session = await getAdminSession();
+    if (!session) {
       return NextResponse.json({ success: false, error: 'Nicht angemeldet' }, { status: 401 });
-    }
-
-    const { authorized, user } = await verifyAdmin(authToken);
-    if (!authorized) {
-      return NextResponse.json({ success: false, error: 'Keine Admin-Berechtigung' }, { status: 403 });
     }
 
     const body = await request.json();
@@ -116,7 +77,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate recurrence settings
     if ((recurrence_type === 'weekly' || recurrence_type === 'biweekly') && day_of_week === undefined) {
       return NextResponse.json(
         { success: false, error: 'Für wöchentliche Termine muss ein Wochentag angegeben werden' },
@@ -124,16 +84,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    const { data, error } = await supabase
+    const { data, error } = await supabaseServer
       .from('recurring_events')
       .insert({
         title, time, location, city, category, groups,
         note, href, recurrence_type, day_of_week, day_of_month,
         start_date, end_date, is_active,
-        created_by: user?.id,
-        updated_by: user?.id
+        created_by: session.id,
+        updated_by: session.id
       })
       .select()
       .single();
@@ -153,16 +111,9 @@ export async function POST(request: NextRequest) {
 // PUT - update recurring event
 export async function PUT(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const authToken = cookieStore.get('sb-access-token')?.value;
-
-    if (!authToken) {
+    const session = await getAdminSession();
+    if (!session) {
       return NextResponse.json({ success: false, error: 'Nicht angemeldet' }, { status: 401 });
-    }
-
-    const { authorized, user } = await verifyAdmin(authToken);
-    if (!authorized) {
-      return NextResponse.json({ success: false, error: 'Keine Admin-Berechtigung' }, { status: 403 });
     }
 
     const body = await request.json();
@@ -172,11 +123,9 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'ID ist erforderlich' }, { status: 400 });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    const { data, error } = await supabase
+    const { data, error } = await supabaseServer
       .from('recurring_events')
-      .update({ ...updates, updated_by: user?.id })
+      .update({ ...updates, updated_by: session.id })
       .eq('id', id)
       .select()
       .single();
@@ -193,19 +142,12 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// DELETE - remove recurring event (and optionally future generated events)
+// DELETE - remove recurring event
 export async function DELETE(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const authToken = cookieStore.get('sb-access-token')?.value;
-
-    if (!authToken) {
+    const session = await getAdminSession();
+    if (!session) {
       return NextResponse.json({ success: false, error: 'Nicht angemeldet' }, { status: 401 });
-    }
-
-    const { authorized } = await verifyAdmin(authToken);
-    if (!authorized) {
-      return NextResponse.json({ success: false, error: 'Keine Admin-Berechtigung' }, { status: 403 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -216,19 +158,16 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'ID ist erforderlich' }, { status: 400 });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
     // Optionally delete future generated events
     if (deleteFutureEvents) {
-      await supabase
+      await supabaseServer
         .from('events')
         .delete()
         .eq('recurring_event_id', id)
         .gte('date', new Date().toISOString().split('T')[0]);
     }
 
-    // Delete the recurring event template
-    const { error } = await supabase
+    const { error } = await supabaseServer
       .from('recurring_events')
       .delete()
       .eq('id', id);
