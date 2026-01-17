@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { Calendar, FileText, BarChart3, Images, LogOut, Menu, X, FileDown, HelpCircle, Users, Book, Home, Share2, Repeat, Shield, Activity } from 'lucide-react'
+import { Calendar, FileText, BarChart3, Images, LogOut, Menu, X, FileDown, HelpCircle, Users, Book, Home, Share2, Repeat, Shield, Activity, LogIn } from 'lucide-react'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -119,11 +119,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { icon: FileDown, label: 'Dokumente', href: '/admin/documents', permission: 'documents' },
     { icon: HelpCircle, label: 'FAQs', href: '/admin/faqs', permission: 'faqs' },
     { icon: Users, label: 'Team', href: '/admin/team', permission: 'team' },
+    { icon: Book, label: 'Wiki', href: '/admin/wiki', permission: 'wiki' },
     { icon: Share2, label: 'Social Media', href: '/admin/social', permission: 'social' },
     { icon: Activity, label: 'Analytics', href: '/admin/analytics', permission: 'analytics' },
+    { icon: LogIn, label: 'Audit', href: '/admin/audit', permission: 'audit' },
     { icon: Users, label: 'Benutzer', href: '/admin/users', permission: 'users' },
     { icon: Shield, label: 'Rollen', href: '/admin/roles', permission: 'roles' },
-    { icon: Book, label: 'Wiki', href: '/admin/wiki', permission: 'dashboard' },
   ]
 
   // Filter Navigation Items basierend auf Permissions

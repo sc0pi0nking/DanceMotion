@@ -11,10 +11,12 @@ export const PERMISSIONS = {
   DOCUMENTS: 'documents',
   FAQS: 'faqs',
   TEAM: 'team',
+  WIKI: 'wiki',
   SOCIAL: 'social',
   USERS: 'users',
   ROLES: 'roles',
   ANALYTICS: 'analytics',
+  AUDIT: 'audit',
   SETTINGS: 'settings',
 } as const
 

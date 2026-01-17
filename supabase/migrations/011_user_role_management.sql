@@ -14,15 +14,17 @@
 --   - documents: Dokumente verwalten
 --   - faqs: FAQs verwalten
 --   - team: Team-Mitglieder verwalten
+--   - wiki: Wiki verwalten
 --   - social: Social Media Links
 --   - users: Benutzer verwalten
 --   - roles: Rollen verwalten
 --   - analytics: Analytics einsehen
+--   - audit: Audit Logs einsehen
 --   - settings: System-Einstellungen
 
 -- 2. Standard-Rollen aktualisieren mit erweiterten Permissions
 UPDATE public.admin_roles 
-SET permissions = '["dashboard", "events", "recurring", "content", "gallery", "documents", "faqs", "team", "social", "users", "roles", "analytics", "settings"]'::jsonb
+SET permissions = '["dashboard", "events", "recurring", "content", "gallery", "documents", "faqs", "team", "wiki", "social", "users", "roles", "analytics", "audit", "settings"]'::jsonb
 WHERE name = 'admin';
 
 UPDATE public.admin_roles 
@@ -31,14 +33,14 @@ SET permissions = '["dashboard", "events", "recurring"]'::jsonb,
 WHERE name = 'event-manager';
 
 UPDATE public.admin_roles 
-SET permissions = '["dashboard", "content", "gallery", "documents", "faqs", "team"]'::jsonb,
+SET permissions = '["dashboard", "content", "gallery", "documents", "faqs", "team", "wiki"]'::jsonb,
     description = 'Content und Medien verwalten'
 WHERE name = 'editor';
 
 -- 3. Neue Rollen hinzufügen
 INSERT INTO public.admin_roles (name, description, permissions) VALUES
   ('viewer', 'Nur-Lese Zugriff auf Dashboard und Analytics', '["dashboard", "analytics"]'::jsonb),
-  ('social-manager', 'Social Media und Galerie verwalten', '["dashboard", "social", "gallery"]'::jsonb)
+  ('social-manager', 'Social Media und Galerie verwalten', '["dashboard", "social", "gallery", "wiki"]'::jsonb)
 ON CONFLICT (name) DO NOTHING;
 
 -- 4. Sicherstellen dass admin_users die richtigen Spalten hat
