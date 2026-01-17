@@ -152,6 +152,11 @@ CREATE INDEX IF NOT EXISTS idx_audit_log_action ON public.admin_audit_log(action
 -- RLS für Audit Log
 ALTER TABLE public.admin_audit_log ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist (for idempotency)
+DROP POLICY IF EXISTS "Admins can read audit log" ON public.admin_audit_log;
+DROP POLICY IF EXISTS "System can insert audit log" ON public.admin_audit_log;
+
+-- Recreate policies
 CREATE POLICY "Admins can read audit log"
 ON public.admin_audit_log FOR SELECT
 USING (true);
