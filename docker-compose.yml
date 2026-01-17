@@ -16,6 +16,7 @@ services:
     restart: unless-stopped
     networks:
       - traefik_proxy
+      - proxy
     env_file:
       - .env
     environment:
@@ -31,5 +32,7 @@ services:
 
 networks:
   traefik_proxy:
+    external: true
+  proxy:
     external: true
 
