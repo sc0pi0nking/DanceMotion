@@ -8,7 +8,7 @@ set -e
 # ============================================
 # Configuration
 # ============================================
-BACKUP_DIR="/opt/dancemotion/backups"
+BACKUP_DIR="/opt/dancemotion/web/backups"
 DB_HOST="db.sbbrjdfcxvbbcswnbyki.supabase.co"
 DB_PORT="5432"
 DB_USER="postgres"
