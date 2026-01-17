@@ -31,19 +31,19 @@ export async function GET() {
       .order('sort_order', { ascending: true });
 
     if (error) {
-      if (error.message.includes("does not exist")) {
+      // Table doesn't exist yet - return empty array
+      if (error.code === '42P01' || error.message.includes("does not exist") || error.message.includes("relation")) {
         return NextResponse.json({ success: true, data: [] });
       }
-      throw error;
+      console.error('Supabase error:', error);
+      return NextResponse.json({ success: true, data: [] }); // Graceful fallback
     }
 
     return NextResponse.json({ success: true, data: data || [] });
   } catch (error) {
     console.error('Error fetching social links:', error);
-    return NextResponse.json(
-      { success: false, error: 'Fehler beim Laden der Social Links' },
-      { status: 500 }
-    );
+    // Return empty array instead of error for public endpoint
+    return NextResponse.json({ success: true, data: [] });
   }
 }
 
