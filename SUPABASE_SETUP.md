@@ -81,7 +81,7 @@ This SQL migration creates:
 
 Once tables are created:
 
-1. ✅ Refresh the website at https://dancemotion.homebasetheisen.me
+1. ✅ Refresh the website at https://dancemotion.org
 2. ✅ The errors should be gone
 3. ✅ You can add events and content through the admin panel
 4. ✅ Changes appear live on the website immediately

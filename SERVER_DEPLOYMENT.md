@@ -58,7 +58,7 @@ ADMIN_EMAIL=admin@dancemotion.de
 ADMIN_PASSWORD=DeinSicheresPassword123!
 
 # App Config
-NEXT_PUBLIC_APP_URL=https://dancemotion.homebasetheisen.me
+NEXT_PUBLIC_APP_URL=https://dancemotion.org
 EOF
 ```
 
@@ -139,7 +139,7 @@ docker stats dancemotion-web
 ```
 https://ops-control.homebasetheisen.me/traefik
 ```
-Dort siehst du den Router für `dancemotion.homebasetheisen.me`
+Dort siehst du den Router für `dancemotion.org`
 
 ---
 

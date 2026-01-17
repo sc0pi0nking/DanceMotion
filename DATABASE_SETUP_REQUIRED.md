@@ -56,8 +56,8 @@ Gehe zu **"Database"** → **"Tables"** und verifiziere, dass diese 6 Tabellen e
 
 ## ⏭️ Nach der SQL-Ausführung
 
-1. Aktualisiere die Website: **https://dancemotion.homebasetheisen.me**
-2. Gehe zum Admin Panel: **https://dancemotion.homebasetheisen.me/admin/login**
+1. Aktualisiere die Website: **https://dancemotion.org**
+2. Gehe zum Admin Panel: **https://dancemotion.org/admin/login**
 3. Melde dich an
 4. Gehe zu **"Events"**
 5. Klicke **"Neues Event erstellen"**

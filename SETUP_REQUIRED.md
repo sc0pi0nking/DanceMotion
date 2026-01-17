@@ -43,7 +43,7 @@ Wenn ja → **Fertig!** ✅
 ---
 
 ## 🌐 Danach
-1. Aktualisiere die Website: https://dancemotion.homebasetheisen.me (F5)
+1. Aktualisiere die Website: https://dancemotion.org (F5)
 2. Alle Fehler sollten weg sein ✅
 3. Du kannst jetzt Events im Admin Panel hinzufügen
 4. Events erscheinen sofort auf der Website 🚀
