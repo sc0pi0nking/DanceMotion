@@ -70,6 +70,9 @@ export async function GET(request: NextRequest) {
       query = query.lte('created_at', new Date(endDate).toISOString())
     }
 
+    // Apply pagination
+    query = query.range(offset, offset + pageSize - 1)
+
     // Check if export format requested
     const format = searchParams.get('format') // 'csv' or 'json'
 

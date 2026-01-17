@@ -32,9 +32,15 @@ export default function SettingsPage() {
 
   const fetchAuditCount = async () => {
     try {
-      const res = await fetch('/api/admin/audit?limit=1')
+      const res = await fetch('/api/admin/audit?limit=1&offset=0')
+      if (!res.ok) {
+        console.error('Audit fetch failed:', res.status)
+        return
+      }
       const data = await res.json()
-      setAuditCount(data.total || 0)
+      // Handle both response formats
+      const total = data.total || data.pagination?.total || 0
+      setAuditCount(total)
     } catch (err) {
       console.error('Failed to fetch audit count:', err)
     }
