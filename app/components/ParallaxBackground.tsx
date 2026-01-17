@@ -19,16 +19,18 @@ const generateMeshParticles = (count: number) => {
 const ParallaxBackgroundContent = memo(() => {
   const { scrollY } = useScroll();
   
-  // Subtle parallax effect - fixed background moves slightly slower
-  const bgY = useTransform(scrollY, [0, 2000], [0, -150]);
+  // Individual element parallax - POSITIVE values = elements move DOWN (slower than scroll)
+  // This creates depth without leaving gaps
+  const orb1Y = useTransform(scrollY, [0, 3000], [0, 150]);
+  const orb2Y = useTransform(scrollY, [0, 3000], [0, 100]);
+  const orb3Y = useTransform(scrollY, [0, 3000], [0, 200]);
 
   // Memoize particles
   const particles = useMemo(() => generateMeshParticles(12), []);
 
   return (
-    <motion.div
-      style={{ y: bgY }}
-      className="fixed inset-0 pointer-events-none z-0 w-full h-full will-change-transform parallax-bg"
+    <div
+      className="fixed inset-0 pointer-events-none z-0 w-full h-full parallax-bg overflow-hidden"
     >
       {/* Subtler SVG background with gradient mesh effect - NOT like hero */}
       <svg
@@ -188,7 +190,47 @@ const ParallaxBackgroundContent = memo(() => {
           />
         ))}
       </svg>
-    </motion.div>
+      
+      {/* Parallax overlay orbs - move at different speeds */}
+      <motion.div 
+        className="absolute inset-0 pointer-events-none"
+        style={{ y: orb1Y }}
+      >
+        <div 
+          className="absolute top-[10%] left-[10%] w-[600px] h-[600px] rounded-full opacity-20"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(80px)",
+          }}
+        />
+      </motion.div>
+      
+      <motion.div 
+        className="absolute inset-0 pointer-events-none"
+        style={{ y: orb2Y }}
+      >
+        <div 
+          className="absolute top-[40%] right-[5%] w-[500px] h-[500px] rounded-full opacity-15"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(100px)",
+          }}
+        />
+      </motion.div>
+      
+      <motion.div 
+        className="absolute inset-0 pointer-events-none"
+        style={{ y: orb3Y }}
+      >
+        <div 
+          className="absolute top-[70%] left-[30%] w-[700px] h-[700px] rounded-full opacity-10"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(120px)",
+          }}
+        />
+      </motion.div>
+    </div>
   );
 });
 
