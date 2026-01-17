@@ -69,6 +69,22 @@ html[data-theme="light"] {
   --accent: #2EC4C6; /* Teal bleibt gleich */
   --card-shadow: 0 8px 24px rgba(26,20,16,0.08);
   --panel-semi: rgba(254, 248, 240, 0.7); /* Light mode: helle Semi-transparente Kacheln */
+  
+  /* Hero background gradients - Light mode (warmer, subtler) */
+  --hero-gradient-start: rgba(46, 196, 198, 0.10);
+  --hero-gradient-mid: rgba(46, 196, 198, 0.05);
+  --hero-gradient-end: rgba(46, 196, 198, 0.02);
+  --hero-burst-inner: rgba(46, 196, 198, 0.15);
+  --hero-burst-mid: rgba(46, 196, 198, 0.06);
+  --hero-glow-inner: rgba(46, 196, 198, 0.18);
+  --hero-line-color: rgba(46, 196, 198, 0.10);
+  --hero-particle-color: rgba(46, 196, 198, 0.35);
+  
+  /* Parallax mesh gradients - Light mode */
+  --mesh-gradient-1: rgba(46, 196, 198, 0.12);
+  --mesh-gradient-2: rgba(46, 196, 198, 0.08);
+  --mesh-orb-1: rgba(46, 196, 198, 0.20);
+  --mesh-orb-2: rgba(46, 196, 198, 0.15);
 }
 
 html[data-theme="dark"] {
@@ -80,6 +96,22 @@ html[data-theme="dark"] {
   --accent: #2EC4C6;
   --card-shadow: 0 24px 60px rgba(46,196,198,0.12);
   --panel-semi: rgba(18, 18, 18, 0.5); /* Dark mode: dunkle Semi-transparente Kacheln */
+  
+  /* Hero background gradients - Dark mode (more vibrant) */
+  --hero-gradient-start: rgba(46, 196, 198, 0.15);
+  --hero-gradient-mid: rgba(46, 196, 198, 0.08);
+  --hero-gradient-end: rgba(46, 196, 198, 0.03);
+  --hero-burst-inner: rgba(46, 196, 198, 0.25);
+  --hero-burst-mid: rgba(46, 196, 198, 0.10);
+  --hero-glow-inner: rgba(46, 196, 198, 0.30);
+  --hero-line-color: rgba(46, 196, 198, 0.15);
+  --hero-particle-color: rgba(46, 196, 198, 0.50);
+  
+  /* Parallax mesh gradients - Dark mode */
+  --mesh-gradient-1: rgba(46, 196, 198, 0.18);
+  --mesh-gradient-2: rgba(46, 196, 198, 0.12);
+  --mesh-orb-1: rgba(46, 196, 198, 0.30);
+  --mesh-orb-2: rgba(46, 196, 198, 0.22);
 }
 
 body {
@@ -505,37 +537,44 @@ html[data-theme="dark"] .glassmorphism {
   transform: rotateY(180deg);
 }
 
-/* === Hero Scene (NEW: dynamic SVG-based scene with motion) === */
-.hero-scene {
-  background: linear-gradient(180deg, var(--bg) 0%, rgba(46,196,198,0.03) 40%, var(--bg) 100%);
-  position: relative;
-}
-
-.hero-scene svg {
-  opacity: 0.85;
-}
-
-html[data-theme="light"] .hero-scene {
-  background: linear-gradient(135deg, var(--bg) 0%, rgba(139, 123, 111, 0.04) 25%, rgba(46,196,198,0.03) 50%, var(--bg) 100%);
-}
-
 /* === Hero Scene (Enhanced for both themes) === */
 .hero-scene {
   background: linear-gradient(180deg, var(--bg) 0%, rgba(46,196,198,0.04) 35%, var(--bg) 100%);
   position: relative;
 }
 
-.hero-scene svg {
-  opacity: 0.9;
+.hero-scene .hero-svg-bg {
+  opacity: 0.85;
+  transition: opacity 0.3s ease;
 }
 
 html[data-theme="light"] .hero-scene {
-  background: linear-gradient(135deg, var(--bg) 0%, rgba(46,196,198,0.12) 25%, rgba(254,251,245,0.9) 60%, rgba(254,249,243,0.95) 100%);
-  position: relative;
+  background: linear-gradient(160deg, var(--bg) 0%, rgba(46,196,198,0.08) 30%, rgba(254,251,245,0.95) 70%, var(--bg) 100%);
+}
+
+html[data-theme="light"] .hero-scene .hero-svg-bg {
+  opacity: 0.7;
 }
 
 html[data-theme="dark"] .hero-scene {
-  background: linear-gradient(180deg, var(--bg) 0%, rgba(46,196,198,0.05) 40%, var(--bg) 100%);
+  background: linear-gradient(180deg, var(--bg) 0%, rgba(46,196,198,0.06) 40%, var(--bg) 100%);
+}
+
+html[data-theme="dark"] .hero-scene .hero-svg-bg {
+  opacity: 0.95;
+}
+
+/* Parallax Background section theming */
+.parallax-bg {
+  transition: opacity 0.3s ease;
+}
+
+html[data-theme="light"] .parallax-bg {
+  opacity: 0.75;
+}
+
+html[data-theme="dark"] .parallax-bg {
+  opacity: 0.9;
 }
 
 /* === Cards: gradient border + inner panel === */

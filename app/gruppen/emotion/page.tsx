@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import EditableContent from "@/app/components/EditableContent";
+import { Clock, MapPin, Calendar } from "lucide-react";
 
 export const metadata = {
   title: "Emotion — DanceMotion Eschweiler",
@@ -36,6 +37,37 @@ export default function EmotionPage() {
       />
       
       <div className="mt-16 space-y-12">
+        {/* Trainingszeiten Section - Admin-editierbar */}
+        <section className="rounded-2xl p-8 md:p-12" style={{ backgroundColor: "var(--accent)", color: "var(--bg)" }}>
+          <h2 className="text-2xl font-semibold mb-6 flex items-center gap-3">
+            <Calendar size={28} />
+            Trainingszeiten
+          </h2>
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <Clock size={20} className="mt-1 flex-shrink-0" style={{ opacity: 0.9 }} />
+              <div>
+                <EditableContent
+                  contentKey="emotion.training_times"
+                  defaultValue="Montags: 19:00 – 20:30 Uhr
+Mittwochs: 18:00 – 19:30 Uhr"
+                  className="font-medium whitespace-pre-line"
+                  multiline
+                  as="div"
+                />
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <MapPin size={20} className="mt-1 flex-shrink-0" style={{ opacity: 0.9 }} />
+              <EditableContent
+                contentKey="emotion.training_location"
+                defaultValue="Turnhalle am Talbahnhof, Eschweiler"
+                className="font-medium"
+              />
+            </div>
+          </div>
+        </section>
+
         <section className="glass rounded-2xl p-8 md:p-12">
           <h2 className="text-2xl font-semibold mb-3" style={{ color: "var(--fg)" }}>Für wen?</h2>
           <EditableContent

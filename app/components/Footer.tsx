@@ -1,8 +1,45 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone, Instagram, Facebook, Youtube, Twitter, Music2, Link as LinkIcon } from "lucide-react";
+
+interface SocialLink {
+  id: string;
+  platform: string;
+  url: string;
+  icon: string;
+  label: string;
+}
+
+// Icon mapping
+const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
+  instagram: Instagram,
+  facebook: Facebook,
+  youtube: Youtube,
+  twitter: Twitter,
+  tiktok: Music2,
+  other: LinkIcon,
+};
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+
+  useEffect(() => {
+    async function fetchSocialLinks() {
+      try {
+        const res = await fetch("/api/social-links");
+        const data = await res.json();
+        if (data.success && data.data) {
+          setSocialLinks(data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching social links:", error);
+      }
+    }
+    fetchSocialLinks();
+  }, []);
 
   return (
     <footer className="site-footer w-full" style={{ borderColor: "var(--border)" }}>
@@ -69,34 +106,31 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Social Media */}
+          {/* Social Media - Dynamic */}
           <div>
             <h4 className="text-sm font-semibold mb-4" style={{ color: "var(--fg)" }}>Social Media</h4>
-            <div className="flex gap-3">
-              <a
-                href="#"
-                className="w-10 h-10 rounded-full flex items-center justify-center transition-all"
-                style={{ backgroundColor: "var(--accent)", color: "var(--bg)" }}
-                title="Instagram"
-              >
-                📱
-              </a>
-              <a
-                href="#"
-                className="w-10 h-10 rounded-full flex items-center justify-center transition-all"
-                style={{ backgroundColor: "var(--accent)", color: "var(--bg)" }}
-                title="Facebook"
-              >
-                f
-              </a>
-              <a
-                href="#"
-                className="w-10 h-10 rounded-full flex items-center justify-center transition-all"
-                style={{ backgroundColor: "var(--accent)", color: "var(--bg)" }}
-                title="YouTube"
-              >
-                ▶
-              </a>
+            <div className="flex gap-3 flex-wrap">
+              {socialLinks.length > 0 ? (
+                socialLinks.map((link) => {
+                  const IconComponent = iconMap[link.icon] || LinkIcon;
+                  return (
+                    <a
+                      key={link.id}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-110 hover:shadow-lg"
+                      style={{ backgroundColor: "var(--accent)", color: "var(--bg)" }}
+                      title={link.label}
+                    >
+                      <IconComponent size={20} />
+                    </a>
+                  );
+                })
+              ) : (
+                // Fallback while loading or if no links
+                <p className="text-sm text-muted">Folge uns bald auf Social Media!</p>
+              )}
             </div>
           </div>
         </div>

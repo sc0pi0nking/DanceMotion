@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { Calendar, FileText, BarChart3, Images, LogOut, Menu, X, FileDown, HelpCircle, Users, Book, Home } from 'lucide-react'
+import { Calendar, FileText, BarChart3, Images, LogOut, Menu, X, FileDown, HelpCircle, Users, Book, Home, Share2, Repeat } from 'lucide-react'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -107,11 +107,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const allNavItems = [
     { icon: BarChart3, label: 'Dashboard', href: '/admin', roles: ['admin'] },
     { icon: Calendar, label: 'Termine', href: '/admin/events', roles: ['admin'] },
+    { icon: Repeat, label: 'Wiederkehrend', href: '/admin/recurring', roles: ['admin'] },
     { icon: FileText, label: 'Inhalte', href: '/admin/content', roles: ['admin', 'editor'] },
     { icon: Images, label: 'Galerie', href: '/admin/gallery', roles: ['admin', 'editor'] },
     { icon: FileDown, label: 'Dokumente', href: '/admin/documents', roles: ['admin', 'editor'] },
     { icon: HelpCircle, label: 'FAQs', href: '/admin/faqs', roles: ['admin', 'editor'] },
     { icon: Users, label: 'Team', href: '/admin/team', roles: ['admin', 'editor'] },
+    { icon: Share2, label: 'Social Media', href: '/admin/social', roles: ['admin'] },
     { icon: Book, label: 'Wiki', href: '/admin/wiki', roles: ['admin', 'editor', 'event-manager'] },
   ]
 
