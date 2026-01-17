@@ -14,7 +14,8 @@
 --   - documents: Dokumente verwalten
 --   - faqs: FAQs verwalten
 --   - team: Team-Mitglieder verwalten
---   - wiki: Wiki verwalten
+--   - wiki_admin: Admin Wiki (Non-Technical) Zugriff
+--   - wiki_dev: Dev Wiki (Technical) Zugriff
 --   - social: Social Media Links
 --   - users: Benutzer verwalten
 --   - roles: Rollen verwalten
@@ -24,23 +25,36 @@
 
 -- 2. Standard-Rollen aktualisieren mit erweiterten Permissions
 UPDATE public.admin_roles 
-SET permissions = '["dashboard", "events", "recurring", "content", "gallery", "documents", "faqs", "team", "wiki", "social", "users", "roles", "analytics", "audit", "settings"]'::jsonb
+SET permissions = '["dashboard", "events", "recurring", "content", "gallery", "documents", "faqs", "team", "wiki_admin", "wiki_dev", "social", "users", "roles", "analytics", "audit", "settings"]'::jsonb
 WHERE name = 'admin';
 
 UPDATE public.admin_roles 
-SET permissions = '["dashboard", "events", "recurring"]'::jsonb,
+SET permissions = '["dashboard", "events", "recurring", "wiki_admin"]'::jsonb,
     description = 'Verwaltung von Terminen und Event-Anfragen'
 WHERE name = 'event-manager';
 
 UPDATE public.admin_roles 
-SET permissions = '["dashboard", "content", "gallery", "documents", "faqs", "team", "wiki"]'::jsonb,
+SET permissions = '["dashboard", "content", "gallery", "documents", "faqs", "team", "wiki_admin", "social"]'::jsonb,
     description = 'Content und Medien verwalten'
 WHERE name = 'editor';
 
--- 3. Neue Rollen hinzufügen
+-- 3. Neue Rollen aktualisieren/hinzufügen
+UPDATE public.admin_roles
+SET permissions = '["dashboard", "analytics", "wiki_admin"]'::jsonb
+WHERE name = 'viewer';
+
+UPDATE public.admin_roles
+SET permissions = '["dashboard", "social", "gallery", "wiki_admin"]'::jsonb
+WHERE name = 'social-manager';
+
+-- Developer Role: Zugriff auf Dev Wiki
 INSERT INTO public.admin_roles (name, description, permissions) VALUES
-  ('viewer', 'Nur-Lese Zugriff auf Dashboard und Analytics', '["dashboard", "analytics"]'::jsonb),
-  ('social-manager', 'Social Media und Galerie verwalten', '["dashboard", "social", "gallery", "wiki"]'::jsonb)
+  ('developer', 'Entwickler-Zugriff mit technischer Dokumentation', '["dashboard", "users", "roles", "audit", "settings", "wiki_dev", "analytics"]'::jsonb)
+ON CONFLICT (name) DO NOTHING;
+
+-- Support Role: Admin Wiki für Support-Team
+INSERT INTO public.admin_roles (name, description, permissions) VALUES
+  ('support', 'Support-Team mit Admin Wiki Zugriff', '["dashboard", "wiki_admin", "analytics"]'::jsonb)
 ON CONFLICT (name) DO NOTHING;
 
 -- 4. Sicherstellen dass admin_users die richtigen Spalten hat

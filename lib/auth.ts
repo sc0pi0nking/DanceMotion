@@ -11,7 +11,8 @@ export const PERMISSIONS = {
   DOCUMENTS: 'documents',
   FAQS: 'faqs',
   TEAM: 'team',
-  WIKI: 'wiki',
+  WIKI_ADMIN: 'wiki_admin',
+  WIKI_DEV: 'wiki_dev',
   SOCIAL: 'social',
   USERS: 'users',
   ROLES: 'roles',
@@ -233,6 +234,8 @@ export const PAGE_PERMISSIONS: Record<string, Permission> = {
   '/admin/analytics': PERMISSIONS.ANALYTICS,
   '/admin/audit': PERMISSIONS.AUDIT,
   '/admin/settings': PERMISSIONS.SETTINGS,
+  '/admin/wiki/admin': PERMISSIONS.WIKI_ADMIN,
+  '/admin/wiki/dev': PERMISSIONS.WIKI_DEV,
 }
 
 /**
