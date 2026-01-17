@@ -28,13 +28,13 @@ const ParallaxBackgroundContent = memo(() => {
   return (
     <motion.div
       style={{ y: bgY }}
-      className="absolute inset-0 pointer-events-none z-0 w-full will-change-transform parallax-bg"
+      className="absolute inset-0 pointer-events-none z-0 w-full min-h-full will-change-transform parallax-bg"
     >
       {/* Subtler SVG background with gradient mesh effect - NOT like hero */}
       <svg
-        className="w-full h-full pointer-events-none"
-        viewBox="0 0 1200 2000"
-        preserveAspectRatio="xMidYMid slice"
+        className="w-full h-full min-h-[200vh] pointer-events-none"
+        viewBox="0 0 1200 4000"
+        preserveAspectRatio="xMidYMin slice"
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
@@ -78,7 +78,7 @@ const ParallaxBackgroundContent = memo(() => {
         </defs>
 
         {/* Base gradient layer */}
-        <rect width="1200" height="2000" fill="url(#meshGradient1)" opacity={0.6} />
+        <rect width="1200" height="4000" fill="url(#meshGradient1)" opacity={0.6} />
 
         {/* Mesh points - slow animation for organic feel */}
         <motion.circle
@@ -163,6 +163,62 @@ const ParallaxBackgroundContent = memo(() => {
             opacity: [0.25, 0.4, 0.25],
           }}
           transition={{ duration: 22, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+        />
+
+        {/* Lower page orbs - extend to footer */}
+        <motion.circle
+          cx={150}
+          cy={2200}
+          r={550}
+          fill="url(#meshRadial1)"
+          filter="url(#meshBlur2)"
+          animate={{
+            cx: [150, 200, 150],
+            cy: [2200, 2280, 2200],
+            r: [550, 580, 550],
+          }}
+          transition={{ duration: 24, repeat: Infinity, ease: "easeInOut", delay: 4 }}
+        />
+
+        <motion.circle
+          cx={1000}
+          cy={2600}
+          r={500}
+          fill="url(#meshRadial2)"
+          filter="url(#meshBlur2)"
+          animate={{
+            cx: [1000, 950, 1000],
+            cy: [2600, 2680, 2600],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{ duration: 26, repeat: Infinity, ease: "easeInOut", delay: 6 }}
+        />
+
+        <motion.circle
+          cx={500}
+          cy={3000}
+          r={600}
+          fill="url(#meshRadial3)"
+          filter="url(#meshBlur)"
+          animate={{
+            r: [600, 650, 600],
+            opacity: [0.25, 0.4, 0.25],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+        />
+
+        <motion.circle
+          cx={900}
+          cy={3500}
+          r={450}
+          fill="url(#meshRadial1)"
+          filter="url(#meshBlur)"
+          animate={{
+            cx: [900, 850, 900],
+            cy: [3500, 3550, 3500],
+            opacity: [0.2, 0.35, 0.2],
+          }}
+          transition={{ duration: 22, repeat: Infinity, ease: "easeInOut", delay: 5 }}
         />
 
         {/* Floating particles for extra depth */}
