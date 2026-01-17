@@ -34,14 +34,15 @@ echo "   Host: $DB_HOST"
 echo "   Database: $DB_NAME"
 echo "   File: $BACKUP_FILE"
 
-if docker run --rm \
+if PGPASSWORD="$DB_PASSWORD" docker run --rm \
   --network host \
-  -e PGPASSWORD=$DB_PASSWORD \
+  -e PGPASSWORD="$DB_PASSWORD" \
   postgres:15-alpine \
-  pg_dump -h $DB_HOST \
-  -p $DB_PORT \
-  -U $DB_USER \
-  -d $DB_NAME \
+  pg_dump -h "$DB_HOST" \
+  -p "$DB_PORT" \
+  -U "$DB_USER" \
+  -d "$DB_NAME" \
+  -w \
   > "$BACKUP_FILE"; then
   
   FILE_SIZE=$(du -h "$BACKUP_FILE" | cut -f1)
