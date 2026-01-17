@@ -66,11 +66,7 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  icons: {
-    icon: "/logos/dancemotion-eschweiler.png",
-    shortcut: "/logos/dancemotion-eschweiler.png",
-    apple: "/logos/dancemotion-eschweiler.png",
-  },
+  // Icons werden automatisch aus app/icon.png und app/apple-icon.png geladen
   // manifest: "/site.webmanifest", // Aktivieren wenn Icons erstellt wurden
 };
 
