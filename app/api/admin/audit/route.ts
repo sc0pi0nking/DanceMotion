@@ -2,6 +2,26 @@ import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
 import { supabaseServer } from '@/lib/supabase'
 import { NextRequest, NextResponse } from 'next/server'
 
+function convertToCSV(data: any[]): string {
+  if (data.length === 0) return ''
+
+  const headers = Object.keys(data[0])
+  const csvHeaders = headers.map(h => `"${h}"`).join(',')
+
+  const csvRows = data.map(row => {
+    return headers
+      .map(header => {
+        const value = row[header]
+        if (value === null || value === undefined) return '""'
+        if (typeof value === 'object') return `"${JSON.stringify(value).replace(/"/g, '""')}"`
+        return `"${String(value).replace(/"/g, '""')}"`
+      })
+      .join(',')
+  })
+
+  return [csvHeaders, ...csvRows].join('\n')
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Check authentication
@@ -50,8 +70,46 @@ export async function GET(request: NextRequest) {
       query = query.lte('created_at', new Date(endDate).toISOString())
     }
 
-    // Apply pagination
-    query = query.range(offset, offset + pageSize - 1)
+    // Check if export format requested
+    const format = searchParams.get('format') // 'csv' or 'json'
+
+    if (format === 'csv' || format === 'json') {
+      // Get all logs for export (no pagination)
+      let exportQuery = supabaseServer
+        .from('admin_audit_log')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (action) exportQuery = exportQuery.eq('action', action)
+      if (targetType) exportQuery = exportQuery.eq('target_type', targetType)
+      if (startDate) exportQuery = exportQuery.gte('created_at', new Date(startDate).toISOString())
+      if (endDate) exportQuery = exportQuery.lte('created_at', new Date(endDate).toISOString())
+
+      const { data: exportData, error: exportError } = await exportQuery
+
+      if (exportError) {
+        return NextResponse.json({ error: 'Export failed' }, { status: 500 })
+      }
+
+      if (format === 'csv') {
+        const csv = convertToCSV(exportData || [])
+        return new NextResponse(csv, {
+          headers: {
+            'Content-Type': 'text/csv',
+            'Content-Disposition': `attachment; filename="audit-logs-${new Date().toISOString().split('T')[0]}.csv"`,
+          },
+        })
+      }
+
+      if (format === 'json') {
+        return new NextResponse(JSON.stringify(exportData, null, 2), {
+          headers: {
+            'Content-Type': 'application/json',
+            'Content-Disposition': `attachment; filename="audit-logs-${new Date().toISOString().split('T')[0]}.json"`,
+          },
+        })
+      }
+    }
 
     const { data, count, error } = await query
 

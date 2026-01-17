@@ -231,6 +231,7 @@ export const PAGE_PERMISSIONS: Record<string, Permission> = {
   '/admin/users': PERMISSIONS.USERS,
   '/admin/roles': PERMISSIONS.ROLES,
   '/admin/analytics': PERMISSIONS.ANALYTICS,
+  '/admin/audit': PERMISSIONS.AUDIT,
   '/admin/settings': PERMISSIONS.SETTINGS,
 }
 

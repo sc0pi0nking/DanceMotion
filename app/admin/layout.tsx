@@ -245,7 +245,24 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <div className="flex items-center gap-2 md:gap-4">
             <div className="text-right hidden sm:block">
               <p className="text-sm font-medium text-white truncate max-w-[150px] md:max-w-none">{user?.email}</p>
-              <p className="text-xs text-slate-400 capitalize">{userRole || 'Administrator'}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-xs text-slate-400 capitalize">{userRole || 'Administrator'}</span>
+                {userRole && (
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
+                      userRole === 'admin'
+                        ? 'bg-red-500/20 text-red-300'
+                        : userRole === 'event-manager'
+                        ? 'bg-blue-500/20 text-blue-300'
+                        : userRole === 'editor'
+                        ? 'bg-purple-500/20 text-purple-300'
+                        : 'bg-slate-500/20 text-slate-300'
+                    }`}
+                  >
+                    {userRole}
+                  </span>
+                )}
+              </div>
             </div>
             <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
               {user?.email?.[0]?.toUpperCase() || '?'}

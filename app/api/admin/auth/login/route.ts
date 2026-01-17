@@ -1,4 +1,5 @@
 import { supabaseServer } from '@/lib/supabase'
+import { logLoginAction } from '@/lib/audit-logger'
 import { cookies } from 'next/headers'
 import type { NextRequest } from 'next/server'
 
@@ -13,7 +14,29 @@ export async function POST(req: NextRequest) {
     })
 
     if (error) {
+      // Log failed login attempt
+      await logLoginAction(
+        email,
+        false,
+        req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || undefined,
+        error.message
+      )
       return Response.json({ error: error.message }, { status: 401 })
+    }
+
+    // Update last_login in admin_users table
+    if (data.user?.id) {
+      await supabaseServer
+        .from('admin_users')
+        .update({ last_login: new Date().toISOString() })
+        .eq('id', data.user.id)
+
+      // Log successful login
+      await logLoginAction(
+        data.user.id,
+        true,
+        req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || undefined
+      )
     }
 
     // Set session cookie

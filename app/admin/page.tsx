@@ -1,13 +1,23 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Calendar, FileText, Clock, TrendingUp } from 'lucide-react'
+import { Calendar, FileText, Clock, TrendingUp, Activity } from 'lucide-react'
 
 interface Stats {
   upcomingEvents: number
   totalEvents: number
   contentItems: number
   lastUpdated: string
+}
+
+interface AuditLog {
+  id: string
+  action: string
+  user_id: string
+  user_name?: string
+  target_type: string
+  target_id: string
+  created_at: string
 }
 
 export default function AdminDashboard() {
@@ -17,10 +27,12 @@ export default function AdminDashboard() {
     contentItems: 0,
     lastUpdated: '',
   })
+  const [recentActivity, setRecentActivity] = useState<AuditLog[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     loadStats()
+    loadRecentActivity()
   }, [])
 
   const loadStats = async () => {
@@ -48,6 +60,31 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const loadRecentActivity = async () => {
+    try {
+      const res = await fetch('/api/admin/audit?limit=5')
+      const data = await res.json()
+      if (data.data) {
+        setRecentActivity(data.data)
+      }
+    } catch (error) {
+      console.error('Failed to load recent activity:', error)
+    }
+  }
+
+  const getActionLabel = (action: string): string => {
+    const labels: Record<string, string> = {
+      create: '✨ Erstellt',
+      update: '✏️ Aktualisiert',
+      delete: '🗑️ Gelöscht',
+      login: '🔓 Angemeldet',
+      logout: '🔒 Abgemeldet',
+      permission_change: '🔐 Permission geändert',
+      password_change: '🔑 Passwort geändert',
+    }
+    return labels[action] || action
   }
 
   return (
@@ -97,44 +134,74 @@ export default function AdminDashboard() {
         />
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Quick Add Event */}
-        <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
-              <Calendar size={24} className="text-blue-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-white">Neues Termin</h3>
+      {/* Recent Activity & Quick Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* Recent Activity */}
+        <div className="lg:col-span-2 bg-slate-800 border border-slate-700 rounded-xl p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Activity size={24} className="text-teal-400" />
+            <h3 className="text-lg font-semibold text-white">Letzte Aktivitäten</h3>
           </div>
-          <p className="text-slate-400 text-sm mb-4">
-            Füge schnell ein neues Event oder Auftritt hinzu
-          </p>
-          <a
-            href="/admin/events"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition"
-          >
-            Termin erstellen →
-          </a>
+          <div className="space-y-2 max-h-64 overflow-y-auto">
+            {recentActivity.length > 0 ? (
+              recentActivity.map((log) => (
+                <div key={log.id} className="flex items-center justify-between text-sm p-2 hover:bg-slate-700/50 rounded transition">
+                  <div className="flex-1">
+                    <span className="font-medium text-white">{getActionLabel(log.action)}</span>
+                    <span className="text-slate-400 ml-2">
+                      {log.target_type === 'user' ? '👤' : log.target_type === 'role' ? '👥' : '📝'} {log.target_type}
+                    </span>
+                  </div>
+                  <span className="text-xs text-slate-500">
+                    {new Date(log.created_at).toLocaleTimeString('de-DE')}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-slate-400 text-sm">Keine Aktivitäten</p>
+            )}
+          </div>
         </div>
 
-        {/* Quick Edit Content */}
-        <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-              <FileText size={24} className="text-purple-400" />
+        {/* Quick Actions Column */}
+        <div className="space-y-4">
+          {/* Quick Add Event */}
+          <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                <Calendar size={24} className="text-blue-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-white">Neues Termin</h3>
             </div>
-            <h3 className="text-lg font-semibold text-white">Inhalte bearbeiten</h3>
+            <p className="text-slate-400 text-sm mb-4">
+              Füge schnell ein neues Event hinzu
+            </p>
+            <a
+              href="/admin/events"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition"
+            >
+              Erstellen →
+            </a>
           </div>
-          <p className="text-slate-400 text-sm mb-4">
-            Ändere Texte auf der Website ohne Code
-          </p>
-          <a
-            href="/admin/content"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-medium transition"
-          >
-            Inhalte verwalten →
-          </a>
+
+          {/* Quick Edit Content */}
+          <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                <FileText size={24} className="text-purple-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-white">Inhalte</h3>
+            </div>
+            <p className="text-slate-400 text-sm mb-4">
+              Bearbeite Website-Texte
+            </p>
+            <a
+              href="/admin/content"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-medium transition"
+            >
+              Verwalten →
+            </a>
+          </div>
         </div>
       </div>
 

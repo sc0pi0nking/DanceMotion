@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabase'
 import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
+import { logUserAction } from '@/lib/audit-logger'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -76,13 +77,13 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
     }
 
     // Audit Log
-    await supabaseServer.from('admin_audit_log').insert({
-      user_id: currentUser.id,
-      action: 'update',
-      target_type: 'user',
-      target_id: id,
-      details: { ...updateData, password_changed: !!password },
-    })
+    await logUserAction(
+      currentUser.id,
+      password ? 'password_change' : 'update',
+      id,
+      { ...updateData, password_changed: !!password },
+      req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || undefined
+    )
 
     // Aktualisierten User laden
     const { data: updatedUser } = await supabaseServer
@@ -139,13 +140,13 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
     }
 
     // Audit Log
-    await supabaseServer.from('admin_audit_log').insert({
-      user_id: currentUser.id,
-      action: 'delete',
-      target_type: 'user',
-      target_id: id,
-      details: { deleted_user: userData },
-    })
+    await logUserAction(
+      currentUser.id,
+      'delete',
+      id,
+      { deleted_user: userData },
+      req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || undefined
+    )
 
     return NextResponse.json({ success: true })
   } catch (error) {

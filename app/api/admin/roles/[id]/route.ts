@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabase'
 import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
+import { logRoleAction } from '@/lib/audit-logger'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -79,13 +80,13 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
     }
 
     // Audit Log
-    await supabaseServer.from('admin_audit_log').insert({
-      user_id: currentUser.id,
-      action: 'update',
-      target_type: 'role',
-      target_id: id,
-      details: updateData,
-    })
+    await logRoleAction(
+      currentUser.id,
+      'update',
+      id,
+      updateData,
+      req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || undefined
+    )
 
     return NextResponse.json(data)
   } catch (error) {
@@ -137,13 +138,13 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
     }
 
     // Audit Log
-    await supabaseServer.from('admin_audit_log').insert({
-      user_id: currentUser.id,
-      action: 'delete',
-      target_type: 'role',
-      target_id: id,
-      details: { deleted_role: role?.name },
-    })
+    await logRoleAction(
+      currentUser.id,
+      'delete',
+      id,
+      { deleted_role: role?.name },
+      req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || undefined
+    )
 
     return NextResponse.json({ success: true })
   } catch (error) {

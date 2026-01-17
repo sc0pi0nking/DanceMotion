@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabase'
 import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
+import { logUserAction } from '@/lib/audit-logger'
 
 // GET: Alle User mit Rollen laden
 export async function GET() {
@@ -86,13 +87,13 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. Audit Log
-    await supabaseServer.from('admin_audit_log').insert({
-      user_id: currentUser.id,
-      action: 'create',
-      target_type: 'user',
-      target_id: authData.user.id,
-      details: { email, name, role_id },
-    })
+    await logUserAction(
+      currentUser.id,
+      'create',
+      authData.user.id,
+      { email, name, role_id },
+      req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || undefined
+    )
 
     return NextResponse.json(adminUser, { status: 201 })
   } catch (error) {
