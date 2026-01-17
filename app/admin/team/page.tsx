@@ -76,28 +76,41 @@ export default function TeamAdminPage() {
     try {
       setError(null);
       setUploading(true);
-      console.log('📤 Uploading image:', file.name);
+      console.log('📤 Uploading image:', file.name, 'Type:', file.type, 'Size:', file.size);
+
+      // Validiere File-Typ
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg'];
+      if (!allowedTypes.includes(file.type)) {
+        throw new Error(`Dateiformat nicht erlaubt: ${file.type}. Erlaubte Formate: JPG, PNG, GIF, WebP`);
+      }
 
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${file.name.split('.').pop()}`;
+      console.log('📝 Filename:', fileName);
       
-      const { error: uploadErr } = await supabase.storage
+      const { error: uploadErr, data } = await supabase.storage
         .from('team-images')
-        .upload(fileName, file);
+        .upload(fileName, file, {
+          contentType: file.type,
+          upsert: false
+        });
 
       if (uploadErr) {
         console.error('❌ Upload error:', uploadErr);
-        throw uploadErr;
+        console.error('Details:', JSON.stringify(uploadErr, null, 2));
+        throw new Error(`Upload fehlgeschlagen: ${uploadErr.message}`);
       }
 
-      const { data } = supabase.storage.from('team-images').getPublicUrl(fileName);
-      console.log('✅ Upload successful:', data.publicUrl);
+      console.log('✅ File uploaded, data:', data);
+
+      const { data: publicUrl } = supabase.storage.from('team-images').getPublicUrl(fileName);
+      console.log('✅ Upload successful:', publicUrl.publicUrl);
       
-      setFormData(prev => ({ ...prev, image_url: data.publicUrl }));
-      setSuccess('Bild hochgeladen!');
+      setFormData(prev => ({ ...prev, image_url: publicUrl.publicUrl }));
+      setSuccess('Bild erfolgreich hochgeladen!');
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Fehler beim Hochladen';
-      console.error('Upload error:', err);
+      console.error('❌ Upload error:', err);
       setError(msg);
     } finally {
       setUploading(false);
