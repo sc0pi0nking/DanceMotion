@@ -51,7 +51,7 @@ export default function Footer() {
           marginBottom: "-1px",
         }}
       />
-      <footer className="site-footer w-full relative z-20" style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}>
+      <footer className="site-footer w-full relative z-20" style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)", marginBottom: "0" }}>
       <div className="mx-auto max-w-6xl px-6 py-12 sm:py-16">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">

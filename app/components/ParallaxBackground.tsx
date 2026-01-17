@@ -20,11 +20,11 @@ const generateFloatingBubbles = (count: number) => {
   return Array.from({ length: count }, (_, i) => ({
     id: i,
     x: Math.random() * 100,
-    y: Math.random() * 300, // Spread across 300vh worth of content
+    y: Math.random() * 100, // Now 0-100 for full viewport
     size: Math.random() * 8 + 4, // Larger bubbles (4-12px)
     duration: Math.random() * 12 + 10, // 10-22 seconds
     delay: Math.random() * 8,
-    floatDistance: Math.random() * 25 + 15, // How far they float up (15-40%)
+    floatDistance: Math.random() * 8 + 5, // How far they float up (5-13%)
   }));
 };
 
@@ -456,12 +456,12 @@ const ParallaxBackgroundContent = memo(() => {
       
       {/* Floating Bubbles Layer - Hero-style animated bubbles that float and fade */}
       <motion.div 
-        className="absolute inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none overflow-hidden"
         style={{ y: bubblesY }}
       >
         <svg
-          className="absolute inset-0 w-full h-[300vh] pointer-events-none"
-          viewBox="0 0 100 300"
+          className="absolute inset-0 w-full h-full pointer-events-none"
+          viewBox="0 0 100 100"
           preserveAspectRatio="xMidYMid slice"
           xmlns="http://www.w3.org/2000/svg"
         >

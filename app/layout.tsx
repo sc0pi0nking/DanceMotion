@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import ScrollToTop from "./components/ScrollToTop";
 import ParallaxBackground from "./components/ParallaxBackground";
 
 const geistSans = Geist({
@@ -82,7 +81,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Header />
         <main className="relative z-10 flex-grow">{children}</main>
         <Footer />
-        <ScrollToTop />
       </body>
     </html>
   );

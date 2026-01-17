@@ -114,9 +114,14 @@ html[data-theme="dark"] {
   --mesh-orb-2: rgba(46, 196, 198, 0.22);
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   background: var(--bg);
   color: var(--fg);
+  overflow-x: hidden;
 }
 
 html[data-theme="light"] body {
