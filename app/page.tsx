@@ -3,7 +3,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, memo } from "react";
 import HeroScene from "./components/HeroScene";
-import ParallaxBackground from "./components/ParallaxBackground";
 import EventTimeline from "./components/EventTimeline";
 import EditableContent from "./components/EditableContent";
 import { Button, LinkButton } from "./components/Button";
@@ -36,11 +35,8 @@ export default function Home() {
       {/* Hero - Normal, scrollable */}
       <HeroScene />
 
-      {/* Content wrapper - with its own parallax background */}
+      {/* Content wrapper */}
       <div className="relative w-full">
-        {/* Parallax Background Layer */}
-        <ParallaxBackground />
-        
         {/* Decorative gradient background under header */}
         <div 
           className="h-32 pointer-events-none relative z-10"
