@@ -76,11 +76,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="de">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
         {/* Global Parallax Background - fixed, behind everything */}
         <ParallaxBackground />
         <Header />
-        <main className="relative z-10">{children}</main>
+        <main className="relative z-10 flex-grow">{children}</main>
         <Footer />
         <ScrollToTop />
       </body>

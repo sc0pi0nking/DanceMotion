@@ -42,7 +42,7 @@ export default function ScrollToTop() {
           whileTap={{ scale: 0.95 }}
           transition={{ type: "spring", stiffness: 260, damping: 20 }}
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-[9999] p-4 rounded-full shadow-2xl transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 cursor-pointer"
+          className="fixed bottom-24 right-8 z-[9999] p-4 rounded-full shadow-2xl transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 cursor-pointer"
           style={{
             backgroundColor: "var(--accent)",
             color: "var(--bg)",

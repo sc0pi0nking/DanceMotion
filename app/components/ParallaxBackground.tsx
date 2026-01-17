@@ -203,17 +203,24 @@ const ParallaxBackgroundContent = memo(() => {
         style={{ y: orb1Y }}
       >
         <div 
-          className="absolute top-[5%] left-[5%] w-[500px] h-[500px] rounded-full opacity-25"
+          className="absolute top-[5%] left-[5%] w-[500px] h-[500px] rounded-full opacity-40"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
             filter: "blur(60px)",
           }}
         />
         <div 
-          className="absolute top-[8%] right-[15%] w-[400px] h-[400px] rounded-full opacity-20"
+          className="absolute top-[8%] right-[15%] w-[400px] h-[400px] rounded-full opacity-35"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
             filter: "blur(70px)",
+          }}
+        />
+        <div 
+          className="absolute top-[12%] left-[40%] w-[350px] h-[350px] rounded-full opacity-30"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(55px)",
           }}
         />
       </motion.div>
@@ -224,17 +231,24 @@ const ParallaxBackgroundContent = memo(() => {
         style={{ y: orb2Y }}
       >
         <div 
-          className="absolute top-[20%] right-[5%] w-[550px] h-[550px] rounded-full opacity-18"
+          className="absolute top-[20%] right-[5%] w-[550px] h-[550px] rounded-full opacity-35"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
             filter: "blur(80px)",
           }}
         />
         <div 
-          className="absolute top-[25%] left-[20%] w-[350px] h-[350px] rounded-full opacity-15"
+          className="absolute top-[25%] left-[20%] w-[350px] h-[350px] rounded-full opacity-30"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
             filter: "blur(60px)",
+          }}
+        />
+        <div 
+          className="absolute top-[18%] left-[55%] w-[400px] h-[400px] rounded-full opacity-28"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(65px)",
           }}
         />
       </motion.div>
@@ -245,17 +259,24 @@ const ParallaxBackgroundContent = memo(() => {
         style={{ y: orb3Y }}
       >
         <div 
-          className="absolute top-[35%] left-[8%] w-[600px] h-[600px] rounded-full opacity-15"
+          className="absolute top-[35%] left-[8%] w-[600px] h-[600px] rounded-full opacity-32"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
             filter: "blur(90px)",
           }}
         />
         <div 
-          className="absolute top-[40%] right-[25%] w-[450px] h-[450px] rounded-full opacity-12"
+          className="absolute top-[40%] right-[25%] w-[450px] h-[450px] rounded-full opacity-28"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
             filter: "blur(75px)",
+          }}
+        />
+        <div 
+          className="absolute top-[32%] right-[8%] w-[380px] h-[380px] rounded-full opacity-25"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(60px)",
           }}
         />
       </motion.div>
@@ -266,17 +287,24 @@ const ParallaxBackgroundContent = memo(() => {
         style={{ y: orb4Y }}
       >
         <div 
-          className="absolute top-[50%] right-[10%] w-[500px] h-[500px] rounded-full opacity-18"
+          className="absolute top-[50%] right-[10%] w-[500px] h-[500px] rounded-full opacity-35"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
             filter: "blur(85px)",
           }}
         />
         <div 
-          className="absolute top-[55%] left-[35%] w-[400px] h-[400px] rounded-full opacity-14"
+          className="absolute top-[55%] left-[35%] w-[400px] h-[400px] rounded-full opacity-30"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
             filter: "blur(70px)",
+          }}
+        />
+        <div 
+          className="absolute top-[48%] left-[5%] w-[450px] h-[450px] rounded-full opacity-28"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(75px)",
           }}
         />
       </motion.div>
@@ -287,17 +315,24 @@ const ParallaxBackgroundContent = memo(() => {
         style={{ y: orb5Y }}
       >
         <div 
-          className="absolute top-[65%] left-[5%] w-[550px] h-[550px] rounded-full opacity-16"
+          className="absolute top-[65%] left-[5%] w-[550px] h-[550px] rounded-full opacity-32"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
             filter: "blur(80px)",
           }}
         />
         <div 
-          className="absolute top-[70%] right-[20%] w-[380px] h-[380px] rounded-full opacity-12"
+          className="absolute top-[70%] right-[20%] w-[380px] h-[380px] rounded-full opacity-28"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
             filter: "blur(65px)",
+          }}
+        />
+        <div 
+          className="absolute top-[62%] right-[45%] w-[420px] h-[420px] rounded-full opacity-25"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(70px)",
           }}
         />
       </motion.div>
@@ -308,17 +343,24 @@ const ParallaxBackgroundContent = memo(() => {
         style={{ y: orb6Y }}
       >
         <div 
-          className="absolute top-[80%] right-[8%] w-[600px] h-[600px] rounded-full opacity-15"
+          className="absolute top-[80%] right-[8%] w-[600px] h-[600px] rounded-full opacity-30"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
             filter: "blur(90px)",
           }}
         />
         <div 
-          className="absolute top-[85%] left-[25%] w-[450px] h-[450px] rounded-full opacity-12"
+          className="absolute top-[85%] left-[25%] w-[450px] h-[450px] rounded-full opacity-25"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
             filter: "blur(75px)",
+          }}
+        />
+        <div 
+          className="absolute top-[78%] left-[60%] w-[380px] h-[380px] rounded-full opacity-28"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(65px)",
           }}
         />
       </motion.div>
@@ -329,24 +371,31 @@ const ParallaxBackgroundContent = memo(() => {
         style={{ y: orb7Y }}
       >
         <div 
-          className="absolute top-[15%] left-[45%] w-[300px] h-[300px] rounded-full opacity-20"
+          className="absolute top-[15%] left-[45%] w-[300px] h-[300px] rounded-full opacity-35"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
             filter: "blur(50px)",
           }}
         />
         <div 
-          className="absolute top-[45%] left-[60%] w-[280px] h-[280px] rounded-full opacity-18"
+          className="absolute top-[45%] left-[60%] w-[280px] h-[280px] rounded-full opacity-32"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
             filter: "blur(45px)",
           }}
         />
         <div 
-          className="absolute top-[75%] left-[50%] w-[320px] h-[320px] rounded-full opacity-15"
+          className="absolute top-[75%] left-[50%] w-[320px] h-[320px] rounded-full opacity-28"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
             filter: "blur(55px)",
+          }}
+        />
+        <div 
+          className="absolute top-[28%] left-[75%] w-[260px] h-[260px] rounded-full opacity-30"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(45px)",
           }}
         />
       </motion.div>
@@ -357,24 +406,31 @@ const ParallaxBackgroundContent = memo(() => {
         style={{ y: orb8Y }}
       >
         <div 
-          className="absolute top-[30%] right-[40%] w-[250px] h-[250px] rounded-full opacity-22"
+          className="absolute top-[30%] right-[40%] w-[250px] h-[250px] rounded-full opacity-38"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
             filter: "blur(40px)",
           }}
         />
         <div 
-          className="absolute top-[60%] left-[15%] w-[220px] h-[220px] rounded-full opacity-20"
+          className="absolute top-[60%] left-[15%] w-[220px] h-[220px] rounded-full opacity-35"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
             filter: "blur(35px)",
           }}
         />
         <div 
-          className="absolute top-[90%] right-[35%] w-[280px] h-[280px] rounded-full opacity-16"
+          className="absolute top-[90%] right-[35%] w-[280px] h-[280px] rounded-full opacity-30"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
             filter: "blur(45px)",
+          }}
+        />
+        <div 
+          className="absolute top-[52%] right-[60%] w-[240px] h-[240px] rounded-full opacity-32"
+          style={{
+            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
+            filter: "blur(40px)",
           }}
         />
       </motion.div>
