@@ -67,7 +67,9 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: "/logos/dancemotion-eschweiler.png",
+    shortcut: "/logos/dancemotion-eschweiler.png",
+    apple: "/logos/dancemotion-eschweiler.png",
   },
   // manifest: "/site.webmanifest", // Aktivieren wenn Icons erstellt wurden
 };
