@@ -179,21 +179,26 @@ export default function Header() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 bottom-0 w-[280px] bg-white dark:bg-gray-900 shadow-2xl z-50 lg:hidden overflow-y-auto"
+              className="fixed top-0 right-0 bottom-0 w-[280px] shadow-2xl z-50 lg:hidden overflow-y-auto"
+              style={{ backgroundColor: "var(--bg)" }}
               role="navigation"
               aria-label="Mobile Navigation"
             >
               {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+              <div 
+                className="flex items-center justify-between p-6"
+                style={{ borderBottom: "1px solid var(--border)" }}
+              >
+                <h2 className="text-lg font-bold" style={{ color: "var(--fg)" }}>
                   Menü
                 </h2>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  className="p-2 rounded-lg transition-colors"
+                  style={{ color: "var(--fg)" }}
                   aria-label="Menü schließen"
                 >
-                  <X size={20} className="text-gray-900 dark:text-white" />
+                  <X size={20} />
                 </button>
               </div>
 
@@ -212,12 +217,12 @@ export default function Header() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`px-4 py-3 rounded-lg text-base font-medium transition-all ${
-                        isActive 
-                          ? "font-bold" 
-                          : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                      }`}
-                      style={isActive ? { color: "var(--accent)" } : { color: "var(--fg)" }}
+                      className="px-4 py-3 rounded-lg text-base font-medium transition-all"
+                      style={{
+                        color: isActive ? "var(--accent)" : "var(--fg)",
+                        fontWeight: isActive ? 700 : 500,
+                        backgroundColor: isActive ? "rgba(46,196,198,0.1)" : "transparent",
+                      }}
                     >
                       {link.label}
                     </motion.a>
@@ -247,14 +252,15 @@ export default function Header() {
                 )}
 
                 {/* Additional Links */}
-                <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <div className="mt-6 pt-6" style={{ borderTop: "1px solid var(--border)" }}>
                   <motion.a
                     href="/impressum"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.4 }}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                    className="block px-4 py-2 text-sm transition-colors"
+                    style={{ color: "var(--muted)" }}
                   >
                     Impressum
                   </motion.a>
@@ -264,7 +270,8 @@ export default function Header() {
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.45 }}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                    className="block px-4 py-2 text-sm transition-colors"
+                    style={{ color: "var(--muted)" }}
                   >
                     Datenschutz
                   </motion.a>

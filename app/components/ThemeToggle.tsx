@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { Sun, Moon } from "lucide-react";
 
 const STORAGE_KEY = "theme";
 
@@ -41,10 +42,14 @@ export default function ThemeToggle() {
     <button
       aria-label={theme === "dark" ? "Wechsel zu Hellmodus" : "Wechsel zu Dunkelmodus"}
       onClick={toggle}
-      className="theme-toggle"
+      className="theme-toggle p-2 rounded-lg transition-all hover:scale-110"
       title={theme === "dark" ? "Zum Hellmodus wechseln" : "Zum Dunkelmodus wechseln"}
+      style={{
+        backgroundColor: "rgba(46,196,198,0.1)",
+        color: "var(--accent)",
+      }}
     >
-      {theme === "dark" ? "☀️" : "🌙"}
+      {theme === "dark" ? <Sun size={20} strokeWidth={2} /> : <Moon size={20} strokeWidth={2} />}
     </button>
   );
 }
