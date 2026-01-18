@@ -4,33 +4,30 @@
 -- ============================================
 
 -- Insert default footer contact information into content table
-INSERT INTO public.site_content (key, section, description, value, is_public, sort_order)
+INSERT INTO content (key, section, description, value)
 VALUES 
   (
     'footer_email',
     'Footer',
     'E-Mail Adresse im Footer',
-    'info@dancemotion-eschweiler.de',
-    true,
-    1
+    jsonb_build_object('text', 'info@dancemotion-eschweiler.de')
   ),
   (
     'footer_phone',
     'Footer',
     'Telefonnummer im Footer',
-    '+49 (0) 2405 87 51',
-    true,
-    2
+    jsonb_build_object('text', '+49 (0) 2405 87 51')
   ),
   (
     'footer_location',
     'Footer',
     'Standort/Stadt im Footer',
-    'Eschweiler, NRW',
-    true,
-    3
+    jsonb_build_object('text', 'Eschweiler, NRW')
   )
-ON CONFLICT (key) DO NOTHING;
+ON CONFLICT (key) DO UPDATE SET
+  section = EXCLUDED.section,
+  description = EXCLUDED.description,
+  updated_at = NOW();
 
 -- Verify the content was inserted
-SELECT key, section, description, value FROM public.site_content WHERE section = 'Footer' ORDER BY sort_order;
+SELECT key, section, description, value FROM content WHERE section = 'Footer' ORDER BY key;
