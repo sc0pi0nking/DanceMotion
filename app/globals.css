@@ -61,14 +61,14 @@
 
 /* Explicit themes via data-theme on <html> */
 html[data-theme="light"] {
-  --bg: #FAF5ED; /* Warmes beige-creme, nicht steril-weiß */
+  --bg: #FFFFFF; /* Bright white on mobile for clarity */
   --fg: #1A1410; /* Tiefer, reicherer Braun-Schwarzton statt bloß schwarz */
   --muted: #6B5B4F; /* Dunkler für WCAG AA Kontrast (~5.5:1) */
-  --panel: #FEF8F0; /* Warmes off-white statt reines weiß */
+  --panel: #FEFDFB; /* Clean off-white panel */
   --border: #E8D9C8; /* Warmer, sichtbarer Border mit Substanz */
   --accent: #2EC4C6; /* Teal bleibt gleich */
   --card-shadow: 0 8px 24px rgba(26,20,16,0.08);
-  --panel-semi: rgba(254, 248, 240, 0.7); /* Light mode: helle Semi-transparente Kacheln */
+  --panel-semi: rgba(254, 253, 251, 0.8); /* Light mode: helle Semi-transparente Kacheln */
   
   /* Hero background gradients - Light mode (warmer, subtler) */
   --hero-gradient-start: rgba(46, 196, 198, 0.10);
@@ -85,6 +85,14 @@ html[data-theme="light"] {
   --mesh-gradient-2: rgba(46, 196, 198, 0.08);
   --mesh-orb-1: rgba(46, 196, 198, 0.20);
   --mesh-orb-2: rgba(46, 196, 198, 0.15);
+}
+
+@media (min-width: 768px) {
+  html[data-theme="light"] {
+    --bg: #FAF5ED; /* Warmes beige-creme auf Desktop */
+    --panel: #FEF8F0; /* Warmes off-white auf Desktop */
+    --panel-semi: rgba(254, 248, 240, 0.7);
+  }
 }
 
 html[data-theme="dark"] {

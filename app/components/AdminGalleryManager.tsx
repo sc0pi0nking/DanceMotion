@@ -47,15 +47,25 @@ export default function AdminGalleryManager() {
   }
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    setUploadedFiles(prev => [...prev, ...acceptedFiles])
+    // Filter files: max 25MB per file, accept all image formats
+    const validFiles = acceptedFiles.filter(file => {
+      const maxSize = 25 * 1024 * 1024; // 25MB in bytes
+      if (file.size > maxSize) {
+        alert(`${file.name} überschreitet die maximale Größe von 25MB`)
+        return false
+      }
+      return true
+    })
+    setUploadedFiles(prev => [...prev, ...validFiles])
   }, [])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp']
+      'image/*': [] // Accept ALL image formats with any extension
     },
-    multiple: true
+    multiple: true,
+    maxSize: 25 * 1024 * 1024 // 25MB limit
   })
 
   async function handleUpload() {

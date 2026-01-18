@@ -12,6 +12,12 @@ interface SocialLink {
   label: string;
 }
 
+interface ContactInfo {
+  email: string;
+  phone: string;
+  location: string;
+}
+
 // Icon mapping
 const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
   instagram: Instagram,
@@ -25,20 +31,44 @@ const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
 export default function Footer() {
   const currentYear = new Date().getFullYear();
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+  const [contactInfo, setContactInfo] = useState<ContactInfo>({
+    email: "info@dancemotion-eschweiler.de",
+    phone: "+49 (0) 2405 87 51",
+    location: "Eschweiler, NRW",
+  });
 
   useEffect(() => {
-    async function fetchSocialLinks() {
+    async function fetchData() {
       try {
-        const res = await fetch("/api/social-links");
-        const data = await res.json();
-        if (data.success && data.data) {
-          setSocialLinks(data.data);
+        // Fetch social links
+        const socialRes = await fetch("/api/social-links");
+        const socialData = await socialRes.json();
+        if (socialData.success && socialData.data) {
+          setSocialLinks(socialData.data);
+        }
+
+        // Fetch contact info from content API
+        const contactRes = await fetch("/api/admin/content");
+        const contentData = await contactRes.json();
+        if (Array.isArray(contentData)) {
+          const contactContent = contentData.filter((item: any) => item.section === "Footer");
+          const emailItem = contactContent.find((item: any) => item.key === "footer_email");
+          const phoneItem = contactContent.find((item: any) => item.key === "footer_phone");
+          const locationItem = contactContent.find((item: any) => item.key === "footer_location");
+          
+          if (emailItem || phoneItem || locationItem) {
+            setContactInfo({
+              email: emailItem?.value?.text || emailItem?.value || contactInfo.email,
+              phone: phoneItem?.value?.text || phoneItem?.value || contactInfo.phone,
+              location: locationItem?.value?.text || locationItem?.value || contactInfo.location,
+            });
+          }
         }
       } catch (error) {
-        console.error("Error fetching social links:", error);
+        console.error("Error fetching data:", error);
       }
     }
-    fetchSocialLinks();
+    fetchData();
   }, []);
 
   return (
@@ -96,20 +126,20 @@ export default function Footer() {
             <ul className="space-y-3">
               <li className="flex items-start gap-3">
                 <Mail size={16} style={{ color: "var(--accent)", marginTop: "2px" }} />
-                <a href="mailto:info@dancemotion-eschweiler.de" className="text-sm-muted hover:text-accent transition-colors">
-                  info@dancemotion-eschweiler.de
+                <a href={`mailto:${contactInfo.email}`} className="text-sm-muted hover:text-accent transition-colors">
+                  {contactInfo.email}
                 </a>
               </li>
               <li className="flex items-start gap-3">
                 <Phone size={16} style={{ color: "var(--accent)", marginTop: "2px" }} />
-                <a href="tel:+4924058751" className="text-sm-muted hover:text-accent transition-colors">
-                  +49 (0) 2405 87 51
+                <a href={`tel:${contactInfo.phone.replace(/\s/g, '')}`} className="text-sm-muted hover:text-accent transition-colors">
+                  {contactInfo.phone}
                 </a>
               </li>
               <li className="flex items-start gap-3">
                 <MapPin size={16} style={{ color: "var(--accent)", marginTop: "2px" }} />
                 <span className="text-sm-muted">
-                  Eschweiler, NRW
+                  {contactInfo.location}
                 </span>
               </li>
             </ul>

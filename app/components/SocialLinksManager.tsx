@@ -305,12 +305,12 @@ export default function SocialLinksManager() {
             return (
               <div
                 key={link.id}
-                className={`p-4 rounded-xl transition-all ${!link.is_visible ? 'opacity-50' : ''}`}
+                className={`p-3 sm:p-4 rounded-xl transition-all ${!link.is_visible ? 'opacity-50' : ''}`}
                 style={{ backgroundColor: "var(--panel)", border: "1px solid var(--border)" }}
               >
-                <div className="flex items-center gap-4">
-                  {/* Drag handle placeholder */}
-                  <div className="text-muted cursor-move">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                  {/* Drag handle placeholder - hidden on mobile */}
+                  <div className="hidden sm:block text-muted cursor-move flex-shrink-0">
                     <GripVertical size={20} />
                   </div>
 
@@ -323,38 +323,44 @@ export default function SocialLinksManager() {
                   </div>
 
                   {/* Editable fields */}
-                  <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <input
-                      type="text"
-                      value={link.platform}
-                      onChange={(e) => updateLocalLink(link.id, "platform", e.target.value)}
-                      className="px-3 py-1.5 rounded-lg text-sm"
-                      style={{ backgroundColor: "var(--bg)", border: "1px solid var(--border)", color: "var(--fg)" }}
-                      placeholder="Plattform"
-                    />
-                    <input
-                      type="text"
-                      value={link.label}
-                      onChange={(e) => updateLocalLink(link.id, "label", e.target.value)}
-                      className="px-3 py-1.5 rounded-lg text-sm"
-                      style={{ backgroundColor: "var(--bg)", border: "1px solid var(--border)", color: "var(--fg)" }}
-                      placeholder="Label"
-                    />
-                    <input
-                      type="url"
-                      value={link.url}
-                      onChange={(e) => updateLocalLink(link.id, "url", e.target.value)}
-                      className="px-3 py-1.5 rounded-lg text-sm"
-                      style={{ backgroundColor: "var(--bg)", border: "1px solid var(--border)", color: "var(--fg)" }}
-                      placeholder="URL"
-                    />
+                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 min-w-0">
+                    <div className="min-w-0">
+                      <input
+                        type="text"
+                        value={link.platform}
+                        onChange={(e) => updateLocalLink(link.id, "platform", e.target.value)}
+                        className="w-full px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm truncate"
+                        style={{ backgroundColor: "var(--bg)", border: "1px solid var(--border)", color: "var(--fg)" }}
+                        placeholder="Plattform"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <input
+                        type="text"
+                        value={link.label}
+                        onChange={(e) => updateLocalLink(link.id, "label", e.target.value)}
+                        className="w-full px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm truncate"
+                        style={{ backgroundColor: "var(--bg)", border: "1px solid var(--border)", color: "var(--fg)" }}
+                        placeholder="Label"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <input
+                        type="url"
+                        value={link.url}
+                        onChange={(e) => updateLocalLink(link.id, "url", e.target.value)}
+                        className="w-full px-2 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm truncate"
+                        style={{ backgroundColor: "var(--bg)", border: "1px solid var(--border)", color: "var(--fg)" }}
+                        placeholder="URL"
+                      />
+                    </div>
                   </div>
 
-                  {/* Icon selector */}
+                  {/* Icon selector - hidden on mobile, visible on sm and up */}
                   <select
                     value={link.icon}
                     onChange={(e) => updateLocalLink(link.id, "icon", e.target.value)}
-                    className="px-2 py-1.5 rounded-lg text-sm"
+                    className="hidden sm:block px-2 py-1.5 rounded-lg text-sm"
                     style={{ backgroundColor: "var(--bg)", border: "1px solid var(--border)", color: "var(--fg)" }}
                   >
                     {iconOptions.map(opt => (
@@ -362,8 +368,8 @@ export default function SocialLinksManager() {
                     ))}
                   </select>
 
-                  {/* Actions */}
-                  <div className="flex items-center gap-2">
+                  {/* Actions - responsive spacing */}
+                  <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                     <button
                       onClick={() => handleToggleVisibility(link)}
                       className="p-2 rounded-lg transition-colors hover:bg-accent/10"
