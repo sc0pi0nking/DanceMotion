@@ -28,14 +28,6 @@
     <priority>0.9</priority>
   </url>
 
-  <!-- Event Studio -->
-  <url>
-    <loc>https://dancemotion.org/eventstudio</loc>
-    <lastmod>2026-01-17</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-
   <!-- Events/Termine -->
   <url>
     <loc>https://dancemotion.org/termine</loc>

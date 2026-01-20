@@ -18,7 +18,7 @@ export interface ContactFormData {
   phone?: string;
   subject?: string;
   message: string;
-  pageSource?: string; // z.B. "/formulare", "/eventstudio"
+  pageSource?: string; // z.B. "/formulare"
 }
 
 /**

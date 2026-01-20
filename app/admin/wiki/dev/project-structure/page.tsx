@@ -116,8 +116,7 @@ export default function ProjectStructurePage() {
 │   ├── faq/page.tsx            # (/faq)
 │   ├── formulare/page.tsx      # (/formulare - Docs)
 │   ├── datenschutz/page.tsx    # (/datenschutz - Privacy)
-│   ├── impressum/page.tsx      # (/impressum - Legal)
-│   └── eventstudio/page.tsx    # (/eventstudio)
+│   └── impressum/page.tsx      # (/impressum - Legal)
 │
 └── gruppen/                    # Group Pages
     ├── little-joys/

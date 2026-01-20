@@ -5,7 +5,7 @@ import { Mail, Phone, User, MessageSquare, Loader } from 'lucide-react';
 
 interface ContactFormProps {
   onSuccess?: () => void;
-  pageSource?: string; // z.B. "/formulare", "/eventstudio"
+  pageSource?: string; // z.B. "/formulare"
   className?: string;
 }
 

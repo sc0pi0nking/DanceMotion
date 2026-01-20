@@ -41,15 +41,6 @@ INSERT INTO content (key, section, description, value) VALUES
   ('group.emotion.schedule', 'Gruppen - Emotion', 'Trainingszeiten', '{"text": "Mittwochs 18:30-20:00 Uhr\nFreitags 18:30-20:00 Uhr"}')
 ON CONFLICT (key) DO NOTHING;
 
--- Eventstudio
-INSERT INTO content (key, section, description, value) VALUES
-  ('eventstudio.hero.title', 'Eventstudio', 'Seitentitel', '{"text": "DanceMotion Eventstudio"}'),
-  ('eventstudio.hero.subtitle', 'Eventstudio', 'Untertitel', '{"text": "Dein Raum für besondere Momente"}'),
-  ('eventstudio.about.text', 'Eventstudio', 'Beschreibungstext', '{"text": "Unser modernes Eventstudio bietet den perfekten Rahmen für deine Veranstaltung. Egal ob Geburtstag, Firmenfeier, Workshop oder private Feier - bei uns findest du professionelle Ausstattung und eine einladende Atmosphäre. Das Studio ist flexibel nutzbar und kann individuell an deine Bedürfnisse angepasst werden."}'),
-  ('eventstudio.features', 'Eventstudio', 'Ausstattung/Features', '{"text": "• Professionelle Sound- und Lichtanlage\n• Klimatisiert und barrierefrei\n• Moderne Spiegelwand\n• Küche und Sanitäranlagen\n• Flexible Raumgestaltung\n• Parkmöglichkeiten vor Ort"}'),
-  ('eventstudio.booking.text', 'Eventstudio', 'Buchungsinformationen', '{"text": "Interessiert? Kontaktiere uns für eine unverbindliche Besichtigung und ein individuelles Angebot. Wir beraten dich gerne bei der Planung deiner Veranstaltung."}')
-ON CONFLICT (key) DO NOTHING;
-
 -- Footer & Contact
 INSERT INTO content (key, section, description, value) VALUES
   ('footer.contact.address', 'Footer', 'Adresse', '{"text": "DanceMotion Eschweiler\nMusterstraße 123\n52249 Eschweiler"}'),
