@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { Calendar, FileText, BarChart3, Images, LogOut, Menu, X, FileDown, HelpCircle, Users, Book, Home, Share2, Repeat, Shield, Activity, LogIn, Settings } from 'lucide-react'
+import { Calendar, FileText, BarChart3, Images, LogOut, Menu, X, FileDown, HelpCircle, Users, Book, Home, Share2, Repeat, Shield, Activity, LogIn, Settings, MessageSquare } from 'lucide-react'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -119,6 +119,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { icon: FileDown, label: 'Dokumente', href: '/admin/documents', permission: 'documents' },
     { icon: HelpCircle, label: 'FAQs', href: '/admin/faqs', permission: 'faqs' },
     { icon: Users, label: 'Team', href: '/admin/team', permission: 'team' },
+    { icon: MessageSquare, label: 'Tickets', href: '/admin/tickets', permission: 'tickets_admin' },
     { icon: Book, label: 'Admin Wiki', href: '/admin/wiki/admin', permission: 'wiki_admin' },
     { icon: Book, label: 'Dev Wiki', href: '/admin/wiki/dev', permission: 'wiki_dev' },
     { icon: Share2, label: 'Social Media', href: '/admin/social', permission: 'social' },
