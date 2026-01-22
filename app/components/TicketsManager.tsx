@@ -7,7 +7,7 @@ interface Ticket {
   id: string
   title: string
   description: string
-  category: 'idea' | 'complaint' | 'suggestion' | 'question' | 'other'
+  category: 'bug' | 'incomplete' | 'suggestion' | 'question' | 'other'
   priority: 'low' | 'normal' | 'high'
   status: 'open' | 'in_progress' | 'resolved' | 'closed'
   admin_notes: Array<{ note: string; created_by: string; created_at: string }>
@@ -17,9 +17,9 @@ interface Ticket {
 }
 
 const categoryLabels = {
-  idea: 'Veranstaltungsidee',
-  complaint: 'Beschwerde',
-  suggestion: 'Verbesserungsvorschlag',
+  bug: 'Fehler/Problem',
+  incomplete: 'Unvollständiges Feature',
+  suggestion: 'Feature-Wunsch',
   question: 'Frage',
   other: 'Sonstiges',
 }

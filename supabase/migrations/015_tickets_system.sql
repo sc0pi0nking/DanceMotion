@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS tickets (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
   title TEXT NOT NULL,
   description TEXT NOT NULL,
-  category TEXT NOT NULL CHECK (category IN ('idea', 'complaint', 'suggestion', 'question', 'other')),
+  category TEXT NOT NULL CHECK (category IN ('bug', 'incomplete', 'suggestion', 'question', 'other')),
   priority TEXT DEFAULT 'normal' CHECK (priority IN ('low', 'normal', 'high')),
   status TEXT DEFAULT 'open' CHECK (status IN ('open', 'in_progress', 'resolved', 'closed')),
   admin_notes JSONB DEFAULT '[]'::jsonb, -- Array of {note, created_by, created_at}
