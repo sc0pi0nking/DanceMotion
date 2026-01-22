@@ -4,7 +4,7 @@
  */
 
 export type EventCategory = "Auftritt" | "Workshop" | "Training" | "Event";
-export type GroupSlug = "little-joys" | "smileys" | "emotion" | "eventstudio";
+export type GroupSlug = "little-joys" | "smileys" | "emotion";
 
 export type Event = {
   id: string;
@@ -232,7 +232,6 @@ export function getGroupBadgeInfo(slug: GroupSlug): {
     "little-joys": { label: "Little Joys", color: "rgba(46,196,198,0.2)" },
     smileys: { label: "Smileys", color: "rgba(46,196,198,0.15)" },
     emotion: { label: "Emotion", color: "rgba(46,196,198,0.25)" },
-    eventstudio: { label: "Eventstudio", color: "rgba(46,196,198,0.1)" },
   };
   return groupMap[slug] || { label: slug, color: "rgba(46,196,198,0.1)" };
 }

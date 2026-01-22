@@ -60,7 +60,6 @@ export default function Header() {
     { href: "/formulare", label: "Formulare" },
     { href: "/faq", label: "FAQ" },
     { href: "/team", label: "Team" },
-    { href: "/eventstudio", label: "Eventstudio" },
   ];
 
   return (
@@ -91,25 +90,6 @@ export default function Header() {
                     Eschweiler
                   </div>
                 </div>
-              </Link>
-              
-              {/* Eventstudio Logo */}
-              <Link 
-                href="/eventstudio" 
-                className="flex items-center gap-1 sm:gap-2 no-underline opacity-80 hover:opacity-100 transition-opacity"
-                aria-label="Zum Eventstudio"
-              >
-                <div 
-                  className="h-px w-3 sm:w-6" 
-                  style={{ backgroundColor: "var(--border)" }}
-                />
-                <Image 
-                  src="/logos/dancemotion-event-studio.png" 
-                  alt="DanceMotion Eventstudio" 
-                  width={40}
-                  height={40}
-                  className="h-8 w-8 sm:h-10 sm:w-10 hover:scale-110 transition-transform"
-                />
               </Link>
             </div>
 
