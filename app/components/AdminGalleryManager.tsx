@@ -5,12 +5,19 @@ import { Upload, Trash2, Image as ImageIcon, X } from 'lucide-react'
 import { useDropzone } from 'react-dropzone'
 import Image from 'next/image'
 
+interface GalleryImage {
+  url: string
+  title?: string
+  description?: string
+  is_hidden?: boolean
+}
+
 interface GalleryItem {
   id: string
   title: string
   category: string
   description?: string
-  images: string[]
+  images: GalleryImage[]
   is_published: boolean
   created_at: string
 }
@@ -22,6 +29,8 @@ export default function AdminGalleryManager() {
   const [uploadProgress, setUploadProgress] = useState<number>(0)
   const [uploadStatus, setUploadStatus] = useState<string>('')
   const [showUploadModal, setShowUploadModal] = useState(false)
+  const [editingImage, setEditingImage] = useState<{ galleryId: string; index: number } | null>(null)
+  const [editImageData, setEditImageData] = useState({ title: '', description: '', is_hidden: false })
   const [newGallery, setNewGallery] = useState({
     title: '',
     category: 'general',
@@ -129,21 +138,56 @@ export default function AdminGalleryManager() {
   }
 
   async function deleteGallery(id: string) {
-    if (!confirm('Galerie wirklich löschen?')) return
-
+    if (!confirm('Diese Galerie wirklich löschen?')) return
+    
     try {
-      const res = await fetch(`/api/admin/gallery/${id}`, {
-        method: 'DELETE',
-      })
+      await fetch(`/api/admin/gallery/${id}`, { method: 'DELETE' })
+      loadGalleries()
+    } catch (error) {
+      console.error('Delete failed:', error)
+    }
+  }
 
+  async function updateImageMetadata(galleryId: string, imageIndex: number) {
+    try {
+      const res = await fetch(`/api/admin/gallery/${galleryId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update_image',
+          imageIndex,
+          metadata: editImageData,
+        }),
+      })
+      
       if (res.ok) {
+        setEditingImage(null)
+        setEditImageData({ title: '', description: '', is_hidden: false })
         loadGalleries()
       } else {
-        alert('Fehler beim Löschen')
+        setError('Fehler beim Speichern')
       }
     } catch (error) {
-      console.error('Delete error:', error)
-      alert('Löschen fehlgeschlagen')
+      console.error('Update failed:', error)
+      setError('Fehler beim Speichern')
+    }
+  }
+
+  async function deleteImage(galleryId: string, imageIndex: number) {
+    if (!confirm('Dieses Bild wirklich löschen?')) return
+    
+    try {
+      await fetch(`/api/admin/gallery/${galleryId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete_image',
+          imageIndex,
+        }),
+      })
+      loadGalleries()
+    } catch (error) {
+      console.error('Delete failed:', error)
     }
   }
 
@@ -190,9 +234,36 @@ export default function AdminGalleryManager() {
             </div>
 
             <div className="grid grid-cols-3 gap-2">
-              {gallery.images.slice(0, 3).map((img, i) => (
-                <div key={i} className="aspect-square bg-gray-100 rounded overflow-hidden">
-                  <Image src={img} alt="" width={100} height={100} className="w-full h-full object-cover" />
+              {gallery.images.map((img, i) => (
+                <div 
+                  key={i} 
+                  className={`aspect-square bg-gray-100 rounded overflow-hidden relative group cursor-pointer ${
+                    img.is_hidden ? 'opacity-50' : ''
+                  }`}
+                  onClick={() => {
+                    setEditingImage({ galleryId: gallery.id, index: i })
+                    setEditImageData({
+                      title: img.title || '',
+                      description: img.description || '',
+                      is_hidden: img.is_hidden || false,
+                    })
+                  }}
+                >
+                  <Image 
+                    src={typeof img === 'string' ? img : img.url} 
+                    alt={img.title || ''} 
+                    width={100} 
+                    height={100} 
+                    className="w-full h-full object-cover" 
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <span className="text-white text-xs font-medium">Bearbeiten</span>
+                  </div>
+                  {img.is_hidden && (
+                    <div className="absolute top-1 right-1 bg-gray-800 text-white text-xs px-2 py-1 rounded">
+                      Verborgen
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -347,6 +418,102 @@ export default function AdminGalleryManager() {
               </button>
               <button
                 onClick={() => setShowUploadModal(false)}
+                className="px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+              >
+                Abbrechen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image Edit Modal */}
+      {editingImage && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full p-6 space-y-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl font-bold">Bild bearbeiten</h3>
+              <button onClick={() => setEditingImage(null)}>
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Image Preview */}
+              <div className="w-full aspect-video bg-gray-100 dark:bg-gray-700 rounded overflow-hidden">
+                {galleries.find(g => g.id === editingImage.galleryId)?.images[editingImage.index] && (
+                  <Image
+                    src={
+                      (() => {
+                        const img = galleries.find(g => g.id === editingImage.galleryId)?.images[editingImage.index]
+                        return typeof img === 'string' ? img : img?.url || ''
+                      })()
+                    }
+                    alt=""
+                    width={400}
+                    height={300}
+                    className="w-full h-full object-cover"
+                  />
+                )}
+              </div>
+
+              {/* Titel */}
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">Bildtitel</label>
+                <input
+                  type="text"
+                  value={editImageData.title}
+                  onChange={(e) => setEditImageData({ ...editImageData, title: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                  placeholder="z.B. Gruppenfoto"
+                />
+              </div>
+
+              {/* Beschreibung */}
+              <div>
+                <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">Beschreibung</label>
+                <textarea
+                  value={editImageData.description}
+                  onChange={(e) => setEditImageData({ ...editImageData, description: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 resize-none"
+                  rows={3}
+                  placeholder="Bilddetails..."
+                />
+              </div>
+
+              {/* Hidden Toggle */}
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="is_hidden"
+                  checked={editImageData.is_hidden}
+                  onChange={(e) => setEditImageData({ ...editImageData, is_hidden: e.target.checked })}
+                  className="rounded"
+                />
+                <label htmlFor="is_hidden" className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  Bild ausblenden
+                </label>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={() =>
+                  updateImageMetadata(editingImage.galleryId, editingImage.index)
+                }
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700"
+              >
+                Speichern
+              </button>
+              <button
+                onClick={() => deleteImage(editingImage.galleryId, editingImage.index)}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700"
+              >
+                Löschen
+              </button>
+              <button
+                onClick={() => setEditingImage(null)}
                 className="px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
               >
                 Abbrechen

@@ -74,14 +74,21 @@ export async function POST(req: Request) {
       imageUrls.push(publicUrl)
     }
 
-    // Create gallery entry
+    // Create gallery entry with image objects (url, title, description, is_hidden)
+    const imageObjects = imageUrls.map(url => ({
+      url,
+      title: '',
+      description: '',
+      is_hidden: false,
+    }))
+
     const { data, error } = await supabaseServer
       .from('gallery')
       .insert([{
         title,
         category,
         description,
-        images: imageUrls,
+        images: imageObjects,
         is_published,
       }])
       .select()
