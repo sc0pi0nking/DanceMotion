@@ -23,5 +23,20 @@ CREATE INDEX IF NOT EXISTS idx_tickets_created_at ON tickets(created_at DESC);
 -- Enable RLS
 ALTER TABLE tickets ENABLE ROW LEVEL SECURITY;
 
--- RLS Policy: Tickets only visible to admins with tickets_admin permission
--- (Implemented in application code)
+-- RLS Policy: Anyone can INSERT (anonymous)
+CREATE POLICY "Allow anyone to create tickets" ON tickets
+  FOR INSERT
+  WITH CHECK (true);
+
+-- RLS Policy: Only admins can SELECT/UPDATE/DELETE
+CREATE POLICY "Allow admins to manage tickets" ON tickets
+  FOR SELECT
+  USING (auth.jwt() ->> 'role' = 'authenticated');
+
+CREATE POLICY "Allow admins to update tickets" ON tickets
+  FOR UPDATE
+  USING (auth.jwt() ->> 'role' = 'authenticated');
+
+CREATE POLICY "Allow admins to delete tickets" ON tickets
+  FOR DELETE
+  USING (auth.jwt() ->> 'role' = 'authenticated');
