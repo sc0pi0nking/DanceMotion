@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Mail, MapPin, Phone, Instagram, Facebook, Youtube, Twitter, Music2, Link as LinkIcon } from "lucide-react";
+import { Mail, MapPin, Phone, Instagram, Facebook, Youtube, Twitter, Music2, Link as LinkIcon, MessageSquare } from "lucide-react";
+import TicketModal from "./TicketModal";
 
 interface SocialLink {
   id: string;
@@ -36,6 +37,7 @@ export default function Footer() {
     phone: "+49 (0) 2405 87 51",
     location: "Eschweiler, NRW",
   });
+  const [ticketModalOpen, setTicketModalOpen] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -182,7 +184,14 @@ export default function Footer() {
           <p className="text-sm-muted">
             © {currentYear} DanceMotion Eschweiler. Alle Rechte vorbehalten.
           </p>
-          <div className="flex gap-4 text-sm">
+          <div className="flex gap-4 text-sm flex-wrap justify-center">
+            <button
+              onClick={() => setTicketModalOpen(true)}
+              className="text-sm-muted hover:text-accent transition-colors flex items-center gap-1"
+            >
+              <MessageSquare size={16} />
+              Fehler melden
+            </button>
             <Link href="/impressum" className="text-sm-muted hover:text-accent transition-colors">
               Impressum
             </Link>
@@ -193,6 +202,7 @@ export default function Footer() {
         </div>
       </div>
     </footer>
+    <TicketModal isOpen={ticketModalOpen} onClose={() => setTicketModalOpen(false)} />
     </>
   );
 }
