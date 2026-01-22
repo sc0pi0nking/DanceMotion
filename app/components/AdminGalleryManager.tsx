@@ -19,6 +19,8 @@ export default function AdminGalleryManager() {
   const [galleries, setGalleries] = useState<GalleryItem[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState<number>(0)
+  const [uploadStatus, setUploadStatus] = useState<string>('')
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [newGallery, setNewGallery] = useState({
     title: '',
@@ -27,6 +29,7 @@ export default function AdminGalleryManager() {
     is_published: true,
   })
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
+  const [error, setError] = useState<string>('')
 
   useEffect(() => {
     loadGalleries()
@@ -70,11 +73,14 @@ export default function AdminGalleryManager() {
 
   async function handleUpload() {
     if (!newGallery.title || uploadedFiles.length === 0) {
-      alert('Bitte Titel eingeben und Bilder auswählen')
+      setError('Bitte Titel eingeben und mindestens ein Bild auswählen')
       return
     }
 
     setUploading(true)
+    setError('')
+    setUploadStatus(`Lade ${uploadedFiles.length} Bilder hoch...`)
+    
     try {
       const formData = new FormData()
       formData.append('title', newGallery.title)
@@ -82,8 +88,10 @@ export default function AdminGalleryManager() {
       formData.append('description', newGallery.description)
       formData.append('is_published', String(newGallery.is_published))
       
-      uploadedFiles.forEach((file) => {
+      uploadedFiles.forEach((file, index) => {
         formData.append('images', file)
+        // Update progress for visual feedback
+        setUploadProgress(Math.round((index / uploadedFiles.length) * 100))
       })
 
       const res = await fetch('/api/admin/gallery', {
@@ -92,23 +100,29 @@ export default function AdminGalleryManager() {
       })
 
       if (res.ok) {
-        alert('Galerie erfolgreich erstellt!')
-        setShowUploadModal(false)
-        setUploadedFiles([])
-        setNewGallery({
-          title: '',
-          category: 'general',
-          description: '',
-          is_published: true,
-        })
-        loadGalleries()
+        setUploadStatus('Erfolgreich erstellt!')
+        setTimeout(() => {
+          setShowUploadModal(false)
+          setUploadedFiles([])
+          setUploadProgress(0)
+          setUploadStatus('')
+          setNewGallery({
+            title: '',
+            category: 'general',
+            description: '',
+            is_published: true,
+          })
+          loadGalleries()
+        }, 1500)
       } else {
-        const error = await res.json()
-        alert(`Fehler: ${error.error}`)
+        const errorData = await res.json()
+        setError(`Fehler: ${errorData.error}`)
+        setUploadStatus('')
       }
     } catch (error) {
       console.error('Upload error:', error)
-      alert('Upload fehlgeschlagen')
+      setError('Upload fehlgeschlagen - bitte versuche es später erneut')
+      setUploadStatus('')
     } finally {
       setUploading(false)
     }
@@ -204,6 +218,34 @@ export default function AdminGalleryManager() {
               </button>
             </div>
 
+            {/* Upload Status Messages */}
+            {error && (
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-400">
+                <p className="font-medium">{error}</p>
+              </div>
+            )}
+
+            {uploadStatus && !error && (
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg text-blue-700 dark:text-blue-400">
+                <p className="font-medium">{uploadStatus}</p>
+              </div>
+            )}
+
+            {uploadProgress > 0 && uploadProgress < 100 && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600 dark:text-gray-400">Upload lädt...</span>
+                  <span className="font-medium text-gray-900 dark:text-gray-100">{uploadProgress}%</span>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                  <div 
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 h-full transition-all duration-300" 
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">Titel *</label>
@@ -269,7 +311,7 @@ export default function AdminGalleryManager() {
                       ? 'Bilder hier ablegen...'
                       : 'Bilder hier ablegen oder klicken zum Auswählen'}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">PNG, JPG, GIF bis 10MB</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Alle Bildformate bis 25MB</p>
                 </div>
               </div>
 
