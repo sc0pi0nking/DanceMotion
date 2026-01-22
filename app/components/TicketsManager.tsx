@@ -165,66 +165,75 @@ export default function TicketsManager() {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Ticket List */}
       <div className="lg:col-span-1 space-y-4">
-        <div className="space-y-3">
+        <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-700 space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">Status</label>
+            <label className="block text-xs font-semibold mb-3 text-gray-700 dark:text-gray-200 uppercase tracking-wide">Status Filter</label>
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-medium transition-colors focus:border-accent focus:outline-none"
             >
-              <option value="all">Alle</option>
-              <option value="open">Offen</option>
-              <option value="in_progress">In Bearbeitung</option>
-              <option value="resolved">Gelöst</option>
-              <option value="closed">Geschlossen</option>
+              <option value="all">Alle Tickets</option>
+              <option value="open">🔴 Offen</option>
+              <option value="in_progress">🔵 In Bearbeitung</option>
+              <option value="resolved">✅ Gelöst</option>
+              <option value="closed">⭕ Geschlossen</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">Priorität</label>
+            <label className="block text-xs font-semibold mb-3 text-gray-700 dark:text-gray-200 uppercase tracking-wide">Priorität Filter</label>
             <select
               value={filterPriority}
               onChange={(e) => setFilterPriority(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              className="w-full px-4 py-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-medium transition-colors focus:border-accent focus:outline-none"
             >
-              <option value="all">Alle</option>
-              <option value="high">Hoch</option>
-              <option value="normal">Normal</option>
-              <option value="low">Niedrig</option>
+              <option value="all">Alle Prioritäten</option>
+              <option value="high">🔴 Hoch</option>
+              <option value="normal">🟠 Normal</option>
+              <option value="low">🔵 Niedrig</option>
             </select>
           </div>
         </div>
 
-        <div className="border-t pt-4" style={{ borderColor: 'var(--border)' }}>
-          <p className="text-sm font-medium mb-3 text-gray-900 dark:text-gray-100">
-            Tickets: {filteredTickets.length}
+        <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+          <p className="text-sm font-bold mb-4 text-gray-900 dark:text-gray-100 flex items-center">
+            <span className="inline-flex items-center justify-center w-6 h-6 bg-accent rounded-full text-white text-xs font-bold mr-2">
+              {filteredTickets.length}
+            </span>
+            Tickets
           </p>
           
           <div className="space-y-2 max-h-[600px] overflow-y-auto">
             {filteredTickets.length === 0 ? (
-              <p className="text-sm text-muted py-4">Keine Tickets</p>
+              <div className="text-center py-8">
+                <p className="text-sm text-gray-500 dark:text-gray-400 italic">Keine Tickets gefunden</p>
+              </div>
             ) : (
               filteredTickets.map((ticket) => (
                 <button
                   key={ticket.id}
                   onClick={() => setSelectedTicket(ticket)}
-                  className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                  className={`w-full text-left p-3.5 rounded-lg border-2 transition-all ${
                     selectedTicket?.id === ticket.id
-                      ? 'border-accent bg-accent/5'
-                      : 'border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      ? 'border-accent bg-accent/10 dark:bg-accent/5 shadow-md'
+                      : 'border-gray-300 dark:border-gray-600 hover:border-accent/50 hover:bg-gray-100 dark:hover:bg-gray-700/50'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate text-gray-900 dark:text-gray-100">
+                      <p className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">
                         {ticket.title}
                       </p>
-                      <p className="text-xs text-muted mt-1">
-                        {new Date(ticket.created_at).toLocaleDateString('de-DE')}
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 font-medium">
+                        {new Date(ticket.created_at).toLocaleDateString('de-DE', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: '2-digit',
+                        })}
                       </p>
                     </div>
-                    <span className={`text-xs px-2 py-1 rounded font-medium whitespace-nowrap ${getStatusColor(ticket.status)}`}>
+                    <span className={`text-xs px-2.5 py-1 rounded-md font-bold whitespace-nowrap ${getStatusColor(ticket.status)}`}>
                       {statusLabels[ticket.status as keyof typeof statusLabels]}
                     </span>
                   </div>
@@ -238,12 +247,12 @@ export default function TicketsManager() {
       {/* Ticket Detail */}
       <div className="lg:col-span-2">
         {selectedTicket ? (
-          <div className="border rounded-lg p-6" style={{ borderColor: 'var(--border)' }}>
-            <div className="flex items-start justify-between mb-6">
-              <div>
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-lg">
+            <div className="flex items-start justify-between mb-6 pb-6 border-b-2 border-gray-300 dark:border-gray-700">
+              <div className="flex-1">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{selectedTicket.title}</h2>
-                <p className="text-sm text-muted mt-1">
-                  Erstellt am {new Date(selectedTicket.created_at).toLocaleDateString('de-DE', {
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 font-medium">
+                  📅 Erstellt am {new Date(selectedTicket.created_at).toLocaleDateString('de-DE', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
@@ -254,31 +263,31 @@ export default function TicketsManager() {
               </div>
               <button
                 onClick={() => deleteTicket(selectedTicket.id)}
-                className="p-2 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                className="ml-4 p-2.5 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-all border border-red-200 dark:border-red-800"
               >
-                <Trash2 size={18} className="text-red-600" />
+                <Trash2 size={20} className="text-red-600 dark:text-red-500" />
               </button>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 mb-6 pb-6 border-b" style={{ borderColor: 'var(--border)' }}>
-              <div>
-                <p className="text-xs font-medium text-muted mb-1">Kategorie</p>
-                <p className="font-medium text-gray-900 dark:text-gray-100">
+            <div className="grid grid-cols-3 gap-4 mb-6 pb-6 border-b-2 border-gray-300 dark:border-gray-700">
+              <div className="bg-white dark:bg-gray-700/50 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                <p className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-2 uppercase tracking-wide">Kategorie</p>
+                <p className="font-bold text-gray-900 dark:text-gray-100 text-sm">
                   {categoryLabels[selectedTicket.category]}
                 </p>
               </div>
-              <div>
-                <p className="text-xs font-medium text-muted mb-1">Priorität</p>
-                <p className={`font-medium ${getPriorityColor(selectedTicket.priority)}`}>
+              <div className="bg-white dark:bg-gray-700/50 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                <p className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-2 uppercase tracking-wide">Priorität</p>
+                <p className={`font-bold text-sm ${getPriorityColor(selectedTicket.priority)}`}>
                   {priorityLabels[selectedTicket.priority]}
                 </p>
               </div>
-              <div>
-                <p className="text-xs font-medium text-muted mb-1">Status</p>
+              <div className="bg-white dark:bg-gray-700/50 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                <p className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-2 uppercase tracking-wide">Status</p>
                 <select
                   value={selectedTicket.status}
                   onChange={(e) => updateTicketStatus(selectedTicket.id, e.target.value)}
-                  className="px-3 py-1 border rounded text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                  className="w-full px-3 py-1.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg text-sm font-semibold bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 transition-colors focus:border-accent focus:outline-none"
                 >
                   <option value="open">Offen</option>
                   <option value="in_progress">In Bearbeitung</option>
@@ -288,23 +297,29 @@ export default function TicketsManager() {
               </div>
             </div>
 
-            <div className="mb-6">
-              <h3 className="font-semibold mb-2 text-gray-900 dark:text-gray-100">Beschreibung</h3>
-              <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{selectedTicket.description}</p>
+            <div className="mb-7">
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-3 text-sm uppercase tracking-wide">📝 Beschreibung</h3>
+              <div className="bg-white dark:bg-gray-700/50 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap leading-relaxed text-sm">
+                  {selectedTicket.description}
+                </p>
+              </div>
             </div>
 
             {/* Admin Notes */}
             <div className="space-y-4">
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Admin-Notizen</h3>
+              <h3 className="font-bold text-gray-900 dark:text-gray-100 text-sm uppercase tracking-wide">💬 Admin-Notizen</h3>
               
-              <div className="space-y-3 max-h-[300px] overflow-y-auto">
+              <div className="bg-white dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 p-4 space-y-3 max-h-[300px] overflow-y-auto">
                 {selectedTicket.admin_notes.length === 0 ? (
-                  <p className="text-sm text-muted italic">Keine Notizen</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 italic text-center py-6">
+                    Keine Admin-Notizen vorhanden
+                  </p>
                 ) : (
                   selectedTicket.admin_notes.map((note, i) => (
-                    <div key={i} className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
-                      <p className="text-xs text-muted mb-1">
-                        {note.created_by} • {new Date(note.created_at).toLocaleDateString('de-DE', {
+                    <div key={i} className="bg-gray-50 dark:bg-gray-600/30 p-3.5 rounded-lg border-l-4 border-accent">
+                      <p className="text-xs text-gray-600 dark:text-gray-300 mb-2 font-semibold">
+                        👤 {note.created_by} • {new Date(note.created_at).toLocaleDateString('de-DE', {
                           year: 'numeric',
                           month: 'short',
                           day: 'numeric',
@@ -312,37 +327,44 @@ export default function TicketsManager() {
                           minute: '2-digit',
                         })}
                       </p>
-                      <p className="text-sm text-gray-700 dark:text-gray-300">{note.note}</p>
+                      <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">{note.note}</p>
                     </div>
                   ))
                 )}
               </div>
 
-              <div className="border-t pt-4" style={{ borderColor: 'var(--border)' }}>
-                <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
-                  Neue Notiz hinzufügen
+              <div className="bg-white dark:bg-gray-700/50 rounded-lg border-2 border-gray-200 dark:border-gray-600 p-4">
+                <label className="block text-sm font-bold mb-3 text-gray-900 dark:text-gray-100 uppercase tracking-wide">
+                  ➕ Neue Notiz hinzufügen
                 </label>
                 <textarea
                   value={newNote}
                   onChange={(e) => setNewNote(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 resize-none"
-                  rows={3}
-                  placeholder="Interne Notiz..."
+                  className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 font-medium resize-none transition-colors focus:border-accent focus:outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                  rows={4}
+                  placeholder="Deine interne Notiz..."
+                  maxLength={500}
                 />
-                <button
-                  onClick={() => addNote(selectedTicket.id)}
-                  disabled={!newNote.trim() || addingNote}
-                  className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {addingNote ? 'Wird gespeichert...' : 'Notiz hinzufügen'}
-                </button>
+                <div className="flex items-center justify-between mt-3">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {newNote.length}/500 Zeichen
+                  </p>
+                  <button
+                    onClick={() => addNote(selectedTicket.id)}
+                    disabled={!newNote.trim() || addingNote}
+                    className="px-5 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-bold hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg"
+                  >
+                    {addingNote ? '⏳ Wird gespeichert...' : '✓ Notiz hinzufügen'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         ) : (
-          <div className="border rounded-lg p-12 text-center" style={{ borderColor: 'var(--border)' }}>
-            <MessageSquare size={48} className="mx-auto mb-4 text-muted opacity-50" />
-            <p className="text-muted">Wähle ein Ticket um Details zu sehen</p>
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-xl p-12 text-center shadow-lg flex flex-col items-center justify-center min-h-[400px]">
+            <MessageSquare size={56} className="mx-auto mb-4 text-gray-400 dark:text-gray-600 opacity-60" />
+            <p className="text-lg font-semibold text-gray-600 dark:text-gray-400">Wähle ein Ticket</p>
+            <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">um Details zu sehen und zu bearbeiten</p>
           </div>
         )}
       </div>
