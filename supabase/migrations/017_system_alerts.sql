@@ -40,30 +40,36 @@ ALTER TABLE system_alerts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE alert_dismissals ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for alerts
-CREATE POLICY IF NOT EXISTS "Anyone can view active alerts" ON system_alerts
+DROP POLICY IF EXISTS "Anyone can view active alerts" ON system_alerts;
+CREATE POLICY "Anyone can view active alerts" ON system_alerts
   FOR SELECT
   USING (end_date > NOW());
 
-CREATE POLICY IF NOT EXISTS "Admins can manage alerts" ON system_alerts
+DROP POLICY IF EXISTS "Admins can manage alerts" ON system_alerts;
+CREATE POLICY "Admins can manage alerts" ON system_alerts
   FOR INSERT
   WITH CHECK (auth.jwt() ->> 'role' = 'authenticated');
 
-CREATE POLICY IF NOT EXISTS "Only alert creator or admin can update" ON system_alerts
+DROP POLICY IF EXISTS "Only alert creator or admin can update" ON system_alerts;
+CREATE POLICY "Only alert creator or admin can update" ON system_alerts
   FOR UPDATE
   USING (auth.jwt() ->> 'sub' = created_by::text OR 
          auth.jwt() ->> 'role' = 'authenticated');
 
-CREATE POLICY IF NOT EXISTS "Only alert creator or admin can delete" ON system_alerts
+DROP POLICY IF EXISTS "Only alert creator or admin can delete" ON system_alerts;
+CREATE POLICY "Only alert creator or admin can delete" ON system_alerts
   FOR DELETE
   USING (auth.jwt() ->> 'sub' = created_by::text OR 
          auth.jwt() ->> 'role' = 'authenticated');
 
 -- RLS Policies for dismissals
-CREATE POLICY IF NOT EXISTS "Users can view their own dismissals" ON alert_dismissals
+DROP POLICY IF EXISTS "Users can view their own dismissals" ON alert_dismissals;
+CREATE POLICY "Users can view their own dismissals" ON alert_dismissals
   FOR SELECT
   USING (auth.jwt() ->> 'sub' = user_id::text);
 
-CREATE POLICY IF NOT EXISTS "Users can dismiss alerts" ON alert_dismissals
+DROP POLICY IF EXISTS "Users can dismiss alerts" ON alert_dismissals;
+CREATE POLICY "Users can dismiss alerts" ON alert_dismissals
   FOR INSERT
   WITH CHECK (auth.jwt() ->> 'sub' = user_id::text);
 
