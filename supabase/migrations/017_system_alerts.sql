@@ -29,11 +29,9 @@ CREATE TABLE IF NOT EXISTS alert_dismissals (
 );
 
 -- Indices for performance
-CREATE INDEX IF NOT EXISTS idx_alerts_active ON system_alerts(start_date, end_date) 
-WHERE end_date > NOW();
+CREATE INDEX IF NOT EXISTS idx_alerts_start_end ON system_alerts(start_date, end_date);
 CREATE INDEX IF NOT EXISTS idx_alerts_priority ON system_alerts(priority DESC);
-CREATE INDEX IF NOT EXISTS idx_dismissals_user ON alert_dismissals(user_id, expires_at)
-WHERE expires_at > NOW();
+CREATE INDEX IF NOT EXISTS idx_dismissals_user ON alert_dismissals(user_id, expires_at);
 CREATE INDEX IF NOT EXISTS idx_dismissals_alert ON alert_dismissals(alert_id);
 
 -- Enable RLS
