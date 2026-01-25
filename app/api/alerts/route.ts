@@ -1,6 +1,6 @@
 import { supabaseServer } from '@/lib/supabase'
 
-// GET - Fetch active alerts
+// GET - Fetch active alerts (excludes admin-only alerts for public users)
 export async function GET() {
   try {
     const now = new Date().toISOString()
@@ -10,6 +10,7 @@ export async function GET() {
       .select('*')
       .lte('start_date', now)
       .gte('end_date', now)
+      .eq('visible_to_admins_only', false)
       .order('priority', { ascending: false })
       .order('created_at', { ascending: false })
 

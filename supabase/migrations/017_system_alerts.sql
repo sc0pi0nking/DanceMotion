@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS system_alerts (
   start_date TIMESTAMPTZ NOT NULL,
   end_date TIMESTAMPTZ NOT NULL,
   is_dismissible BOOLEAN DEFAULT true,
+  visible_to_admins_only BOOLEAN DEFAULT false,
   created_by UUID NOT NULL REFERENCES auth.users(id) ON DELETE SET NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
