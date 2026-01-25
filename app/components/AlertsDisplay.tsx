@@ -97,7 +97,7 @@ export default function AlertsDisplay() {
   }
 
   return (
-    <div className="fixed top-4 right-4 z-50 max-w-md w-full space-y-3 max-h-[80vh] overflow-y-auto">
+    <div className="fixed top-20 left-1/2 -translate-x-1/2 z-40 max-w-2xl w-full mx-auto space-y-3 max-h-[70vh] overflow-y-auto px-4">
       {visibleAlerts.map((alert) => {
         const config = alertTypeConfig[alert.alert_type]
         const IconComponent = config.icon

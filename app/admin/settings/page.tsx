@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { Settings, Save, AlertCircle, CheckCircle, Trash2, Lock, Eye, Database, Zap, Activity, Calendar } from 'lucide-react'
-import FooterContactSettings from '@/app/components/FooterContactSettings'
 
 interface SystemSettings {
   audit_retention_days: number
@@ -358,11 +357,6 @@ export default function SettingsPage() {
             <p className="text-sm text-slate-400">Keine Aktivitäten vorhanden</p>
           )}
         </div>      
-      </div>
-
-      {/* Footer Contact Settings */}
-      <div className="border-t pt-6" style={{ borderColor: "var(--border)" }}>
-        <FooterContactSettings />
       </div>
     </div>
   )
