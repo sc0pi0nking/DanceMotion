@@ -1,44 +1,29 @@
+import { getAdminSession } from '@/lib/auth'
 import { supabaseServer } from '@/lib/supabase'
 
 // Helper to check admin permissions
 async function checkAdminPermission() {
   try {
-    const { data: { user }, error: userError } = await supabaseServer.auth.getUser()
-    if (!user || userError) {
+    const user = await getAdminSession()
+    if (!user) {
       return { authorized: false, user: null }
     }
 
-    // Check if user has alerts_admin permission
-    const { data: roleData, error: roleError } = await supabaseServer
-      .from('user_roles')
-      .select('role_id')
-      .eq('user_id', user.id)
+    // Fetch user with role and permissions from admin_users_with_roles view
+    const { data: adminUser, error } = await supabaseServer
+      .from('admin_users_with_roles')
+      .select('permissions')
+      .eq('id', user.id)
       .single()
 
-    if (roleError) {
+    if (error || !adminUser) {
+      console.error('Failed to fetch admin user:', error)
       return { authorized: false, user }
     }
 
-    const { data: permData, error: permError } = await supabaseServer
-      .from('role_permissions')
-      .select('permission_id')
-      .eq('role_id', roleData.role_id)
-
-    if (permError) {
-      return { authorized: false, user }
-    }
-
-    // Get the permission IDs
-    const { data: permissions, error: permIdError } = await supabaseServer
-      .from('permissions')
-      .select('id')
-      .eq('name', 'alerts_admin')
-
-    if (permIdError || !permissions || permissions.length === 0) {
-      return { authorized: false, user }
-    }
-
-    const hasPermission = permData.some(p => p.permission_id === permissions[0].id)
+    const permissions = Array.isArray(adminUser.permissions) ? adminUser.permissions : []
+    const hasPermission = permissions.includes('alerts_admin')
+    
     return { authorized: hasPermission, user }
   } catch (error) {
     console.error('Permission check failed:', error)
