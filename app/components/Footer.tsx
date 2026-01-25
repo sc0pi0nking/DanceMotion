@@ -179,16 +179,16 @@ export default function Footer() {
           </div>
 
           {/* Contact */}
-          <div>
+          <div className="group">
             <div className="flex items-center justify-between mb-4">
               <h4 className="text-sm font-semibold" style={{ color: "var(--fg)" }}>Kontakt</h4>
               {!isEditing && (
                 <button
                   onClick={handleEditClick}
-                  className="p-1 hover:bg-accent/10 rounded transition opacity-0 hover:opacity-100 group-hover:opacity-100"
+                  className="p-1.5 hover:bg-accent/20 dark:hover:bg-accent/30 rounded transition opacity-60 hover:opacity-100"
                   title="Kontaktinfos bearbeiten"
                 >
-                  <Edit2 size={14} style={{ color: "var(--accent)" }} />
+                  <Edit2 size={16} style={{ color: "var(--accent)" }} />
                 </button>
               )}
             </div>
