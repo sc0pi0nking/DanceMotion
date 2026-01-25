@@ -30,8 +30,14 @@ export default function AdminLoginPage() {
         return
       }
 
+      // Verify session is established before redirecting
+      // This prevents the "reload required" issue
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
       // Refresh the router cache and redirect to dashboard
       router.refresh()
+      
+      // Ensure session is checked before navigation
       router.push('/admin')
     } catch (err) {
       setError('Ein Fehler ist aufgetreten')

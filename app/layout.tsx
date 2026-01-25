@@ -6,6 +6,7 @@ import Footer from "./components/Footer";
 import ParallaxBackground from "./components/ParallaxBackground";
 import AnalyticsTracker from "./components/AnalyticsTracker";
 import CookieBanner from "./components/CookieBanner";
+import AlertsDisplay from "./components/AlertsDisplay";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -80,6 +81,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AnalyticsTracker />
         {/* Cookie Banner */}
         <CookieBanner />
+        {/* System Alerts */}
+        <AlertsDisplay />
         {/* Global Parallax Background - fixed, behind everything */}
         <ParallaxBackground />
         <Header />

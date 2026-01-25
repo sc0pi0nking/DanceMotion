@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { Calendar, FileText, BarChart3, Images, LogOut, Menu, X, FileDown, HelpCircle, Users, Book, Home, Share2, Repeat, Shield, Activity, LogIn, Settings, MessageSquare } from 'lucide-react'
+import { Calendar, FileText, BarChart3, Images, LogOut, Menu, X, FileDown, HelpCircle, Users, Book, Home, Share2, Repeat, Shield, Activity, LogIn, Settings, MessageSquare, AlertCircle } from 'lucide-react'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -54,15 +54,28 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }, [sidebarOpen])
 
   useEffect(() => {
-    // Check if user is authenticated
+    // Check if user is authenticated immediately on mount
     checkAuth()
     
     // Prüfe Session regelmäßig (z.B. wenn Tab im Hintergrund war)
+    // Reduced interval on mobile for better detection
     const interval = setInterval(() => {
       checkAuth()
-    }, 30000) // Alle 30 Sekunden
+    }, window.innerWidth < 1024 ? 15000 : 30000) // 15s on mobile, 30s on desktop
     
-    return () => clearInterval(interval)
+    // Also check when page becomes visible (tab focus)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        checkAuth()
+      }
+    }
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    
+    return () => {
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
   }, [])
 
   const checkAuth = async () => {
@@ -120,6 +133,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { icon: HelpCircle, label: 'FAQs', href: '/admin/faqs', permission: 'faqs' },
     { icon: Users, label: 'Team', href: '/admin/team', permission: 'team' },
     { icon: MessageSquare, label: 'Tickets', href: '/admin/tickets', permission: 'tickets_admin' },
+    { icon: AlertCircle, label: 'Alerts', href: '/admin/alerts', permission: 'alerts_admin' },
     { icon: Book, label: 'Admin Wiki', href: '/admin/wiki/admin', permission: 'wiki_admin' },
     { icon: Book, label: 'Dev Wiki', href: '/admin/wiki/dev', permission: 'wiki_dev' },
     { icon: Share2, label: 'Social Media', href: '/admin/social', permission: 'social' },
