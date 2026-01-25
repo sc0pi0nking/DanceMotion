@@ -70,7 +70,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json()
-    const { title, message, alert_type, priority, start_date, end_date, is_dismissible } = body
+    const { title, message, alert_type, priority, start_date, end_date, is_dismissible, visible_to_admins_only } = body
 
     // Validate input
     if (!title || !message || !alert_type || !start_date || !end_date) {
@@ -97,6 +97,7 @@ export async function POST(req: Request) {
         start_date,
         end_date,
         is_dismissible,
+        visible_to_admins_only: visible_to_admins_only || false,
         created_by: user!.id,
       }])
       .select()
