@@ -10,7 +10,6 @@ export async function GET() {
       .select('*')
       .lte('start_date', now)
       .gte('end_date', now)
-      .eq('visible_to_admins_only', false)
       .order('priority', { ascending: false })
       .order('created_at', { ascending: false })
 

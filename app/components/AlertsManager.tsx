@@ -12,7 +12,6 @@ interface Alert {
   start_date: string
   end_date: string
   is_dismissible: boolean
-  visible_to_admins_only: boolean
   created_at: string
 }
 
@@ -44,7 +43,6 @@ export default function AlertsManager() {
     end_date: new Date(Date.now() + 86400000).toISOString().split('T')[0],
     end_time: '00:00',
     is_dismissible: true,
-    visible_to_admins_only: false,
   })
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -86,7 +84,6 @@ export default function AlertsManager() {
           start_date: new Date(startDateTime).toISOString(),
           end_date: new Date(endDateTime).toISOString(),
           is_dismissible: formData.is_dismissible,
-          visible_to_admins_only: formData.visible_to_admins_only,
         }),
       })
 
@@ -103,7 +100,6 @@ export default function AlertsManager() {
           end_date: new Date(Date.now() + 86400000).toISOString().split('T')[0],
           end_time: '00:00',
           is_dismissible: true,
-          visible_to_admins_only: false,
         })
         await loadAlerts()
         setTimeout(() => setMessage(null), 3000)
@@ -253,18 +249,6 @@ export default function AlertsManager() {
                     className="w-4 h-4 rounded"
                   />
                   Nutzer können schließen
-                </label>
-              </div>
-
-              <div>
-                <label className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                  <input
-                    type="checkbox"
-                    checked={formData.visible_to_admins_only}
-                    onChange={(e) => setFormData({ ...formData, visible_to_admins_only: e.target.checked })}
-                    className="w-4 h-4 rounded"
-                  />
-                  Nur für Admins sichtbar
                 </label>
               </div>
             </div>
