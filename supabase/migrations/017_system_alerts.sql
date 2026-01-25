@@ -66,13 +66,5 @@ CREATE POLICY "Users can dismiss alerts" ON alert_dismissals
   FOR INSERT
   WITH CHECK (auth.jwt() ->> 'sub' = user_id::text);
 
--- Add permission to admin roles if not exists
-INSERT INTO role_permissions (role_id, permission)
-SELECT r.id, 'alerts_admin'
-FROM roles r
-WHERE r.name IN ('admin', 'event-manager')
-AND NOT EXISTS (
-  SELECT 1 FROM role_permissions rp 
-  WHERE rp.role_id = r.id AND rp.permission = 'alerts_admin'
-)
-ON CONFLICT DO NOTHING;
+-- Note: The 'alerts_admin' permission needs to be assigned manually in the admin panel
+-- Go to /admin/roles and add 'alerts_admin' permission to admin and event-manager roles
