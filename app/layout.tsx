@@ -7,6 +7,7 @@ import ParallaxBackground from "./components/ParallaxBackground";
 import AnalyticsTracker from "./components/AnalyticsTracker";
 import CookieBanner from "./components/CookieBanner";
 import AlertsDisplay from "./components/AlertsDisplay";
+import { getOrganizationSchema, getLocalBusinessSchema } from "@/lib/structured-data";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,11 +21,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "DanceMotion Eschweiler — Tanzgruppen & Eventstudio",
+    default: "DanceMotion Eschweiler — Tanzgruppen & Events",
     template: "%s | DanceMotion Eschweiler",
   },
-  description: "Offene Tanzgemeinschaft in Eschweiler: Little Joys, Smileys, Emotion & Eventstudio. Energie, Kreativität und Wärme für alle Altersgruppen.",
-  keywords: ["Tanzgruppe", "Eschweiler", "DanceMotion", "Kindertanz", "Erwachsenentanz", "Eventstudio", "Tanzkurse", "NRW"],
+  description: "Offene Tanzgemeinschaft in Eschweiler: Little Joys, Smileys, Emotion & Events. Energie, Kreativität und Wärme für alle Altersgruppen.",
+  keywords: ["Tanzgruppe", "Eschweiler", "DanceMotion", "Kindertanz", "Erwachsenentanz", "Tanzkurse", "NRW", "Events"],
   authors: [{ name: "DanceMotion Eschweiler" }],
   creator: "DanceMotion Eschweiler",
   publisher: "DanceMotion Eschweiler",
@@ -41,8 +42,8 @@ export const metadata: Metadata = {
     locale: "de_DE",
     url: "https://dancemotion.org",
     siteName: "DanceMotion Eschweiler",
-    title: "DanceMotion Eschweiler — Tanzgruppen & Eventstudio",
-    description: "Offene Tanzgemeinschaft in Eschweiler: Little Joys, Smileys, Emotion & Eventstudio. Energie, Kreativität und Wärme.",
+    title: "DanceMotion Eschweiler — Tanzgruppen & Events",
+    description: "Offene Tanzgemeinschaft in Eschweiler: Little Joys, Smileys, Emotion & Events. Energie, Kreativität und Wärme.",
     images: [
       {
         url: "/og-image.jpg",
@@ -54,8 +55,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "DanceMotion Eschweiler — Tanzgruppen & Eventstudio",
-    description: "Offene Tanzgemeinschaft in Eschweiler: Little Joys, Smileys, Emotion & Eventstudio.",
+    title: "DanceMotion Eschweiler — Tanzgruppen & Events",
+    description: "Offene Tanzgemeinschaft in Eschweiler: Little Joys, Smileys, Emotion & Events.",
     images: ["/og-image.jpg"],
   },
   robots: {
@@ -76,6 +77,21 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="de">
+      <head>
+        {/* JSON-LD Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(getOrganizationSchema()),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(getLocalBusinessSchema()),
+          }}
+        />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
         {/* Analytics Tracking (DSGVO-konform) */}
         <AnalyticsTracker />

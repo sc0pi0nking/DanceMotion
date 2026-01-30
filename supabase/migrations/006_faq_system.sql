@@ -106,7 +106,7 @@ INSERT INTO public.faqs (question, answer, category, order_index, published) VAL
   ),
   (
     'Kann ich DanceMotion für meine Hochzeit/Firmenfeier buchen?',
-    'Absolut! Wir bieten professionelle Tanzshows für Hochzeiten, Firmenfeiern, Geburtstage und andere Events. Nutzen Sie unser Event-Anfrageformular im Eventstudio.',
+    'Absolut! Wir bieten professionelle Tanzshows für Hochzeiten, Firmenfeiern, Geburtstage und andere Events. Nutzen Sie unser Event-Anfrageformular auf der Terminseite.',
     'events',
     2,
     true

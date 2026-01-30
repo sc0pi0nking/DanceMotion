@@ -3,6 +3,25 @@
 import React, { memo, useMemo, useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 
+// Detect if user prefers reduced motion
+const prefersReducedMotion = (): boolean => {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+};
+
+// Detect if device is low-end (mobile or old browser)
+const isLowEndDevice = (): boolean => {
+  if (typeof window === "undefined") return false;
+  
+  const userAgent = navigator.userAgent;
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+  
+  // Check if laptop/desktop with low RAM or old browser
+  const isOldBrowser = /MSIE|Trident|Edge\/1[0-6]/.test(userAgent);
+  
+  return isMobile || isOldBrowser;
+};
+
 // Generate subtle floating particles
 const generateMeshParticles = (count: number) => {
   return Array.from({ length: count }, (_, i) => ({
@@ -16,15 +35,16 @@ const generateMeshParticles = (count: number) => {
 };
 
 // Generate floating bubbles like in Hero - these animate up/down and fade in/out
+// OPTIMIZED: Much fewer bubbles on low-end devices
 const generateFloatingBubbles = (count: number) => {
   return Array.from({ length: count }, (_, i) => ({
     id: i,
     x: Math.random() * 100,
-    y: Math.random() * 100, // Now 0-100 for full viewport
-    size: Math.random() * 8 + 4, // Larger bubbles (4-12px)
-    duration: Math.random() * 12 + 10, // 10-22 seconds
+    y: Math.random() * 100,
+    size: Math.random() * 8 + 4,
+    duration: Math.random() * 12 + 10,
     delay: Math.random() * 8,
-    floatDistance: Math.random() * 8 + 5, // How far they float up (5-13%)
+    floatDistance: Math.random() * 8 + 5,
   }));
 };
 
@@ -32,31 +52,48 @@ const generateFloatingBubbles = (count: number) => {
 const ParallaxBackgroundContent = memo(() => {
   const { scrollY } = useScroll();
   const [isMounted, setIsMounted] = useState(false);
+  const [shouldReduceMotion, setShouldReduceMotion] = useState(false);
+  const [isLowEnd, setIsLowEnd] = useState(false);
   
   // Only generate particles on client to avoid hydration mismatch
   useEffect(() => {
     setIsMounted(true);
+    setShouldReduceMotion(prefersReducedMotion());
+    setIsLowEnd(isLowEndDevice());
   }, []);
   
   // Individual element parallax - POSITIVE values = elements move DOWN (slower than scroll)
-  // This creates depth without leaving gaps - multiple layers for rich effect
-  const orb1Y = useTransform(scrollY, [0, 3000], [0, 150]);
-  const orb2Y = useTransform(scrollY, [0, 3000], [0, 100]);
-  const orb3Y = useTransform(scrollY, [0, 3000], [0, 200]);
-  const orb4Y = useTransform(scrollY, [0, 3000], [0, 80]);
-  const orb5Y = useTransform(scrollY, [0, 3000], [0, 180]);
-  const orb6Y = useTransform(scrollY, [0, 3000], [0, 120]);
-  const orb7Y = useTransform(scrollY, [0, 3000], [0, 250]);
-  const orb8Y = useTransform(scrollY, [0, 3000], [0, 60]);
+  // OPTIMIZED: Disable parallax on low-end devices or if reduce-motion preference
+  const parallaxDisabled = shouldReduceMotion || isLowEnd;
+  
+  const orb1Y = useTransform(scrollY, [0, 3000], parallaxDisabled ? [0, 0] : [0, 150]);
+  const orb2Y = useTransform(scrollY, [0, 3000], parallaxDisabled ? [0, 0] : [0, 100]);
+  const orb3Y = useTransform(scrollY, [0, 3000], parallaxDisabled ? [0, 0] : [0, 200]);
+  const orb4Y = useTransform(scrollY, [0, 3000], parallaxDisabled ? [0, 0] : [0, 80]);
+  const orb5Y = useTransform(scrollY, [0, 3000], parallaxDisabled ? [0, 0] : [0, 180]);
+  const orb6Y = useTransform(scrollY, [0, 3000], parallaxDisabled ? [0, 0] : [0, 120]);
+  const orb7Y = useTransform(scrollY, [0, 3000], parallaxDisabled ? [0, 0] : [0, 250]);
+  const orb8Y = useTransform(scrollY, [0, 3000], parallaxDisabled ? [0, 0] : [0, 60]);
 
   // Memoize particles - only generate on client
-  const particles = useMemo(() => isMounted ? generateMeshParticles(12) : [], [isMounted]);
+  // OPTIMIZED: Reduce from 12 to 8 particles on low-end devices
+  const particles = useMemo(() => {
+    if (!isMounted) return [];
+    const count = isLowEnd ? 4 : 8;
+    return generateMeshParticles(count);
+  }, [isMounted, isLowEnd]);
   
   // Memoize floating bubbles - Hero-style animated bubbles
-  const floatingBubbles = useMemo(() => isMounted ? generateFloatingBubbles(40) : [], [isMounted]);
+  // OPTIMIZED: Reduce from 40 to 15 (or 0 on low-end if reduce-motion)
+  const floatingBubbles = useMemo(() => {
+    if (!isMounted) return [];
+    if (shouldReduceMotion && isLowEnd) return []; // Disable completely on low-end with reduce-motion
+    const count = isLowEnd ? 8 : 15;
+    return generateFloatingBubbles(count);
+  }, [isMounted, isLowEnd, shouldReduceMotion]);
   
   // Parallax transform for bubbles layer
-  const bubblesY = useTransform(scrollY, [0, 3000], [0, 180]);
+  const bubblesY = useTransform(scrollY, [0, 3000], parallaxDisabled ? [0, 0] : [0, 180]);
 
   return (
     <div

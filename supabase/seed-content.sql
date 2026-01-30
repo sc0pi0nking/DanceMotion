@@ -10,7 +10,7 @@ INSERT INTO content (key, section, description, value) VALUES
   ('home.hero.title', 'Homepage', 'Hauptüberschrift auf der Startseite', '{"text": "Willkommen bei DanceMotion"}'),
   ('home.hero.subtitle', 'Homepage', 'Untertitel/Slogan auf der Startseite', '{"text": "Tanz, Bewegung und Lebensfreude in Eschweiler"}'),
   ('home.about.title', 'Homepage', 'Über uns - Überschrift', '{"text": "Über DanceMotion"}'),
-  ('home.about.text', 'Homepage', 'Über uns - Beschreibung', '{"text": "DanceMotion ist deine Tanzschule in Eschweiler für alle Altersgruppen. Wir bieten professionellen Tanzunterricht in verschiedenen Stilen und ein modernes Eventstudio für besondere Anlässe."}'),
+  ('home.about.text', 'Homepage', 'Über uns - Beschreibung', '{"text": "DanceMotion ist deine Tanzschule in Eschweiler für alle Altersgruppen. Wir bieten professionellen Tanzunterricht in verschiedenen Stilen und regelmäßige Events und Auftritte."}'),
   ('home.cta.text', 'Homepage', 'Call-to-Action Text', '{"text": "Bereit zum Tanzen? Komm vorbei oder schreib uns!"}')
 ON CONFLICT (key) DO NOTHING;
 

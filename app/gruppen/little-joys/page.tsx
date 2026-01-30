@@ -2,10 +2,26 @@ import Link from "next/link";
 import Image from "next/image";
 import EditableContent from "@/app/components/EditableContent";
 import { Clock, MapPin, Calendar } from "lucide-react";
+import { getGroupSchema } from "@/lib/structured-data";
 
 export const metadata = {
   title: "Little Joys — DanceMotion Eschweiler",
   description: "Tanzen für die Kleinsten: spielerisch, voller Freude und Bewegung.",
+  alternates: {
+    canonical: "/gruppen/little-joys",
+  },
+  openGraph: {
+    title: "Little Joys - Tanzgruppe für Kinder",
+    description: "Tanzen für die Kleinsten: spielerisch, voller Freude und Bewegung.",
+    images: [
+      {
+        url: "/group-little-joys.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Little Joys",
+      },
+    ],
+  },
 };
 
 export default function LittleJoysPage() {

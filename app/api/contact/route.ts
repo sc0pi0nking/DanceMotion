@@ -8,9 +8,26 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { sendEmail, generateContactEmailHTML, generateContactEmailText, type ContactFormData } from '@/lib/email';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limiter';
+import { validateEmail, sanitizeInput } from '@/lib/validators';
 
 export async function POST(request: NextRequest) {
   try {
+    // ========================================
+    // RATE LIMITING
+    // ========================================
+    const clientIp = getClientIp(request);
+    const rateLimitResponse = checkRateLimit(
+      request,
+      `contact-form-${clientIp}`,
+      5, // 5 requests
+      60 * 60 * 1000 // per hour
+    );
+
+    if (rateLimitResponse) {
+      return rateLimitResponse;
+    }
+
     const body = await request.json();
     
     const { name, email, phone, subject, message, pageSource } = body;
@@ -56,9 +73,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Email-Validierung (strenger)
-    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-    if (!emailRegex.test(email)) {
+    // Email-Validierung mit verbesserter Funktion
+    if (!validateEmail(email)) {
       return NextResponse.json(
         { error: 'Ungültige E-Mail-Adresse' },
         { status: 400 }
