@@ -57,6 +57,7 @@ export default function Header() {
     { href: "/#groups", label: "Gruppen" },
     { href: "/termine", label: "Termine" },
     { href: "/galerie", label: "Galerie" },
+    { href: "/sponsor", label: "Sponsoren" },
     { href: "/formulare", label: "Formulare" },
     { href: "/faq", label: "FAQ" },
     { href: "/team", label: "Team" },

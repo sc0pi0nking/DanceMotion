@@ -131,6 +131,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { icon: Images, label: 'Galerie', href: '/admin/gallery', permission: 'gallery' },
     { icon: FileDown, label: 'Dokumente', href: '/admin/documents', permission: 'documents' },
     { icon: HelpCircle, label: 'FAQs', href: '/admin/faqs', permission: 'faqs' },
+    { icon: Share2, label: 'Sponsoren', href: '/admin/sponsors', permission: 'sponsors' },
     { icon: Users, label: 'Team', href: '/admin/team', permission: 'team' },
     { icon: MessageSquare, label: 'Tickets', href: '/admin/tickets', permission: 'tickets_admin' },
     { icon: AlertCircle, label: 'Alerts', href: '/admin/alerts', permission: 'alerts_admin' },
