@@ -41,17 +41,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     }
   }, [pathname])
 
-  // Body scroll verhindern wenn Sidebar offen auf Mobile
+  // Admin als eigene, fixe Seite (kein Body-Scroll)
   useEffect(() => {
-    if (sidebarOpen && window.innerWidth < 1024) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'unset'
-    }
+    document.documentElement.classList.add('admin-shell')
+    document.body.classList.add('admin-shell')
     return () => {
-      document.body.style.overflow = 'unset'
+      document.documentElement.classList.remove('admin-shell')
+      document.body.classList.remove('admin-shell')
     }
-  }, [sidebarOpen])
+  }, [])
 
   useEffect(() => {
     // Check if user is authenticated immediately on mount
@@ -122,33 +120,61 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     }
   }
 
-  // Alle verfügbaren Navigation Items mit Permission-Mapping
-  const allNavItems = [
-    { icon: BarChart3, label: 'Dashboard', href: '/admin', permission: 'dashboard' },
-    { icon: Calendar, label: 'Termine', href: '/admin/events', permission: 'events' },
-    { icon: Repeat, label: 'Wiederkehrend', href: '/admin/recurring', permission: 'recurring' },
-    { icon: FileText, label: 'Inhalte', href: '/admin/content', permission: 'content' },
-    { icon: Images, label: 'Galerie', href: '/admin/gallery', permission: 'gallery' },
-    { icon: FileDown, label: 'Dokumente', href: '/admin/documents', permission: 'documents' },
-    { icon: HelpCircle, label: 'FAQs', href: '/admin/faqs', permission: 'faqs' },
-    { icon: Share2, label: 'Sponsoren', href: '/admin/sponsors', permission: 'sponsors' },
-    { icon: Users, label: 'Team', href: '/admin/team', permission: 'team' },
-    { icon: MessageSquare, label: 'Tickets', href: '/admin/tickets', permission: 'tickets_admin' },
-    { icon: AlertCircle, label: 'Alerts', href: '/admin/alerts', permission: 'alerts_admin' },
-    { icon: Book, label: 'Admin Wiki', href: '/admin/wiki/admin', permission: 'wiki_admin' },
-    { icon: Book, label: 'Dev Wiki', href: '/admin/wiki/dev', permission: 'wiki_dev' },
-    { icon: Share2, label: 'Social Media', href: '/admin/social', permission: 'social' },
-    { icon: Activity, label: 'Analytics', href: '/admin/analytics', permission: 'analytics' },
-    { icon: LogIn, label: 'Audit', href: '/admin/audit', permission: 'audit' },
-    { icon: Users, label: 'Benutzer', href: '/admin/users', permission: 'users' },
-    { icon: Shield, label: 'Rollen', href: '/admin/roles', permission: 'roles' },
-    { icon: Settings, label: 'Einstellungen', href: '/admin/settings', permission: 'settings' },
+  // Navigation kategorisiert für bessere Übersichtlichkeit
+  const navCategories = [
+    {
+      label: 'Übersicht',
+      items: [
+        { icon: BarChart3, label: 'Dashboard', href: '/admin', permission: 'dashboard' },
+      ]
+    },
+    {
+      label: 'Inhalte',
+      items: [
+        { icon: Calendar, label: 'Termine', href: '/admin/events', permission: 'events' },
+        { icon: Repeat, label: 'Wiederkehrend', href: '/admin/recurring', permission: 'recurring' },
+        { icon: FileText, label: 'Inhalte', href: '/admin/content', permission: 'content' },
+        { icon: Images, label: 'Galerie', href: '/admin/gallery', permission: 'gallery' },
+        { icon: FileDown, label: 'Dokumente', href: '/admin/documents', permission: 'documents' },
+        { icon: HelpCircle, label: 'FAQs', href: '/admin/faqs', permission: 'faqs' },
+        { icon: Users, label: 'Team', href: '/admin/team', permission: 'team' },
+      ]
+    },
+    {
+      label: 'Kommunikation',
+      items: [
+        { icon: MessageSquare, label: 'Tickets', href: '/admin/tickets', permission: 'tickets_admin' },
+        { icon: AlertCircle, label: 'Alerts', href: '/admin/alerts', permission: 'alerts_admin' },
+        { icon: Share2, label: 'Social Media', href: '/admin/social', permission: 'social' },
+        { icon: Share2, label: 'Sponsoren', href: '/admin/sponsors', permission: 'sponsors' },
+      ]
+    },
+    {
+      label: 'Dokumentation',
+      items: [
+        { icon: Book, label: 'Admin Wiki', href: '/admin/wiki/admin', permission: 'wiki_admin' },
+        { icon: Book, label: 'Dev Wiki', href: '/admin/wiki/dev', permission: 'wiki_dev' },
+      ]
+    },
+    {
+      label: 'System',
+      items: [
+        { icon: Activity, label: 'Analytics', href: '/admin/analytics', permission: 'analytics' },
+        { icon: LogIn, label: 'Audit', href: '/admin/audit', permission: 'audit' },
+        { icon: Users, label: 'Benutzer', href: '/admin/users', permission: 'users' },
+        { icon: Shield, label: 'Rollen', href: '/admin/roles', permission: 'roles' },
+        { icon: Settings, label: 'Einstellungen', href: '/admin/settings', permission: 'settings' },
+      ]
+    },
   ]
 
   // Filter Navigation Items basierend auf Permissions
-  const navItems = allNavItems.filter(item => 
-    userPermissions.includes(item.permission)
-  )
+  const filteredCategories = navCategories
+    .map(category => ({
+      ...category,
+      items: category.items.filter(item => userPermissions.includes(item.permission))
+    }))
+    .filter(category => category.items.length > 0)
 
   // Check if current path matches nav item
   const isActive = (href: string) => {
@@ -159,7 +185,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   return (
-    <div className="flex h-screen" style={{ backgroundColor: "var(--bg)", color: "var(--fg)" }}>
+    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: "var(--bg)", color: "var(--fg)" }}>
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div
@@ -199,23 +225,33 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-4 px-3 overflow-y-auto">
-          <div className="space-y-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`
-                  flex items-center gap-3 px-4 py-3 rounded-lg transition
-                  ${isActive(item.href) 
-                    ? 'bg-teal-500/20 text-teal-400 border-l-4 border-teal-500' 
-                    : 'text-slate-300 hover:bg-slate-700 hover:text-white'
-                  }
-                `}
-              >
-                <item.icon size={20} className="flex-shrink-0" />
-                <span className="text-sm font-medium lg:hidden xl:block">{item.label}</span>
-              </Link>
+        <nav className="flex-1 py-2 px-3 overflow-y-auto">
+          <div className="space-y-4">
+            {filteredCategories.map((category) => (
+              <div key={category.label}>
+                {/* Category Label */}
+                <p className="px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider lg:hidden xl:block">
+                  {category.label}
+                </p>
+                <div className="space-y-0.5">
+                  {category.items.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`
+                        flex items-center gap-3 px-4 py-2.5 rounded-lg transition
+                        ${isActive(item.href) 
+                          ? 'bg-teal-500/20 text-teal-400 border-l-4 border-teal-500 -ml-0.5' 
+                          : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'
+                        }
+                      `}
+                    >
+                      <item.icon size={18} className="flex-shrink-0" />
+                      <span className="text-sm font-medium lg:hidden xl:block">{item.label}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </nav>
@@ -244,7 +280,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden w-full lg:pl-20 xl:pl-0">
+      <main className="flex-1 flex flex-col overflow-hidden w-full lg:pl-20 xl:pl-0 min-w-0">
         {/* Header */}
         <header className="h-16 bg-slate-800 border-b border-slate-700 px-4 md:px-6 flex items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-3">
@@ -289,7 +325,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </header>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-auto p-4 md:p-6">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 admin-scroll">
           {children}
         </div>
       </main>

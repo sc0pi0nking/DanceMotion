@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { FileText, Plus, Save, X, Eye, Search, Tag, Trash2 } from 'lucide-react'
 import type { ContentItem } from '@/lib/supabase'
+import { AdminPageHeader, AdminCard, AdminLoadingState, AdminModal, ModalCancelButton, ModalConfirmButton, AdminInput, AdminTextarea, FormGroup } from '../components'
 
 interface ContentSection {
   section: string
@@ -137,31 +138,44 @@ export default function AdminContentPage() {
     }))
     .filter(section => section.items.length > 0)
 
-  return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Inhalte verwalten</h1>
-        <p className="text-slate-400">Bearbeite alle Texte auf der Website direkt</p>
-      </div>
+  const totalItems = contentSections.reduce((sum, s) => sum + s.items.length, 0)
 
-      {/* Search and Filter Bar */}
-      <div className="mb-6 flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-          <input
-            type="text"
-            placeholder="Suche nach Key, Beschreibung oder Inhalt..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
-          />
-        </div>
-        
-        <div className="flex gap-2">
+  if (loading) {
+    return <AdminLoadingState message="Inhalte werden geladen..." fullPage />
+  }
+
+  return (
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="Inhalte verwalten"
+        description={`${totalItems} Inhalte in ${contentSections.length} Bereichen`}
+        icon={FileText}
+        breadcrumbs={[{ label: 'Inhalte' }]}
+        actions={[
+          {
+            label: 'Neuer Inhalt',
+            icon: Plus,
+            onClick: () => setShowAddNew(true),
+          },
+        ]}
+      >
+        {/* Search and Filter */}
+        <div className="flex flex-col md:flex-row gap-3 mt-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input
+              type="text"
+              placeholder="Suche nach Key, Beschreibung oder Inhalt..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-teal-500 transition"
+            />
+          </div>
+          
           <select
             value={selectedSection}
             onChange={(e) => setSelectedSection(e.target.value)}
-            className="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-teal-500"
+            className="px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:border-teal-500 transition"
           >
             <option value="all">Alle Bereiche</option>
             {allSections.map((section) => (
@@ -170,100 +184,62 @@ export default function AdminContentPage() {
               </option>
             ))}
           </select>
-
-          <button
-            onClick={() => setShowAddNew(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-lg hover:shadow-lg transition"
-          >
-            <Plus size={20} />
-            Neu
-          </button>
         </div>
-      </div>
+      </AdminPageHeader>
 
       {/* Add New Modal */}
-      {showAddNew && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 max-w-2xl w-full">
-            <h2 className="text-2xl font-bold text-white mb-4">Neuer Inhalt</h2>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Key (eindeutig) *
-                </label>
-                <input
-                  type="text"
-                  placeholder="z.B. home.hero.title"
-                  value={newItem.key}
-                  onChange={(e) => setNewItem({ ...newItem, key: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Bereich/Section *
-                </label>
-                <input
-                  type="text"
-                  placeholder="z.B. Homepage, Gruppen, Footer"
-                  value={newItem.section}
-                  onChange={(e) => setNewItem({ ...newItem, section: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Beschreibung
-                </label>
-                <input
-                  type="text"
-                  placeholder="Was ist dieser Inhalt?"
-                  value={newItem.description}
-                  onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1">
-                  Inhalt
-                </label>
-                <textarea
-                  value={newItem.value}
-                  onChange={(e) => setNewItem({ ...newItem, value: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
-                  rows={6}
-                />
-              </div>
-
-              <div className="flex gap-2 justify-end">
-                <button
-                  onClick={() => setShowAddNew(false)}
-                  className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded transition"
-                >
-                  Abbrechen
-                </button>
-                <button
-                  onClick={() => void handleCreate()}
-                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded hover:shadow-lg transition"
-                >
-                  <Save size={16} />
-                  Erstellen
-                </button>
-              </div>
-            </div>
-          </div>
+      <AdminModal
+        isOpen={showAddNew}
+        onClose={() => {
+          setShowAddNew(false)
+          setNewItem({ key: '', section: '', description: '', value: '' })
+        }}
+        title="Neuer Inhalt"
+        description="Erstelle einen neuen bearbeitbaren Text"
+        size="lg"
+        footer={
+          <>
+            <ModalCancelButton onClick={() => setShowAddNew(false)} />
+            <ModalConfirmButton onClick={handleCreate}>Erstellen</ModalConfirmButton>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <FormGroup cols={2}>
+            <AdminInput
+              label="Key (eindeutig)"
+              placeholder="z.B. home.hero.title"
+              value={newItem.key}
+              onChange={(e) => setNewItem({ ...newItem, key: e.target.value })}
+              required
+            />
+            <AdminInput
+              label="Bereich"
+              placeholder="z.B. Startseite"
+              value={newItem.section}
+              onChange={(e) => setNewItem({ ...newItem, section: e.target.value })}
+              required
+            />
+          </FormGroup>
+          <AdminInput
+            label="Beschreibung"
+            placeholder="Kurze Beschreibung wo dieser Text verwendet wird"
+            value={newItem.description}
+            onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
+          />
+          <AdminTextarea
+            label="Inhalt"
+            placeholder="Der eigentliche Text..."
+            value={newItem.value}
+            onChange={(e) => setNewItem({ ...newItem, value: e.target.value })}
+            rows={4}
+          />
         </div>
-      )}
+      </AdminModal>
 
-      {loading ? (
-        <div className="text-center py-8 text-slate-400">Lädt...</div>
-      ) : filteredSections.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-slate-400">
+      {filteredSections.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-slate-400 mb-4">
             {searchTerm || selectedSection !== 'all'
               ? 'Keine Inhalte gefunden'
               : 'Noch keine Inhalte konfiguriert'}
@@ -271,7 +247,7 @@ export default function AdminContentPage() {
           {!searchTerm && selectedSection === 'all' && (
             <button
               onClick={() => setShowAddNew(true)}
-              className="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-lg hover:shadow-lg transition"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-lg hover:shadow-lg transition"
             >
               <Plus size={20} />
               Ersten Inhalt erstellen
@@ -279,16 +255,15 @@ export default function AdminContentPage() {
           )}
         </div>
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-6">
           {filteredSections.map((section) => (
-            <div key={section.section} className="border border-slate-700 rounded-lg p-6 bg-slate-800/50">
-              <div className="flex items-center gap-3 mb-4 pb-3 border-b border-slate-700">
-                <Tag className="text-teal-400" size={24} />
-                <h2 className="text-2xl font-bold text-white">{section.section}</h2>
-                <span className="text-sm text-slate-400">({section.items.length})</span>
-              </div>
-
-              <div className="space-y-3">
+            <AdminCard
+              key={section.section}
+              title={section.section}
+              icon={Tag}
+              headerAction={<span className="text-sm text-slate-400">{section.items.length} Einträge</span>}
+            >
+              <div className="space-y-3 -mx-4 md:-mx-6 px-4 md:px-6">
                 {section.items.map((item) => (
                   <div
                     key={item.id}
@@ -364,29 +339,8 @@ export default function AdminContentPage() {
                   </div>
                 ))}
               </div>
-            </div>
+            </AdminCard>
           ))}
-        </div>
-      )}
-
-      {contentSections.length > 0 && (
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 bg-slate-800/50 border border-slate-700 rounded-lg">
-            <div className="text-2xl font-bold text-teal-400">
-              {contentSections.reduce((acc, s) => acc + s.items.length, 0)}
-            </div>
-            <div className="text-sm text-slate-400">Gesamt Inhalte</div>
-          </div>
-          <div className="p-4 bg-slate-800/50 border border-slate-700 rounded-lg">
-            <div className="text-2xl font-bold text-cyan-400">{contentSections.length}</div>
-            <div className="text-sm text-slate-400">Bereiche</div>
-          </div>
-          <div className="p-4 bg-slate-800/50 border border-slate-700 rounded-lg">
-            <div className="text-2xl font-bold text-purple-400">
-              {filteredSections.reduce((acc, s) => acc + s.items.length, 0)}
-            </div>
-            <div className="text-sm text-slate-400">Gefiltert</div>
-          </div>
         </div>
       )}
     </div>

@@ -132,6 +132,19 @@ body {
   overflow-x: hidden;
 }
 
+/* Admin shell: fixed layout, avoid double scroll */
+html.admin-shell,
+body.admin-shell {
+  height: 100%;
+  overflow: hidden;
+}
+
+.admin-shell .admin-scroll {
+  height: calc(100vh - 4rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 html[data-theme="light"] body {
   background: var(--bg);
 }

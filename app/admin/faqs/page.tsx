@@ -1,10 +1,19 @@
-import FAQManager from '@/app/components/FAQManager';
+'use client';
 
-export const metadata = {
-  title: 'FAQ Verwaltung — DanceMotion Admin',
-  description: 'Häufig gestellte Fragen verwalten',
-};
+import { HelpCircle } from 'lucide-react';
+import FAQManager from '@/app/components/FAQManager';
+import { AdminPageHeader } from '../components';
 
 export default function FAQsAdminPage() {
-  return <FAQManager />;
+  return (
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="FAQs verwalten"
+        description="Häufig gestellte Fragen bearbeiten"
+        icon={HelpCircle}
+        breadcrumbs={[{ label: 'FAQs' }]}
+      />
+      <FAQManager />
+    </div>
+  );
 }

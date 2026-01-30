@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, Edit2, Trash2, User, Shield, Check, X, Eye, EyeOff, RefreshCw, Trash, Lock, UserCheck } from 'lucide-react'
+import { Plus, Edit2, Trash2, User, Shield, Check, X, Eye, EyeOff, RefreshCw, Trash, Lock, UserCheck, Users } from 'lucide-react'
+import { AdminPageHeader, AdminCard, AdminLoadingState, AdminTable, AdminModal, ModalCancelButton, ModalConfirmButton, AdminInput, AdminSelect, FormGroup } from '../components'
 
 interface Role {
   id: string
@@ -254,37 +255,28 @@ export default function UsersPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <RefreshCw className="animate-spin" size={32} style={{ color: 'var(--accent)' }} />
-      </div>
-    )
+    return <AdminLoadingState message="Benutzer werden geladen..." fullPage />
   }
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--fg)' }}>
-            Benutzer verwalten
-          </h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--muted)' }}>
-            {users.length} Benutzer registriert
-          </p>
-        </div>
-        <button
-          onClick={openCreateModal}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all hover:scale-105"
-          style={{ backgroundColor: 'var(--accent)', color: 'var(--bg)' }}
-        >
-          <Plus size={20} />
-          Neuer Benutzer
-        </button>
-      </div>
+      <AdminPageHeader
+        title="Benutzer verwalten"
+        description={`${users.length} Benutzer registriert · ${users.filter(u => u.is_active).length} aktiv`}
+        icon={Users}
+        breadcrumbs={[{ label: 'System', href: '/admin' }, { label: 'Benutzer' }]}
+        actions={[
+          {
+            label: 'Neuer Benutzer',
+            icon: Plus,
+            onClick: openCreateModal,
+          },
+        ]}
+      />
 
       {error && (
-        <div className="p-4 rounded-lg" style={{ backgroundColor: 'rgba(239,68,68,0.1)', color: '#ef4444' }}>
+        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400">
           {error}
         </div>
       )}

@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { MessageSquare } from 'lucide-react'
 import TicketsManager from '@/app/components/TicketsManager'
+import { AdminPageHeader, AdminLoadingState } from '../components'
 
 export default function AdminTicketsPage() {
   const [userPermissions, setUserPermissions] = useState<string[]>([])
@@ -34,18 +36,19 @@ export default function AdminTicketsPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
-      </div>
-    )
+    return <AdminLoadingState message="Berechtigungen werden geprüft..." fullPage />
   }
 
   if (!hasAccess) {
     return (
-      <div className="p-6">
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 text-center">
-          <p className="text-red-800 dark:text-red-400 font-medium">
+      <div className="space-y-6">
+        <AdminPageHeader
+          title="Support Tickets"
+          icon={MessageSquare}
+          breadcrumbs={[{ label: 'Tickets' }]}
+        />
+        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6 text-center">
+          <p className="text-red-400 font-medium">
             Du hast keine Berechtigung für diesen Bereich
           </p>
         </div>
@@ -54,12 +57,13 @@ export default function AdminTicketsPage() {
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Support Tickets</h1>
-        <p className="text-muted">Verwalte anonyme Anfragen und Tickets von Benutzern</p>
-      </div>
-
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="Support Tickets"
+        description="Verwalte anonyme Anfragen und Tickets von Benutzern"
+        icon={MessageSquare}
+        breadcrumbs={[{ label: 'Tickets' }]}
+      />
       <TicketsManager />
     </div>
   )

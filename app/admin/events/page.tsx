@@ -1,14 +1,16 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, Trash2, Edit2, ChevronDown } from 'lucide-react'
+import { Plus, Trash2, Edit2, ChevronDown, Calendar, X } from 'lucide-react'
 import type { Event } from '@/lib/supabase'
+import { AdminPageHeader, AdminCard, AdminLoadingState, AdminEmptyState, AdminModal, ModalCancelButton, ModalConfirmButton, AdminInput, AdminSelect, FormGroup } from '../components'
 
 export default function AdminEventsPage() {
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('all')
   const [formData, setFormData] = useState<Partial<Event>>({
     title: '',
     date: '',
@@ -103,161 +105,195 @@ export default function AdminEventsPage() {
 
   const categories: Array<'Auftritt' | 'Workshop' | 'Training' | 'Event'> = ['Auftritt', 'Workshop', 'Training', 'Event']
 
+  // Filter events
+  const filteredEvents = events.filter((event) => {
+    const eventDate = new Date(event.date)
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    if (filter === 'upcoming') return eventDate >= today
+    if (filter === 'past') return eventDate < today
+    return true
+  }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
+  const upcomingCount = events.filter(e => new Date(e.date) >= new Date(new Date().setHours(0,0,0,0))).length
+
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-8">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-white mb-1 md:mb-2">Termine verwalten</h1>
-          <p className="text-slate-400 text-sm md:text-base">Erstelle, bearbeite und lösche deine Events</p>
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="Termine verwalten"
+        description={`${events.length} Termine insgesamt · ${upcomingCount} kommende`}
+        icon={Calendar}
+        breadcrumbs={[{ label: 'Termine' }]}
+        actions={[
+          {
+            label: 'Neues Event',
+            icon: Plus,
+            onClick: () => {
+              resetForm()
+              setShowForm(true)
+            },
+          },
+        ]}
+      >
+        {/* Filter Tabs */}
+        <div className="flex gap-2 mt-4">
+          {[
+            { key: 'all', label: 'Alle' },
+            { key: 'upcoming', label: 'Kommende' },
+            { key: 'past', label: 'Vergangene' },
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setFilter(tab.key as 'all' | 'upcoming' | 'past')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                filter === tab.key
+                  ? 'bg-teal-500/20 text-teal-400 border border-teal-500/30'
+                  : 'bg-slate-800 text-slate-400 border border-slate-700 hover:border-slate-600'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
-        <button
-          onClick={() => {
-            resetForm()
-            setShowForm(true)
+      </AdminPageHeader>
+
+      {/* Event Form Modal */}
+      <AdminModal
+        isOpen={showForm}
+        onClose={resetForm}
+        title={editingId ? 'Event bearbeiten' : 'Neues Event erstellen'}
+        size="lg"
+        footer={
+          <>
+            <ModalCancelButton onClick={resetForm} />
+            <ModalConfirmButton onClick={() => {
+              const form = document.getElementById('event-form') as HTMLFormElement
+              form?.requestSubmit()
+            }}>
+              {editingId ? 'Aktualisieren' : 'Erstellen'}
+            </ModalConfirmButton>
+          </>
+        }
+      >
+        <form id="event-form" onSubmit={handleSubmit} className="space-y-4">
+          <FormGroup cols={2}>
+            <AdminInput
+              label="Event Titel"
+              placeholder="z.B. Sommeraufführung 2026"
+              value={formData.title || ''}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              required
+            />
+            <AdminInput
+              type="date"
+              label="Datum"
+              value={formData.date || ''}
+              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+              required
+            />
+          </FormGroup>
+
+          <FormGroup cols={2}>
+            <AdminInput
+              type="time"
+              label="Uhrzeit"
+              value={formData.time || ''}
+              onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+            />
+            <AdminSelect
+              label="Kategorie"
+              value={formData.category || 'Event'}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+              options={categories.map(cat => ({ value: cat, label: cat }))}
+            />
+          </FormGroup>
+
+          <FormGroup cols={2}>
+            <AdminInput
+              label="Veranstaltungsort"
+              placeholder="z.B. Stadthalle"
+              value={formData.location || ''}
+              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+              required
+            />
+            <AdminInput
+              label="Stadt"
+              placeholder="z.B. Musterstadt"
+              value={formData.city || ''}
+              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+              required
+            />
+          </FormGroup>
+
+          <FormGroup cols={2}>
+            <AdminInput
+              label="Zusatzinfo (optional)"
+              placeholder="z.B. Eintritt frei"
+              value={formData.note || ''}
+              onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+            />
+            <AdminInput
+              label="Link (optional)"
+              placeholder="https://..."
+              value={formData.href || ''}
+              onChange={(e) => setFormData({ ...formData, href: e.target.value })}
+            />
+          </FormGroup>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Gruppen</label>
+            <div className="flex flex-wrap gap-3">
+              {groupOptions.map((group) => (
+                <label key={group.value} className="flex items-center gap-2 cursor-pointer bg-slate-700 px-3 py-2 rounded-lg hover:bg-slate-600 transition">
+                  <input
+                    type="checkbox"
+                    checked={(formData.groups || []).includes(group.value)}
+                    onChange={(e) => {
+                      const newGroups = e.target.checked
+                        ? [...(formData.groups || []), group.value]
+                        : (formData.groups || []).filter((g) => g !== group.value)
+                      setFormData({ ...formData, groups: newGroups })
+                    }}
+                    className="w-4 h-4 rounded bg-slate-600 border-slate-500 text-teal-500 focus:ring-teal-500"
+                  />
+                  <span className="text-white text-sm">{group.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </form>
+      </AdminModal>
+
+      {/* Events List */}
+      {loading ? (
+        <AdminLoadingState message="Events werden geladen..." />
+      ) : filteredEvents.length === 0 ? (
+        <AdminEmptyState
+          icon={Calendar}
+          title={filter === 'all' ? 'Noch keine Events' : `Keine ${filter === 'upcoming' ? 'kommenden' : 'vergangenen'} Events`}
+          description="Erstelle dein erstes Event, um loszulegen"
+          action={{
+            label: 'Event erstellen',
+            icon: Plus,
+            onClick: () => {
+              resetForm()
+              setShowForm(true)
+            },
           }}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-lg hover:shadow-lg hover:shadow-teal-500/50 transition font-medium w-full sm:w-auto"
-        >
-          <Plus size={20} />
-          Neues Event
-        </button>
-      </div>
-
-      {showForm && (
-        <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 md:p-6 mb-6 md:mb-8">
-          <h2 className="text-lg md:text-xl font-bold text-white mb-4 md:mb-6">
-            {editingId ? 'Event bearbeiten' : 'Neues Event erstellen'}
-          </h2>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-              <input
-                type="text"
-                placeholder="Event Titel"
-                value={formData.title || ''}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
-                required
-              />
-
-              <input
-                type="date"
-                value={formData.date || ''}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-teal-500"
-                required
-              />
-
-              <input
-                type="time"
-                value={formData.time || ''}
-                onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
-              />
-
-              <input
-                type="text"
-                placeholder="Veranstaltungsort"
-                value={formData.location || ''}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
-                required
-              />
-
-              <input
-                type="text"
-                placeholder="Stadt"
-                value={formData.city || ''}
-                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
-                required
-              />
-
-              <select
-                value={formData.category || 'Event'}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value as 'Auftritt' | 'Workshop' | 'Training' | 'Event' })}
-                className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-teal-500"
-              >
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
-              </select>
-
-              <input
-                type="text"
-                placeholder="Zusatzinfo (optional)"
-                value={formData.note || ''}
-                onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-                className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
-              />
-
-              <input
-                type="text"
-                placeholder="Link (optional)"
-                value={formData.href || ''}
-                onChange={(e) => setFormData({ ...formData, href: e.target.value })}
-                className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm text-slate-400 mb-2">Gruppen (mehrfache Auswahl möglich)</label>
-              <div className="flex flex-wrap gap-2">
-                {groupOptions.map((group) => (
-                  <label key={group.value} className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={(formData.groups || []).includes(group.value)}
-                      onChange={(e) => {
-                        const newGroups = e.target.checked
-                          ? [...(formData.groups || []), group.value]
-                          : (formData.groups || []).filter((g) => g !== group.value)
-                        setFormData({ ...formData, groups: newGroups })
-                      }}
-                      className="w-4 h-4 rounded"
-                    />
-                    <span className="text-white text-sm">{group.label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-2 pt-4">
-              <button
-                type="submit"
-                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-lg hover:shadow-lg transition font-medium"
-              >
-                {editingId ? 'Aktualisieren' : 'Erstellen'}
-              </button>
-              <button
-                type="button"
-                onClick={resetForm}
-                className="flex-1 px-4 py-2.5 bg-slate-700 text-slate-300 rounded-lg hover:bg-slate-600 transition font-medium"
-              >
-                Abbrechen
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      <div className="space-y-4">
-        {loading ? (
-          <div className="text-center py-8 text-slate-400">Lädt...</div>
-        ) : events.length === 0 ? (
-          <div className="text-center py-8 text-slate-400">Noch keine Events. Erstelle eins!</div>
-        ) : (
-          events.map((event) => (
+        />
+      ) : (
+        <div className="space-y-3">
+          {filteredEvents.map((event) => (
             <EventCard
               key={event.id}
               event={event}
               onEdit={handleEdit}
               onDelete={handleDelete}
             />
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
