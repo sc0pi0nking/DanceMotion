@@ -1,9 +1,13 @@
 import { supabaseServer } from '@/lib/supabase'
+import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
 
 // GET - All tickets (admin only)
 export async function GET() {
   try {
-    // TODO: Verify admin permission with tickets_admin
+    const currentUser = await getAdminUserWithPermissions()
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.TICKETS_ADMIN)) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const { data, error } = await supabaseServer
       .from('tickets')

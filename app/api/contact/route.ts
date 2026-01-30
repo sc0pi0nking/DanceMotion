@@ -81,14 +81,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // XSS-Schutz: Nur Whitelist-Zeichen erlauben
-    const sanitizeInput = (input: string): string => {
-      return input
-        .trim()
-        .replace(/[<>]/g, '') // HTML-Tags entfernen
-        .slice(0, 5000); // Max-Länge erzwingen
-    };
-
     const sanitizedData: ContactFormData = {
       name: sanitizeInput(name),
       email: sanitizeInput(email),
@@ -102,7 +94,13 @@ export async function POST(request: NextRequest) {
     // EMAIL VERSENDEN
     // ========================================
 
-    const adminEmail = process.env.CONTACT_EMAIL || 'kontakt@dancemotion.de'; // TODO: Placeholder - wird noch gesetzt
+    const adminEmail = process.env.CONTACT_EMAIL;
+    if (!adminEmail) {
+      return NextResponse.json(
+        { error: 'Kontakt-Email ist nicht konfiguriert' },
+        { status: 500 }
+      );
+    }
 
     const emailResult = await sendEmail({
       to: adminEmail,
@@ -144,9 +142,13 @@ export async function POST(request: NextRequest) {
 
 // CORS Header erlauben (für Frontend-Requests)
 export async function OPTIONS(request: NextRequest) {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  const origin = request.headers.get('origin');
+  const allowOrigin = siteUrl && origin && origin.startsWith(siteUrl) ? origin : siteUrl || '*';
+
   return NextResponse.json({}, {
     headers: {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': allowOrigin,
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     },

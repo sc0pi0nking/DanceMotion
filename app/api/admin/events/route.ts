@@ -1,9 +1,15 @@
 import { supabaseServer } from '@/lib/supabase'
 import type { Event } from '@/lib/supabase'
+import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
 
 // GET - Fetch all events
 export async function GET() {
   try {
+    const currentUser = await getAdminUserWithPermissions()
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.EVENTS)) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const { data, error } = await supabaseServer
       .from('events')
       .select('*')
@@ -31,6 +37,11 @@ export async function GET() {
 // POST - Create new event
 export async function POST(req: Request) {
   try {
+    const currentUser = await getAdminUserWithPermissions()
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.EVENTS)) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const event: Omit<Event, 'id' | 'created_at' | 'updated_at' | 'updated_by'> = await req.json()
 
     // Fix: Convert empty time string to null

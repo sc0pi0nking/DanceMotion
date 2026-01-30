@@ -1,10 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabase'
+import { checkRateLimit, getClientIp } from '@/lib/rate-limiter'
 import crypto from 'crypto'
 
 // POST: Track a page view (anonymized)
 export async function POST(req: NextRequest) {
   try {
+    const clientIp = getClientIp(req)
+    const rateLimitResponse = checkRateLimit(
+      req,
+      `analytics-${clientIp}`,
+      60,
+      60 * 1000
+    )
+
+    if (rateLimitResponse) {
+      return rateLimitResponse
+    }
+
     const body = await req.json()
     const { path, referrer, userAgent } = body
 
@@ -12,10 +25,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Path required' }, { status: 400 })
     }
 
+    if (String(path).length > 200 || String(referrer || '').length > 500 || String(userAgent || '').length > 500) {
+      return NextResponse.json({ error: 'Payload too large' }, { status: 413 })
+    }
+
     // Generate anonymous session hash from IP + UA + date (changes daily)
     const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 
-               req.headers.get('x-real-ip') || 
-               'unknown'
+           req.headers.get('x-real-ip') || 
+           'unknown'
     const today = new Date().toISOString().split('T')[0]
     const sessionHash = crypto
       .createHash('sha256')

@@ -1,5 +1,6 @@
 import { supabaseServer } from '@/lib/supabase'
 import { createClient } from '@supabase/supabase-js'
+import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,6 +13,11 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const currentUser = await getAdminUserWithPermissions()
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.GALLERY)) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const { id } = await params
     const body = await req.json()
     const { action, imageIndex, metadata } = body
@@ -71,6 +77,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const currentUser = await getAdminUserWithPermissions()
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.GALLERY)) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const { id } = await params
 
     // Get gallery to find image URLs

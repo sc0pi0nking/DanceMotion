@@ -6,11 +6,13 @@ export const metadata = {
   description: 'Antworten auf häufig gestellte Fragen zu unseren Tanzkursen, Anmeldung, Events und mehr.',
 };
 
+export const revalidate = 3600;
+
 async function getFAQs() {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
     const res = await fetch(`${baseUrl}/api/faqs`, {
-      cache: 'no-store',
+      next: { revalidate: 3600 },
     });
     
     if (!res.ok) return [];

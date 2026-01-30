@@ -1,5 +1,6 @@
 import { supabaseServer } from '@/lib/supabase'
 import type { Event } from '@/lib/supabase'
+import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
 
 // GET - Fetch single event
 export async function GET(
@@ -7,6 +8,11 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const currentUser = await getAdminUserWithPermissions()
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.EVENTS)) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const { id } = await params
     const { data, error } = await supabaseServer
       .from('events')
@@ -31,6 +37,11 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const currentUser = await getAdminUserWithPermissions()
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.EVENTS)) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const { id } = await params
     const event: Partial<Event> = await req.json()
 
@@ -65,6 +76,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const currentUser = await getAdminUserWithPermissions()
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.EVENTS)) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const { id } = await params
     const { error } = await supabaseServer
       .from('events')

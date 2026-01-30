@@ -18,8 +18,8 @@ const nextConfig: NextConfig = {
         hostname: "**",
       },
     ],
-    // Don't optimize images from external sources
-    unoptimized: process.env.NODE_ENV === 'production',
+    // Enable Next.js image optimization in production
+    unoptimized: false,
   },
   
   // Performance: Enable experimental features

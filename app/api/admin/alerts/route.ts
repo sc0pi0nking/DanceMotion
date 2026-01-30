@@ -1,29 +1,15 @@
-import { getAdminSession } from '@/lib/auth'
+import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
 import { supabaseServer } from '@/lib/supabase'
 
 // Helper to check admin permissions
 async function checkAdminPermission() {
   try {
-    const user = await getAdminSession()
+    const user = await getAdminUserWithPermissions()
     if (!user) {
       return { authorized: false, user: null }
     }
 
-    // Fetch user with role and permissions from admin_users_with_roles view
-    const { data: adminUser, error } = await supabaseServer
-      .from('admin_users_with_roles')
-      .select('permissions')
-      .eq('id', user.id)
-      .single()
-
-    if (error || !adminUser) {
-      console.error('Failed to fetch admin user:', error)
-      return { authorized: false, user }
-    }
-
-    const permissions = Array.isArray(adminUser.permissions) ? adminUser.permissions : []
-    const hasPermission = permissions.includes('alerts_admin')
-    
+    const hasPermission = user.permissions.includes(PERMISSIONS.ALERTS_ADMIN)
     return { authorized: hasPermission, user }
   } catch (error) {
     console.error('Permission check failed:', error)

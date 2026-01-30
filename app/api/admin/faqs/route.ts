@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase';
+import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth';
 
 // GET - Alle FAQs abrufen (Admin)
 export async function GET() {
   try {
+    const currentUser = await getAdminUserWithPermissions();
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.FAQS)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const supabase = supabaseServer;
     
     const { data: faqs, error } = await supabase
@@ -27,6 +33,11 @@ export async function GET() {
 // POST - Neue FAQ erstellen (Admin)
 export async function POST(request: NextRequest) {
   try {
+    const currentUser = await getAdminUserWithPermissions();
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.FAQS)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const supabase = supabaseServer;
     const body = await request.json();
 

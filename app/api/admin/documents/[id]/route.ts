@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase';
+import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth';
 
 // DELETE - Dokument löschen
 export async function DELETE(
@@ -7,6 +8,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const currentUser = await getAdminUserWithPermissions();
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.DOCUMENTS)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const { id } = await params;
     const supabase = supabaseServer;
 
@@ -61,6 +67,11 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const currentUser = await getAdminUserWithPermissions();
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.DOCUMENTS)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const { id } = await params;
     const supabase = supabaseServer;
     const body = await request.json();

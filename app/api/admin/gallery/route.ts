@@ -1,5 +1,6 @@
 import { supabaseServer } from '@/lib/supabase'
 import { createClient } from '@supabase/supabase-js'
+import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -9,6 +10,11 @@ const supabase = createClient(
 // GET - All galleries
 export async function GET() {
   try {
+    const currentUser = await getAdminUserWithPermissions()
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.GALLERY)) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const { data, error } = await supabaseServer
       .from('gallery')
       .select('*')
@@ -29,6 +35,11 @@ export async function GET() {
 // POST - Create gallery with images
 export async function POST(req: Request) {
   try {
+    const currentUser = await getAdminUserWithPermissions()
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.GALLERY)) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const formData = await req.formData()
     const title = formData.get('title') as string
     const category = formData.get('category') as string || 'general'

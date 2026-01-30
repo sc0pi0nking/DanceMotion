@@ -1,4 +1,5 @@
 import { supabaseServer } from '@/lib/supabase'
+import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
 
 // PATCH - Update ticket status or add note
 export async function PATCH(
@@ -6,11 +7,14 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const currentUser = await getAdminUserWithPermissions()
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.TICKETS_ADMIN)) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const { id } = await params
     const body = await req.json()
     const { action, status, note } = body
-
-    // TODO: Verify admin permission with tickets_admin
 
     if (action === 'update_status') {
       const { data, error } = await supabaseServer
@@ -85,9 +89,12 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params
+    const currentUser = await getAdminUserWithPermissions()
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.TICKETS_ADMIN)) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
-    // TODO: Verify admin permission with tickets_admin
+    const { id } = await params
 
     const { error } = await supabaseServer
       .from('tickets')

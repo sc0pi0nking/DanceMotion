@@ -1,5 +1,6 @@
 import { supabaseServer } from '@/lib/supabase'
 import type { ContentItem } from '@/lib/supabase'
+import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
 
 // GET - Fetch single content item
 export async function GET(
@@ -7,6 +8,11 @@ export async function GET(
   { params }: { params: Promise<{ key: string }> }
 ) {
   try {
+    const currentUser = await getAdminUserWithPermissions()
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.CONTENT)) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const { key } = await params
     const { data, error } = await supabaseServer
       .from('content')
@@ -31,6 +37,11 @@ export async function PUT(
   { params }: { params: Promise<{ key: string }> }
 ) {
   try {
+    const currentUser = await getAdminUserWithPermissions()
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.CONTENT)) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const { key } = await params
     const item: Partial<ContentItem> = await req.json()
 
@@ -70,6 +81,11 @@ export async function DELETE(
   { params }: { params: Promise<{ key: string }> }
 ) {
   try {
+    const currentUser = await getAdminUserWithPermissions()
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.CONTENT)) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     const { key } = await params
     const { error } = await supabaseServer
       .from('content')

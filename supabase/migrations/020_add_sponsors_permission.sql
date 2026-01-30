@@ -3,16 +3,16 @@
 
 -- Update admin role to include sponsors permission
 UPDATE public.admin_roles
-SET permissions = array_append(permissions, 'sponsors'::text)::jsonb
-WHERE name = 'admin' AND NOT permissions @> '"sponsors"'::jsonb;
+SET permissions = COALESCE(permissions, '[]'::jsonb) || '["sponsors"]'::jsonb
+WHERE name = 'admin' AND NOT permissions @> '["sponsors"]'::jsonb;
 
 -- Update manager role to include sponsors permission
 UPDATE public.admin_roles
-SET permissions = array_append(permissions, 'sponsors'::text)::jsonb
-WHERE name = 'manager' AND NOT permissions @> '"sponsors"'::jsonb;
+SET permissions = COALESCE(permissions, '[]'::jsonb) || '["sponsors"]'::jsonb
+WHERE name = 'manager' AND NOT permissions @> '["sponsors"]'::jsonb;
 
 -- Update any other manager-like roles
 UPDATE public.admin_roles
-SET permissions = array_append(permissions, 'sponsors'::text)::jsonb
+SET permissions = COALESCE(permissions, '[]'::jsonb) || '["sponsors"]'::jsonb
 WHERE (name LIKE '%manager%' OR name LIKE '%admin%') 
-  AND NOT permissions @> '"sponsors"'::jsonb;
+  AND NOT permissions @> '["sponsors"]'::jsonb;

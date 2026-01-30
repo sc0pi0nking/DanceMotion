@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase';
+import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth';
 
 // GET - Alle Dokumente abrufen (nur für Admins, auch inaktive)
 export async function GET() {
   try {
+    const currentUser = await getAdminUserWithPermissions();
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.DOCUMENTS)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const supabase = supabaseServer;
     
     const { data: documents, error } = await supabase
@@ -26,6 +32,11 @@ export async function GET() {
 // POST - Neues Dokument hochladen
 export async function POST(request: NextRequest) {
   try {
+    const currentUser = await getAdminUserWithPermissions();
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.DOCUMENTS)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const supabase = supabaseServer;
     const formData = await request.formData();
 
