@@ -52,9 +52,10 @@ export async function getSystemSettings(): Promise<SystemSettings> {
     if (data) {
       for (const item of data) {
         const key = item.key.replace('setting_', '')
-        try {
-          settings[key] = JSON.parse(item.value)
-        } catch {
+        // value is JSONB, handle wrapped objects {v: value}
+        if (typeof item.value === 'object' && item.value !== null && 'v' in item.value) {
+          settings[key] = item.value.v
+        } else {
           settings[key] = item.value
         }
       }

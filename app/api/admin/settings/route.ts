@@ -46,10 +46,11 @@ export async function GET() {
     if (data) {
       for (const item of data) {
         const key = item.key.replace('setting_', '')
-        try {
-          // Try to parse JSON values (for booleans, numbers)
-          settings[key] = JSON.parse(item.value)
-        } catch {
+        // value is already JSONB, so it's parsed automatically
+        // Handle both direct values and wrapped objects
+        if (typeof item.value === 'object' && item.value !== null && 'v' in item.value) {
+          settings[key] = item.value.v
+        } else {
           settings[key] = item.value
         }
       }
@@ -86,7 +87,9 @@ export async function PUT(req: Request) {
     // Update each setting sequentially
     for (const [key, value] of Object.entries(settings)) {
       const contentKey = `setting_${key}`
-      const stringValue = typeof value === 'string' ? value : JSON.stringify(value)
+      // Store value wrapped in object for JSONB compatibility
+      // This ensures strings, numbers, booleans all work correctly
+      const jsonbValue = { v: value }
 
       // Check if setting exists
       const { data: existing } = await supabaseServer
@@ -101,7 +104,7 @@ export async function PUT(req: Request) {
         await supabaseServer
           .from('content')
           .update({ 
-            value: stringValue, 
+            value: jsonbValue, 
             updated_at: new Date().toISOString(),
             updated_by: currentUser.email || 'system'
           })
@@ -112,7 +115,7 @@ export async function PUT(req: Request) {
           .from('content')
           .insert([{ 
             key: contentKey, 
-            value: stringValue, 
+            value: jsonbValue, 
             section: 'settings',
             updated_by: currentUser.email || 'system'
           }])
