@@ -84,6 +84,9 @@ export default function SettingsPage() {
     location: '',
   })
 
+  const [initialLoading, setInitialLoading] = useState(true)
+  const [hasChanges, setHasChanges] = useState(false)
+
   useEffect(() => {
     fetchSettings()
     fetchAuditCount()
@@ -91,10 +94,21 @@ export default function SettingsPage() {
     fetchContactInfo()
   }, [])
 
-  const fetchSettings = () => {
-    const saved = localStorage.getItem('dm_system_settings')
-    if (saved) {
-      setSettings({ ...defaultSettings, ...JSON.parse(saved) })
+  const fetchSettings = async () => {
+    try {
+      setInitialLoading(true)
+      const res = await fetch('/api/admin/settings')
+      if (!res.ok) throw new Error('Failed to fetch settings')
+      const data = await res.json()
+      if (data.success && data.settings) {
+        setSettings({ ...defaultSettings, ...data.settings })
+      }
+    } catch (err) {
+      console.error('Failed to fetch settings:', err)
+      // Fallback to defaults
+      setSettings(defaultSettings)
+    } finally {
+      setInitialLoading(false)
     }
   }
 
@@ -158,14 +172,30 @@ export default function SettingsPage() {
   const saveSettings = async () => {
     try {
       setLoading(true)
-      localStorage.setItem('dm_system_settings', JSON.stringify(settings))
-      setMessage({ type: 'success', text: '✅ Einstellungen gespeichert' })
+      const res = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ settings }),
+      })
+      
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.error || 'Speichern fehlgeschlagen')
+      }
+      
+      setHasChanges(false)
+      setMessage({ type: 'success', text: '✅ Einstellungen global gespeichert' })
       setTimeout(() => setMessage(null), 3000)
-    } catch {
-      setMessage({ type: 'error', text: '❌ Fehler beim Speichern der Einstellungen' })
+    } catch (err: any) {
+      setMessage({ type: 'error', text: `❌ ${err.message || 'Fehler beim Speichern'}` })
     } finally {
       setLoading(false)
     }
+  }
+
+  const updateSetting = <K extends keyof SystemSettings>(key: K, value: SystemSettings[K]) => {
+    setSettings(prev => ({ ...prev, [key]: value }))
+    setHasChanges(true)
   }
 
   const saveContactInfo = async () => {
@@ -230,13 +260,40 @@ export default function SettingsPage() {
     { id: 'system', label: 'System', icon: Server },
   ] as const
 
+  if (initialLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mx-auto mb-4"></div>
+          <p className="text-slate-400">Lade Einstellungen...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
-      <AdminPageHeader
-        icon={Settings}
-        title="Einstellungen"
-        description="Systemkonfiguration, Design, Sicherheit und Wartung"
-      />
+      <div className="flex items-center justify-between">
+        <AdminPageHeader
+          icon={Settings}
+          title="Einstellungen"
+          description="Systemkonfiguration, Design, Sicherheit und Wartung"
+        />
+        {hasChanges && (
+          <button
+            onClick={saveSettings}
+            disabled={loading}
+            className="flex items-center gap-2 px-6 py-3 bg-teal-500 hover:bg-teal-600 disabled:bg-slate-600 text-white rounded-xl font-medium transition shadow-lg"
+          >
+            {loading ? (
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <Save size={18} />
+            )}
+            Alle Änderungen speichern
+          </button>
+        )}
+      </div>
 
       {message && (
         <div
@@ -285,7 +342,7 @@ export default function SettingsPage() {
                   <input
                     type="text"
                     value={settings.site_title}
-                    onChange={(e) => setSettings({ ...settings, site_title: e.target.value })}
+                    onChange={(e) => updateSetting('site_title', e.target.value)}
                     className="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white focus:border-teal-500 focus:outline-none"
                   />
                 </div>
@@ -294,7 +351,7 @@ export default function SettingsPage() {
                   <label className="block text-sm font-medium text-slate-300 mb-2">Beschreibung (Meta)</label>
                   <textarea
                     value={settings.site_description}
-                    onChange={(e) => setSettings({ ...settings, site_description: e.target.value })}
+                    onChange={(e) => updateSetting('site_description', e.target.value)}
                     rows={3}
                     className="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white focus:border-teal-500 focus:outline-none resize-none"
                   />
@@ -394,7 +451,7 @@ export default function SettingsPage() {
                     ].map((theme) => (
                       <button
                         key={theme.value}
-                        onClick={() => setSettings({ ...settings, default_theme: theme.value as 'dark' | 'light' | 'system' })}
+                        onClick={() => updateSetting('default_theme', theme.value as 'dark' | 'light' | 'system')}
                         className={`p-3 rounded-lg border flex flex-col items-center gap-2 transition ${
                           settings.default_theme === theme.value
                             ? 'border-teal-500 bg-teal-500/20'
@@ -416,7 +473,7 @@ export default function SettingsPage() {
                     {accentColors.map((color) => (
                       <button
                         key={color.value}
-                        onClick={() => setSettings({ ...settings, accent_color: color.value })}
+                        onClick={() => updateSetting('accent_color', color.value)}
                         className={`p-3 rounded-lg border flex items-center gap-2 transition ${
                           settings.accent_color === color.value
                             ? 'border-white bg-white/10'
@@ -493,7 +550,7 @@ export default function SettingsPage() {
                     min="15"
                     max="480"
                     value={settings.session_timeout_minutes}
-                    onChange={(e) => setSettings({ ...settings, session_timeout_minutes: parseInt(e.target.value) || 60 })}
+                    onChange={(e) => updateSetting('session_timeout_minutes', parseInt(e.target.value) || 60)}
                     className="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white focus:border-teal-500 focus:outline-none"
                   />
                   <p className="text-xs text-slate-500 mt-1">Automatische Abmeldung nach Inaktivität (15-480 Min.)</p>
@@ -523,7 +580,7 @@ export default function SettingsPage() {
                     min="6"
                     max="32"
                     value={settings.min_password_length}
-                    onChange={(e) => setSettings({ ...settings, min_password_length: parseInt(e.target.value) || 8 })}
+                    onChange={(e) => updateSetting('min_password_length', parseInt(e.target.value) || 8)}
                     className="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white focus:border-teal-500 focus:outline-none"
                   />
                 </div>
@@ -531,7 +588,7 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between p-3 rounded-lg bg-slate-900 border border-slate-600">
                   <label className="text-sm font-medium text-slate-300">Sonderzeichen erforderlich</label>
                   <button
-                    onClick={() => setSettings({ ...settings, require_special_chars: !settings.require_special_chars })}
+                    onClick={() => updateSetting('require_special_chars', !settings.require_special_chars)}
                     className={`w-12 h-7 rounded-full transition ${
                       settings.require_special_chars ? 'bg-teal-500' : 'bg-slate-600'
                     }`}
@@ -572,7 +629,7 @@ export default function SettingsPage() {
                   <label className="block text-sm font-medium text-slate-300 mb-2">Standard-Dauer (Minuten)</label>
                   <select
                     value={settings.default_event_duration}
-                    onChange={(e) => setSettings({ ...settings, default_event_duration: parseInt(e.target.value) })}
+                    onChange={(e) => updateSetting('default_event_duration', parseInt(e.target.value))}
                     className="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white focus:border-teal-500 focus:outline-none"
                   >
                     <option value={30}>30 Minuten</option>
@@ -590,7 +647,7 @@ export default function SettingsPage() {
                     min="0"
                     max="90"
                     value={settings.show_past_events_days}
-                    onChange={(e) => setSettings({ ...settings, show_past_events_days: parseInt(e.target.value) || 7 })}
+                    onChange={(e) => updateSetting('show_past_events_days', parseInt(e.target.value) || 7)}
                     className="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white focus:border-teal-500 focus:outline-none"
                   />
                   <p className="text-xs text-slate-500 mt-1">0 = nur zukünftige Events anzeigen</p>
@@ -599,7 +656,7 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between p-3 rounded-lg bg-slate-900 border border-slate-600">
                   <label className="text-sm font-medium text-slate-300">Event-Erinnerungen aktivieren</label>
                   <button
-                    onClick={() => setSettings({ ...settings, enable_event_reminders: !settings.enable_event_reminders })}
+                    onClick={() => updateSetting('enable_event_reminders', !settings.enable_event_reminders)}
                     className={`w-12 h-7 rounded-full transition ${
                       settings.enable_event_reminders ? 'bg-teal-500' : 'bg-slate-600'
                     }`}
@@ -667,7 +724,7 @@ export default function SettingsPage() {
                     min="7"
                     max="365"
                     value={settings.audit_retention_days}
-                    onChange={(e) => setSettings({ ...settings, audit_retention_days: parseInt(e.target.value) })}
+                    onChange={(e) => updateSetting('audit_retention_days', parseInt(e.target.value))}
                     className="w-full px-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white focus:border-teal-500 focus:outline-none"
                   />
                   <p className="text-xs text-slate-500 mt-1">Logs älter als diese Anzahl Tage werden automatisch gelöscht (DSGVO)</p>
@@ -676,7 +733,7 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between p-3 rounded-lg bg-slate-900 border border-slate-600">
                   <label className="text-sm font-medium text-slate-300">✅ Audit-Logging aktiviert</label>
                   <button
-                    onClick={() => setSettings({ ...settings, enable_audit_logging: !settings.enable_audit_logging })}
+                    onClick={() => updateSetting('enable_audit_logging', !settings.enable_audit_logging)}
                     className={`w-12 h-7 rounded-full transition ${
                       settings.enable_audit_logging ? 'bg-teal-500' : 'bg-slate-600'
                     }`}

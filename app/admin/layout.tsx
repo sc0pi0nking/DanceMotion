@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { Calendar, FileText, BarChart3, Images, LogOut, Menu, X, FileDown, HelpCircle, Users, Book, Home, Share2, Repeat, Shield, Activity, LogIn, Settings, MessageSquare, AlertCircle } from 'lucide-react'
@@ -14,6 +14,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [user, setUser] = useState<any>(null)
   const [userRole, setUserRole] = useState<string>('')
   const [userPermissions, setUserPermissions] = useState<string[]>([])
+  const [sessionTimeout, setSessionTimeout] = useState(60) // Default 60 minutes
+  const [showTimeoutWarning, setShowTimeoutWarning] = useState(false)
+  const lastActivityRef = useRef<number>(Date.now())
   const router = useRouter()
   const pathname = usePathname()
 
@@ -97,6 +100,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       setUser(data.user)
       setUserRole(data.user.role || data.user.role_name || '')
       setUserPermissions(data.user.permissions || [])
+      
+      // Get session timeout from server settings
+      if (data.session?.timeout_minutes) {
+        setSessionTimeout(data.session.timeout_minutes)
+      }
     } catch (error) {
       console.error('Auth check failed:', error)
       setUser(null)
@@ -105,6 +113,43 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       router.push('/admin/login')
     }
   }
+
+  // Session timeout handling
+  const updateActivity = useCallback(() => {
+    lastActivityRef.current = Date.now()
+    setShowTimeoutWarning(false)
+  }, [])
+
+  useEffect(() => {
+    // Track user activity
+    const events = ['mousedown', 'keydown', 'touchstart', 'scroll']
+    events.forEach(event => {
+      window.addEventListener(event, updateActivity)
+    })
+
+    // Check for inactivity every minute
+    const checkInactivity = setInterval(() => {
+      if (!user) return
+      
+      const inactiveMinutes = (Date.now() - lastActivityRef.current) / (1000 * 60)
+      const warningThreshold = sessionTimeout - 5 // Warn 5 minutes before
+      
+      if (inactiveMinutes >= sessionTimeout) {
+        // Session timed out - logout
+        handleLogout()
+      } else if (inactiveMinutes >= warningThreshold) {
+        // Show warning
+        setShowTimeoutWarning(true)
+      }
+    }, 60000) // Check every minute
+
+    return () => {
+      events.forEach(event => {
+        window.removeEventListener(event, updateActivity)
+      })
+      clearInterval(checkInactivity)
+    }
+  }, [user, sessionTimeout, updateActivity])
 
   const handleLogout = async () => {
     try {
@@ -186,6 +231,23 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ backgroundColor: "var(--bg)", color: "var(--fg)" }}>
+      {/* Session Timeout Warning */}
+      {showTimeoutWarning && (
+        <div className="fixed top-4 right-4 z-[100] bg-amber-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-4 animate-pulse">
+          <AlertCircle size={24} />
+          <div>
+            <p className="font-semibold">Session läuft bald ab</p>
+            <p className="text-sm opacity-90">Klicke irgendwo, um aktiv zu bleiben</p>
+          </div>
+          <button
+            onClick={updateActivity}
+            className="px-4 py-2 bg-white text-amber-600 rounded-lg font-medium hover:bg-amber-50 transition"
+          >
+            Aktiv bleiben
+          </button>
+        </div>
+      )}
+
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div

@@ -51,3 +51,64 @@ export async function POST(req: Request) {
     )
   }
 }
+
+// PUT - Update or create content item by key
+export async function PUT(req: Request) {
+  try {
+    const currentUser = await getAdminUserWithPermissions()
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.CONTENT)) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const { key, value } = await req.json()
+    
+    if (!key) {
+      return Response.json({ error: 'Key is required' }, { status: 400 })
+    }
+
+    // Check if content with this key exists
+    const { data: existing } = await supabaseServer
+      .from('content')
+      .select('id')
+      .eq('key', key)
+      .single()
+
+    let result
+    if (existing) {
+      // Update existing
+      const { data, error } = await supabaseServer
+        .from('content')
+        .update({ 
+          value, 
+          updated_at: new Date().toISOString(),
+          updated_by: currentUser.email || 'system'
+        })
+        .eq('key', key)
+        .select()
+
+      if (error) throw error
+      result = data?.[0]
+    } else {
+      // Create new
+      const { data, error } = await supabaseServer
+        .from('content')
+        .insert([{ 
+          key, 
+          value, 
+          section: 'footer',
+          updated_by: currentUser.email || 'system'
+        }])
+        .select()
+
+      if (error) throw error
+      result = data?.[0]
+    }
+
+    return Response.json({ success: true, data: result })
+  } catch (error: any) {
+    return Response.json(
+      { error: error.message },
+      { status: 500 }
+    )
+  }
+}

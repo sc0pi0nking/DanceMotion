@@ -1,5 +1,6 @@
 import { getAdminSession } from '@/lib/auth'
 import { supabaseServer } from '@/lib/supabase'
+import { getSystemSettings } from '@/lib/settings'
 
 export async function GET() {
   try {
@@ -8,6 +9,9 @@ export async function GET() {
     if (!user) {
       return Response.json({ error: 'Not authenticated' }, { status: 401 })
     }
+
+    // Get system settings for session timeout
+    const settings = await getSystemSettings()
 
     // Fetch user with role and permissions from admin_users_with_roles view
     const { data: adminUser, error } = await supabaseServer
@@ -27,7 +31,12 @@ export async function GET() {
         permissions: ['dashboard', 'events', 'recurring', 'content', 'gallery', 'documents', 'faqs', 'team', 'social', 'users', 'roles', 'analytics', 'settings'],
         is_active: true,
       }
-      return Response.json({ user: userWithRole })
+      return Response.json({ 
+        user: userWithRole,
+        session: {
+          timeout_minutes: settings.session_timeout_minutes,
+        }
+      })
     }
 
     const userWithRole = {
@@ -40,7 +49,12 @@ export async function GET() {
       is_active: adminUser.is_active,
     }
 
-    return Response.json({ user: userWithRole })
+    return Response.json({ 
+      user: userWithRole,
+      session: {
+        timeout_minutes: settings.session_timeout_minutes,
+      }
+    })
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error'
     return Response.json({ error: message }, { status: 500 })
