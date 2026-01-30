@@ -35,7 +35,7 @@ export default function LittleJoysPage() {
       <div className="mt-8 mb-8 flex justify-center">
         <div className="glassmorphism p-8 rounded-2xl">
           <Image 
-            src="/logos/litteljoys.png" 
+            src="/logos/littlejoys.png" 
             alt="Little Joys Logo" 
             width={128}
             height={128}

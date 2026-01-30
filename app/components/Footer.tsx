@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Mail, MapPin, Phone, Instagram, Facebook, Youtube, Twitter, Music2, Link as LinkIcon, MessageSquare, Edit2, Save, X } from "lucide-react";
+import { Mail, MapPin, Phone, Instagram, Facebook, Youtube, Twitter, Music2, Link as LinkIcon, MessageSquare } from "lucide-react";
 import TicketModal from "./TicketModal";
 
 interface SocialLink {
@@ -38,9 +38,6 @@ export default function Footer() {
     location: "Eschweiler, NRW",
   });
   const [ticketModalOpen, setTicketModalOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editValues, setEditValues] = useState<ContactInfo>(contactInfo);
-  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -52,24 +49,15 @@ export default function Footer() {
           setSocialLinks(socialData.data);
         }
 
-        // Fetch contact info from content API
-        const contactRes = await fetch("/api/admin/content");
+        // Fetch contact info from PUBLIC content API (read-only)
+        const contactRes = await fetch("/api/content?keys=footer_email,footer_phone,footer_location");
         const contentData = await contactRes.json();
-        if (Array.isArray(contentData)) {
-          const contactContent = contentData.filter((item: any) => item.section === "Footer");
-          const emailItem = contactContent.find((item: any) => item.key === "footer_email");
-          const phoneItem = contactContent.find((item: any) => item.key === "footer_phone");
-          const locationItem = contactContent.find((item: any) => item.key === "footer_location");
-          
-          if (emailItem || phoneItem || locationItem) {
-            const newInfo = {
-              email: emailItem?.value?.text || emailItem?.value || contactInfo.email,
-              phone: phoneItem?.value?.text || phoneItem?.value || contactInfo.phone,
-              location: locationItem?.value?.text || locationItem?.value || contactInfo.location,
-            };
-            setContactInfo(newInfo);
-            setEditValues(newInfo);
-          }
+        if (contentData.success && contentData.data) {
+          setContactInfo({
+            email: contentData.data.footer_email || contactInfo.email,
+            phone: contentData.data.footer_phone || contactInfo.phone,
+            location: contentData.data.footer_location || contactInfo.location,
+          });
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -77,57 +65,6 @@ export default function Footer() {
     }
     fetchData();
   }, []);
-
-  const handleEditClick = () => {
-    setEditValues(contactInfo);
-    setIsEditing(true);
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-  };
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      // Save email
-      await fetch("/api/admin/content/footer_email", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          value: { text: editValues.email },
-          section: "Footer",
-        }),
-      });
-
-      // Save phone
-      await fetch("/api/admin/content/footer_phone", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          value: { text: editValues.phone },
-          section: "Footer",
-        }),
-      });
-
-      // Save location
-      await fetch("/api/admin/content/footer_location", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          value: { text: editValues.location },
-          section: "Footer",
-        }),
-      });
-
-      setContactInfo(editValues);
-      setIsEditing(false);
-    } catch (error) {
-      console.error("Save failed:", error);
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   return (
     <>
@@ -179,83 +116,28 @@ export default function Footer() {
           </div>
 
           {/* Contact */}
-          <div className="group">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-sm font-semibold" style={{ color: "var(--fg)" }}>Kontakt</h4>
-              {!isEditing && (
-                <button
-                  onClick={handleEditClick}
-                  className="p-1.5 hover:bg-accent/20 dark:hover:bg-accent/30 rounded transition opacity-60 hover:opacity-100"
-                  title="Kontaktinfos bearbeiten"
-                >
-                  <Edit2 size={16} style={{ color: "var(--accent)" }} />
-                </button>
-              )}
-            </div>
-
-            {isEditing ? (
-              <div className="space-y-3 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
-                <input
-                  type="email"
-                  value={editValues.email}
-                  onChange={(e) => setEditValues({ ...editValues, email: e.target.value })}
-                  className="w-full px-2 py-1.5 text-sm border rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  placeholder="Email"
-                />
-                <input
-                  type="tel"
-                  value={editValues.phone}
-                  onChange={(e) => setEditValues({ ...editValues, phone: e.target.value })}
-                  className="w-full px-2 py-1.5 text-sm border rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  placeholder="Telefon"
-                />
-                <input
-                  type="text"
-                  value={editValues.location}
-                  onChange={(e) => setEditValues({ ...editValues, location: e.target.value })}
-                  className="w-full px-2 py-1.5 text-sm border rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                  placeholder="Ort"
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleSave}
-                    disabled={isSaving}
-                    className="flex-1 px-2 py-1.5 bg-accent text-white text-sm rounded hover:opacity-90 disabled:opacity-50 font-medium flex items-center justify-center gap-1"
-                  >
-                    <Save size={14} />
-                    Speichern
-                  </button>
-                  <button
-                    onClick={handleCancel}
-                    className="flex-1 px-2 py-1.5 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-100 text-sm rounded hover:bg-gray-400 dark:hover:bg-gray-500 font-medium flex items-center justify-center gap-1"
-                  >
-                    <X size={14} />
-                    Abbrechen
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <ul className="space-y-3">
-                <li className="flex items-start gap-3">
-                  <Mail size={16} style={{ color: "var(--accent)", marginTop: "2px" }} />
-                  <a href={`mailto:${contactInfo.email}`} className="text-sm-muted hover:text-accent transition-colors">
-                    {contactInfo.email}
-                  </a>
-                </li>
-                <li className="flex items-start gap-3">
-                  <Phone size={16} style={{ color: "var(--accent)", marginTop: "2px" }} />
-                  <a href={`tel:${contactInfo.phone.replace(/\s/g, '')}`} className="text-sm-muted hover:text-accent transition-colors">
-                    {contactInfo.phone}
-                  </a>
-                </li>
-                <li className="flex items-start gap-3">
-                  <MapPin size={16} style={{ color: "var(--accent)", marginTop: "2px" }} />
-                  <span className="text-sm-muted">
-                    {contactInfo.location}
-                  </span>
-                </li>
-              </ul>
-            )}
+          <div>
+            <h4 className="text-sm font-semibold mb-4" style={{ color: "var(--fg)" }}>Kontakt</h4>
+            <ul className="space-y-3">
+              <li className="flex items-start gap-3">
+                <Mail size={16} style={{ color: "var(--accent)", marginTop: "2px" }} />
+                <a href={`mailto:${contactInfo.email}`} className="text-sm-muted hover:text-accent transition-colors">
+                  {contactInfo.email}
+                </a>
+              </li>
+              <li className="flex items-start gap-3">
+                <Phone size={16} style={{ color: "var(--accent)", marginTop: "2px" }} />
+                <a href={`tel:${contactInfo.phone.replace(/\s/g, '')}`} className="text-sm-muted hover:text-accent transition-colors">
+                  {contactInfo.phone}
+                </a>
+              </li>
+              <li className="flex items-start gap-3">
+                <MapPin size={16} style={{ color: "var(--accent)", marginTop: "2px" }} />
+                <span className="text-sm-muted">
+                  {contactInfo.location}
+                </span>
+              </li>
+            </ul>
           </div>
 
           {/* Social Media - Dynamic */}
