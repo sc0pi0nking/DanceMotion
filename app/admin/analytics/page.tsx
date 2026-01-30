@@ -11,8 +11,10 @@ import {
   Globe,
   TrendingUp,
   RefreshCw,
-  Activity
+  Activity,
+  ChevronRight
 } from 'lucide-react'
+import AdvancedAnalytics from '@/app/components/AdvancedAnalytics'
 
 interface AnalyticsData {
   totals: {
@@ -308,6 +310,20 @@ export default function AnalyticsPage() {
               🔒 Diese Analytics sind DSGVO-konform. Es werden keine personenbezogenen Daten gespeichert. 
               Session-Hashes werden täglich erneuert und alte Daten nach 90 Tagen gelöscht.
             </p>
+          </div>
+
+          {/* Advanced Analytics Section */}
+          <div className="mt-8 pt-8 border-t border-slate-700">
+            <div className="mb-6">
+              <h2 className="text-xl font-bold text-white flex items-center gap-3 mb-2">
+                <TrendingUp className="w-6 h-6 text-teal-400" />
+                Erweiterte Metriken
+              </h2>
+              <p className="text-slate-400 text-sm">
+                Detaillierte Analysen zu Engagement, Event-Popularität, Performance und Gruppen
+              </p>
+            </div>
+            <AdvancedAnalytics daysBack={parseInt(range, 10)} />
           </div>
         </>
       ) : null}
