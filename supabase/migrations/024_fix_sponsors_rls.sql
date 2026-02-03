@@ -6,6 +6,11 @@ DROP POLICY IF EXISTS "Only authenticated users can insert sponsors" ON sponsors
 DROP POLICY IF EXISTS "Only creator or admin can update sponsors" ON sponsors;
 DROP POLICY IF EXISTS "Only creator or admin can delete sponsors" ON sponsors;
 
+-- Drop new policies if they exist (for re-running migration)
+DROP POLICY IF EXISTS "Authenticated users can insert sponsors" ON sponsors;
+DROP POLICY IF EXISTS "Authenticated users can update sponsors" ON sponsors;
+DROP POLICY IF EXISTS "Authenticated users can delete sponsors" ON sponsors;
+
 -- Create new policies that allow any authenticated user
 -- (App-level permission checking handles the actual authorization)
 
