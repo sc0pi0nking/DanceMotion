@@ -23,8 +23,9 @@ export default function AdminLoginPage() {
         body: JSON.stringify({ email, password }),
       })
 
+      const data = await res.json()
+
       if (!res.ok) {
-        const data = await res.json()
         setError(data.error || 'Login fehlgeschlagen')
         setLoading(false)
         return
@@ -34,11 +35,15 @@ export default function AdminLoginPage() {
       // This prevents the "reload required" issue
       await new Promise(resolve => setTimeout(resolve, 100))
       
-      // Refresh the router cache and redirect to dashboard
+      // Refresh the router cache
       router.refresh()
       
-      // Ensure session is checked before navigation
-      router.push('/admin')
+      // Check if password change is required
+      if (data.requirePasswordChange) {
+        router.push('/admin/change-password')
+      } else {
+        router.push('/admin')
+      }
     } catch (err) {
       setError('Ein Fehler ist aufgetreten')
       setLoading(false)

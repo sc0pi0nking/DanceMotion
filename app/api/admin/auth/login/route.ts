@@ -24,6 +24,18 @@ export async function POST(req: NextRequest) {
       return Response.json({ error: error.message }, { status: 401 })
     }
 
+    // Check if user needs to change password
+    let requirePasswordChange = false
+    if (data.user?.id) {
+      const { data: adminUser } = await supabaseServer
+        .from('admin_users')
+        .select('force_password_change')
+        .eq('id', data.user.id)
+        .single()
+      
+      requirePasswordChange = adminUser?.force_password_change === true
+    }
+
     // Update last_login in admin_users table
     if (data.user?.id) {
       await supabaseServer
@@ -51,6 +63,7 @@ export async function POST(req: NextRequest) {
     return Response.json({
       success: true,
       user: data.user,
+      requirePasswordChange,
     })
   } catch (error) {
     return Response.json(

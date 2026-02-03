@@ -66,6 +66,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. User in admin_users Tabelle eintragen
+    // force_password_change = true damit User beim ersten Login Passwort ändern muss
     const { data: adminUser, error: dbError } = await supabaseServer
       .from('admin_users')
       .insert({
@@ -75,6 +76,7 @@ export async function POST(req: NextRequest) {
         role_id: role_id || null,
         phone: phone || null,
         is_active: true,
+        force_password_change: true,
       })
       .select()
       .single()
