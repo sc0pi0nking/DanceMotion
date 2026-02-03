@@ -26,6 +26,9 @@ ENV ADMIN_EMAIL=${ADMIN_EMAIL}
 ENV ADMIN_PASSWORD=${ADMIN_PASSWORD}
 ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 
+# Increase Node.js memory limit to prevent SIGSEGV during build
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
 RUN npm run build
 
 # ---- run ----
