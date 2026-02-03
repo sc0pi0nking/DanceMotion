@@ -32,6 +32,10 @@ RUN npm run build
 FROM node:20-alpine AS run
 WORKDIR /app
 ENV NODE_ENV=production
+
+# Install sharp dependencies for image optimization
+RUN apk add --no-cache libc6-compat
+
 COPY --from=build /app ./
 
 # Runtime environment variables (werden von docker-compose gesetzt)

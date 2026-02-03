@@ -166,7 +166,7 @@ export default function TerminePage() {
           Interesse geweckt?
         </h3>
         <p className="mb-6" style={{ color: "var(--muted)" }}>
-          Erfahre mehr über unsere Gruppen und das Eventstudio.
+          Erfahre mehr über unsere Tanzgruppen.
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <Link

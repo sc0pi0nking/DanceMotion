@@ -100,7 +100,6 @@ export default function AdminEventsPage() {
     { value: 'little-joys', label: 'Little Joys' },
     { value: 'smileys', label: 'Smileys' },
     { value: 'emotion', label: 'Emotion' },
-    { value: 'eventstudio', label: 'Eventstudio' },
   ]
 
   const categories: Array<'Auftritt' | 'Workshop' | 'Training' | 'Event'> = ['Auftritt', 'Workshop', 'Training', 'Event']

@@ -1,6 +1,6 @@
 # DanceMotion Website
 
-Website für DanceMotion Eschweiler (Tanzgruppen + Eventstudio).
+Website für DanceMotion Eschweiler - Offene Tanzgemeinschaft.
 
 ## Dev
 npm install

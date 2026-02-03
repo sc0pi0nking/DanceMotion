@@ -18,8 +18,8 @@ const nextConfig: NextConfig = {
         hostname: "**",
       },
     ],
-    // Enable Next.js image optimization in production
-    unoptimized: false,
+    // Disable optimization in Docker to avoid sharp issues
+    unoptimized: process.env.NODE_ENV === 'production',
   },
   
   // Performance: Enable experimental features
