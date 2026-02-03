@@ -11,8 +11,10 @@ UPDATE public.admin_users
 SET force_password_change = false 
 WHERE force_password_change IS NULL OR force_password_change = true;
 
--- 3. Update the view to include force_password_change
-CREATE OR REPLACE VIEW public.admin_users_with_roles AS
+-- 3. Drop and recreate view to include force_password_change
+DROP VIEW IF EXISTS public.admin_users_with_roles;
+
+CREATE VIEW public.admin_users_with_roles AS
 SELECT 
   u.id,
   u.email,
@@ -23,11 +25,11 @@ SELECT
   u.last_login,
   u.created_at,
   u.updated_at,
-  u.force_password_change,
   r.id as role_id,
   r.name as role_name,
   r.description as role_description,
-  r.permissions
+  r.permissions,
+  u.force_password_change
 FROM public.admin_users u
 LEFT JOIN public.admin_roles r ON u.role_id = r.id;
 
