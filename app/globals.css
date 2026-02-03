@@ -63,10 +63,12 @@
 html[data-theme="light"] {
   --bg: #FFFFFF; /* Bright white on mobile for clarity */
   --fg: #1A1410; /* Tiefer, reicherer Braun-Schwarzton statt bloß schwarz */
-  --muted: #6B5B4F; /* Dunkler für WCAG AA Kontrast (~5.5:1) */
+  --muted: #4A3F37; /* Deutlich dunkler für WCAG AA Kontrast (~7:1 auf Weiß) */
+  --body-text: #3D3430; /* Noch dunkler für Fließtext - sehr gute Lesbarkeit */
   --panel: #FEFDFB; /* Clean off-white panel */
   --border: #E8D9C8; /* Warmer, sichtbarer Border mit Substanz */
   --accent: #2EC4C6; /* Teal bleibt gleich */
+  --accent-dark: #1FA8AA; /* Dunkleres Teal für Text-Links (WCAG AA) */
   --card-shadow: 0 8px 24px rgba(26,20,16,0.08);
   --panel-semi: rgba(254, 253, 251, 0.8); /* Light mode: helle Semi-transparente Kacheln */
   
@@ -98,10 +100,12 @@ html[data-theme="light"] {
 html[data-theme="dark"] {
   --bg: #0A0A0A;
   --fg: #F9F7F4;
-  --muted: #A89F99;
+  --muted: #C4BCB7; /* Heller für besseren Kontrast auf dunklem Hintergrund */
+  --body-text: #D8D2CE; /* Noch heller für Fließtext */
   --panel: #121212;
   --border: #2A2A2A;
   --accent: #2EC4C6;
+  --accent-dark: #2EC4C6; /* Im Dark Mode brauchen wir kein dunkleres Teal */
   --card-shadow: 0 24px 60px rgba(46,196,198,0.12);
   --panel-semi: rgba(18, 18, 18, 0.5); /* Dark mode: dunkle Semi-transparente Kacheln */
   
@@ -130,6 +134,19 @@ body {
   background: var(--bg);
   color: var(--fg);
   overflow-x: hidden;
+}
+
+/* Utility-Klassen für SEO-optimierte Lesbarkeit */
+.text-body {
+  color: var(--body-text, var(--muted));
+}
+
+.text-muted {
+  color: var(--muted);
+}
+
+.text-heading {
+  color: var(--fg);
 }
 
 /* Admin shell: fixed layout, avoid double scroll */

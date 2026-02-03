@@ -13,12 +13,13 @@ interface FAQItemProps {
 
 function FAQItem({ question, answer, isOpen, onToggle }: FAQItemProps) {
   return (
-    <div className="border-b border-gray-200 dark:border-gray-700">
+    <div style={{ borderBottom: "1px solid var(--border)" }}>
       <button
         onClick={onToggle}
-        className="w-full py-5 px-6 flex items-center justify-between text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+        className="w-full py-5 px-6 flex items-center justify-between text-left transition-colors"
+        style={{ backgroundColor: isOpen ? "rgba(46,196,198,0.05)" : "transparent" }}
       >
-        <span className="font-semibold text-gray-900 dark:text-white pr-4">
+        <span className="font-semibold pr-4" style={{ color: "var(--fg)" }}>
           {question}
         </span>
         <motion.div
@@ -26,7 +27,7 @@ function FAQItem({ question, answer, isOpen, onToggle }: FAQItemProps) {
           transition={{ duration: 0.2 }}
           className="flex-shrink-0"
         >
-          <ChevronDown size={20} className="text-gray-600 dark:text-gray-400" />
+          <ChevronDown size={20} style={{ color: "var(--muted)" }} />
         </motion.div>
       </button>
 
@@ -39,7 +40,10 @@ function FAQItem({ question, answer, isOpen, onToggle }: FAQItemProps) {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="px-6 pb-5 text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+            <div 
+              className="px-6 pb-5 whitespace-pre-wrap"
+              style={{ color: "var(--body-text, var(--muted))" }}
+            >
               {answer}
             </div>
           </motion.div>
@@ -88,13 +92,22 @@ export default function FAQAccordion({ faqs }: FAQAccordionProps) {
     <div className="space-y-6">
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+        <Search 
+          className="absolute left-4 top-1/2 -translate-y-1/2" 
+          size={20} 
+          style={{ color: "var(--muted)" }}
+        />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="FAQs durchsuchen..."
-          className="w-full pl-12 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+          className="w-full pl-12 pr-4 py-3 rounded-lg transition-all"
+          style={{ 
+            backgroundColor: "var(--panel)", 
+            border: "1px solid var(--border)",
+            color: "var(--fg)"
+          }}
         />
       </div>
 
@@ -104,11 +117,12 @@ export default function FAQAccordion({ faqs }: FAQAccordionProps) {
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              activeCategory === cat
-                ? 'bg-blue-600 text-white shadow-lg'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-            }`}
+            className="px-4 py-2 rounded-lg font-medium transition-all"
+            style={{
+              backgroundColor: activeCategory === cat ? "var(--accent)" : "var(--panel)",
+              color: activeCategory === cat ? "white" : "var(--fg)",
+              border: activeCategory === cat ? "none" : "1px solid var(--border)"
+            }}
           >
             {cat === 'all' ? 'Alle' : CATEGORY_LABELS[cat] || cat}
             <span className="ml-2 text-xs opacity-75">
@@ -120,7 +134,10 @@ export default function FAQAccordion({ faqs }: FAQAccordionProps) {
 
       {/* FAQ List */}
       {filteredFAQs.length > 0 ? (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+        <div 
+          className="rounded-lg shadow-lg overflow-hidden"
+          style={{ backgroundColor: "var(--panel)", border: "1px solid var(--border)" }}
+        >
           {filteredFAQs.map((faq) => (
             <FAQItem
               key={faq.id}
@@ -132,7 +149,7 @@ export default function FAQAccordion({ faqs }: FAQAccordionProps) {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+        <div className="text-center py-12" style={{ color: "var(--muted)" }}>
           <p className="text-lg">Keine FAQs gefunden</p>
           <p className="text-sm mt-2">Versuchen Sie eine andere Suche oder Kategorie</p>
         </div>

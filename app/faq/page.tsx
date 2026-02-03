@@ -52,8 +52,11 @@ export default async function FAQPage() {
       {faqs.length > 0 ? (
         <FAQAccordion faqs={faqs} />
       ) : (
-        <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-          <p className="text-gray-500 dark:text-gray-400">
+        <div 
+          className="text-center py-12 rounded-lg shadow-lg"
+          style={{ backgroundColor: "var(--panel)", border: "1px solid var(--border)" }}
+        >
+          <p style={{ color: "var(--muted)" }}>
             Derzeit sind keine FAQs verfügbar. Schauen Sie bald wieder vorbei!
           </p>
         </div>

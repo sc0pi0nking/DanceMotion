@@ -70,7 +70,7 @@ export default function SponsorsGrid() {
   if (sponsors.length === 0) {
     return (
       <div className="text-center py-20">
-        <p className="text-gray-500 dark:text-gray-400 text-lg">
+        <p className="text-lg" style={{ color: "var(--muted)" }}>
           Noch keine Sponsoren vorhanden.
         </p>
       </div>
@@ -86,11 +86,12 @@ export default function SponsorsGrid() {
             <button
               key={cat.value || 'all'}
               onClick={() => setSelectedCategory(cat.value)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-                selectedCategory === cat.value
-                  ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white shadow-lg shadow-teal-500/30'
-                  : 'bg-slate-800/50 text-gray-300 hover:bg-slate-700/50 border border-slate-700/50'
-              }`}
+              className="px-4 py-2 rounded-lg font-medium transition-all duration-300"
+              style={{
+                backgroundColor: selectedCategory === cat.value ? "var(--accent)" : "var(--panel)",
+                color: selectedCategory === cat.value ? "white" : "var(--fg)",
+                border: selectedCategory === cat.value ? "none" : "1px solid var(--border)"
+              }}
             >
               {cat.label}
             </button>
@@ -101,7 +102,7 @@ export default function SponsorsGrid() {
       {/* Sponsors Grid */}
       {filteredSponsors.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-500 dark:text-gray-400">
+          <p style={{ color: "var(--muted)" }}>
             Keine Sponsoren in dieser Kategorie.
           </p>
         </div>
@@ -110,7 +111,11 @@ export default function SponsorsGrid() {
           {filteredSponsors.map((sponsor) => (
             <div
               key={sponsor.id}
-              className="group bg-white dark:bg-slate-800/50 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-slate-200 dark:border-slate-700/50"
+              className="group rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
+              style={{ 
+                backgroundColor: "var(--panel)", 
+                border: "1px solid var(--border)" 
+              }}
             >
               {/* Logo Area */}
               <div 
@@ -136,16 +141,29 @@ export default function SponsorsGrid() {
               {/* Content */}
               <div className="p-6">
                 <div className="flex items-start justify-between gap-2 mb-3">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-teal-500 transition-colors">
+                  <h3 
+                    className="text-lg font-bold transition-colors"
+                    style={{ color: "var(--fg)" }}
+                  >
                     {sponsor.name}
                   </h3>
-                  <span className="flex-shrink-0 text-xs px-2 py-1 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20">
+                  <span 
+                    className="flex-shrink-0 text-xs px-2 py-1 rounded-full"
+                    style={{ 
+                      backgroundColor: "rgba(46,196,198,0.1)", 
+                      color: "var(--accent)",
+                      border: "1px solid rgba(46,196,198,0.2)"
+                    }}
+                  >
                     {getCategoryLabel(sponsor.category)}
                   </span>
                 </div>
 
                 {sponsor.description && (
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                  <p 
+                    className="text-sm mb-4 line-clamp-2"
+                    style={{ color: "var(--body-text, var(--muted))" }}
+                  >
                     {sponsor.description}
                   </p>
                 )}
@@ -155,7 +173,8 @@ export default function SponsorsGrid() {
                     href={sponsor.website_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-sm font-medium text-teal-500 hover:text-teal-400 transition-colors"
+                    className="inline-flex items-center gap-2 text-sm font-medium transition-colors"
+                    style={{ color: "var(--accent)" }}
                   >
                     Website besuchen
                     <ExternalLink className="w-4 h-4" />

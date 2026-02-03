@@ -53,7 +53,7 @@ export default function TeamPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500 dark:text-gray-400">Lädt Team...</p>
+        <p style={{ color: "var(--muted)" }}>Lädt Team...</p>
       </div>
     );
   }
@@ -68,10 +68,10 @@ export default function TeamPage() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-5xl font-bold mb-4" style={{ color: "var(--fg)" }}>
             Unser Team
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <p className="text-xl max-w-2xl mx-auto" style={{ color: "var(--body-text, var(--muted))" }}>
             Lerne die Menschen kennen, die DanceMotion zu dem machen, was es ist – 
             Leidenschaft, Energie und Professionalität.
           </p>
@@ -80,7 +80,7 @@ export default function TeamPage() {
         {/* Team Grid */}
         {members.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-600 dark:text-gray-400">Keine Team-Mitglieder vorhanden</p>
+            <p style={{ color: "var(--muted)" }}>Keine Team-Mitglieder vorhanden</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
@@ -92,7 +92,10 @@ export default function TeamPage() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 className="group"
               >
-                <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+                <div 
+                  className="rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
+                  style={{ backgroundColor: "var(--panel)", border: "1px solid var(--border)" }}
+                >
                 {/* Image */}
                 <div className="relative h-80 overflow-hidden" style={{ backgroundColor: "var(--panel)", backgroundImage: "linear-gradient(135deg, rgba(46,196,198,0.2), rgba(46,196,198,0.08))" }}>
                   {member.image_url ? (
@@ -117,22 +120,22 @@ export default function TeamPage() {
 
                 {/* Content */}
                 <div className="p-6">
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                  <h3 className="text-2xl font-bold mb-1" style={{ color: "var(--fg)" }}>
                     {member.name}
                   </h3>
-                  <p className="text-blue-600 dark:text-blue-400 font-medium mb-3">
+                  <p className="font-medium mb-3" style={{ color: "var(--accent)" }}>
                     {member.role}
                   </p>
                   
                   {member.bio && (
-                    <p className="text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">
+                    <p className="mb-4 leading-relaxed" style={{ color: "var(--body-text, var(--muted))" }}>
                       {member.bio}
                     </p>
                   )}
 
                   {/* Social Links */}
                   {member.social_links && Object.keys(member.social_links).length > 0 && (
-                    <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div className="flex gap-3 pt-4" style={{ borderTop: "1px solid var(--border)" }}>
                       {member.social_links.instagram && (
                         <a
                           href={`https://instagram.com/${member.social_links.instagram}`}
@@ -158,7 +161,8 @@ export default function TeamPage() {
                       {member.social_links.email && (
                         <a
                           href={`mailto:${member.social_links.email}`}
-                          className="p-3 bg-gray-600 text-white rounded-lg hover:shadow-lg transform hover:scale-110 transition-all duration-300"
+                          className="p-3 text-white rounded-lg hover:shadow-lg transform hover:scale-110 transition-all duration-300"
+                          style={{ backgroundColor: "var(--accent)" }}
                           title="E-Mail"
                         >
                           <Mail size={20} />
