@@ -11,43 +11,41 @@ export const metadata: Metadata = {
 
 export default function SponsorsPage() {
   return (
-    <div className="min-h-screen w-full">
-      {/* Hero Section */}
-      <section className="relative py-20 px-4 md:px-8">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 text-center">
-            Unsere Sponsoren
+    <div className="min-h-screen py-16">
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
+            Unsere Sponsoren & Partner
           </h1>
-          <p className="text-lg text-muted-foreground text-center mb-12">
-            Wir danken unseren Partnern und Sponsoren, die DanceMotion Eschweiler unterstützen 
-            und es uns ermöglichen, qualitativ hochwertigen Tanzunterricht und Events zu bieten.
+          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            Wir danken allen Unternehmen und Partnern, die DanceMotion Eschweiler unterstützen
+            und es uns ermöglichen, unsere Leidenschaft für den Tanz zu leben.
           </p>
         </div>
-      </section>
 
-      {/* Sponsors Grid */}
-      <section className="py-12 px-4 md:px-8">
-        <div className="max-w-6xl mx-auto">
-          <SponsorsGrid />
-        </div>
-      </section>
+        {/* Sponsors Grid */}
+        <SponsorsGrid />
 
-      {/* CTA Section */}
-      <section className="relative py-16 px-4 md:px-8 bg-card border-t border-border">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-4">Du möchtest DanceMotion unterstützen?</h2>
-          <p className="text-lg text-muted-foreground mb-8">
-            Kontaktiere uns für Sponsoring- oder Partnermöglichkeiten. Gemeinsam können wir 
-            noch mehr erreichen!
-          </p>
-          <a
-            href="/kontakt"
-            className="inline-block px-8 py-3 bg-accent text-accent-foreground rounded-lg hover:opacity-90 font-semibold transition-opacity"
-          >
-            Jetzt kontaktieren
-          </a>
+        {/* CTA Section */}
+        <div className="mt-20 text-center">
+          <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 dark:from-slate-800/80 dark:to-slate-900/80 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 md:p-12 max-w-3xl mx-auto">
+            <h2 className="text-3xl font-bold mb-4 text-white">
+              Du möchtest DanceMotion unterstützen?
+            </h2>
+            <p className="text-lg text-gray-400 mb-8">
+              Kontaktiere uns für Sponsoring- oder Partnermöglichkeiten. 
+              Gemeinsam können wir noch mehr erreichen!
+            </p>
+            <a
+              href="/formulare"
+              className="inline-block px-8 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-lg font-semibold hover:shadow-lg hover:shadow-teal-500/30 transition-all duration-300"
+            >
+              Jetzt kontaktieren
+            </a>
+          </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

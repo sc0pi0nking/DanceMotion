@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Plus, Edit2, Trash2, ArrowUp, ArrowDown, Eye, EyeOff, ExternalLink, Building2 } from 'lucide-react';
+import React, { useEffect, useState, useRef } from 'react';
+import { Plus, Edit2, Trash2, ArrowUp, ArrowDown, Eye, EyeOff, ExternalLink, Building2, Upload, X, Image as ImageIcon } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import {
   AdminCard,
@@ -47,6 +47,7 @@ export default function AdminSponsorsManager() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [editingSponsor, setEditingSponsor] = useState<Sponsor | null>(null);
   const [deletingSponsor, setDeletingSponsor] = useState<Sponsor | null>(null);
   const [formData, setFormData] = useState({
@@ -56,6 +57,7 @@ export default function AdminSponsorsManager() {
     website_url: '',
     category: 'general',
   });
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchSponsors();
@@ -87,6 +89,74 @@ export default function AdminSponsorsManager() {
       category: 'general',
     });
     setIsModalOpen(true);
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploading(true);
+
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+      if (!allowedTypes.includes(file.type)) {
+        alert(`Dateiformat nicht erlaubt: ${file.type}. Erlaubte Formate: JPG, PNG, GIF, WebP, SVG`);
+        return;
+      }
+
+      // Max 2MB
+      if (file.size > 2 * 1024 * 1024) {
+        alert('Datei zu groß. Maximum: 2MB');
+        return;
+      }
+
+      const fileName = `sponsor-${Date.now()}-${Math.random().toString(36).substring(7)}.${file.name.split('.').pop()}`;
+      
+      const { error: uploadErr } = await supabase.storage
+        .from('sponsor-images')
+        .upload(fileName, file, {
+          contentType: file.type,
+          upsert: false
+        });
+
+      if (uploadErr) {
+        console.error('Upload error:', uploadErr);
+        alert(`Upload fehlgeschlagen: ${uploadErr.message}`);
+        return;
+      }
+
+      const { data: publicUrl } = supabase.storage.from('sponsor-images').getPublicUrl(fileName);
+      setFormData(prev => ({ ...prev, logo_url: publicUrl.publicUrl }));
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Fehler beim Hochladen');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleDeleteImage = async () => {
+    if (!formData.logo_url) return;
+    
+    // Only delete if it's from our storage
+    if (formData.logo_url.includes('sponsor-images')) {
+      try {
+        const urlParts = formData.logo_url.split('/');
+        const fileName = urlParts[urlParts.length - 1];
+
+        await supabase.storage
+          .from('sponsor-images')
+          .remove([fileName]);
+      } catch (error) {
+        console.error('Error deleting image:', error);
+      }
+    }
+    
+    setFormData(prev => ({ ...prev, logo_url: '' }));
   };
 
   const openEditModal = (sponsor: Sponsor) => {
@@ -415,14 +485,67 @@ export default function AdminSponsorsManager() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1">
-                Logo URL
+                Logo / Bild
               </label>
-              <AdminInput
-                type="url"
-                value={formData.logo_url}
-                onChange={(e) => setFormData({ ...formData, logo_url: e.target.value })}
-                placeholder="https://..."
+              
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp,image/svg+xml"
+                onChange={handleImageUpload}
+                className="hidden"
               />
+
+              {formData.logo_url ? (
+                <div className="relative">
+                  <div className="w-full h-24 bg-slate-700/50 rounded-lg flex items-center justify-center overflow-hidden border border-slate-600">
+                    <img 
+                      src={formData.logo_url} 
+                      alt="Logo Vorschau" 
+                      className="max-h-full max-w-full object-contain p-2"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleDeleteImage}
+                    className="absolute -top-2 -right-2 p-1 bg-red-500 hover:bg-red-600 rounded-full text-white transition"
+                    title="Bild entfernen"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="w-full h-24 border-2 border-dashed border-slate-600 rounded-lg flex flex-col items-center justify-center gap-2 text-slate-400 hover:border-teal-500 hover:text-teal-400 transition disabled:opacity-50"
+                >
+                  {uploading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+                      <span className="text-xs">Wird hochgeladen...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-5 h-5" />
+                      <span className="text-xs">Bild hochladen</span>
+                    </>
+                  )}
+                </button>
+              )}
+              
+              {/* Or enter URL manually */}
+              <div className="mt-2">
+                <AdminInput
+                  type="url"
+                  value={formData.logo_url}
+                  onChange={(e) => setFormData({ ...formData, logo_url: e.target.value })}
+                  placeholder="Oder URL eingeben..."
+                  className="text-xs"
+                />
+              </div>
             </div>
 
             <div>
