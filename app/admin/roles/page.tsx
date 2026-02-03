@@ -13,6 +13,7 @@ const ALL_PERMISSIONS = [
   { key: 'documents', label: 'Dokumente', description: 'Dokumente verwalten' },
   { key: 'faqs', label: 'FAQs', description: 'FAQ verwalten' },
   { key: 'team', label: 'Team', description: 'Team-Mitglieder verwalten' },
+  { key: 'sponsors', label: 'Sponsoren', description: 'Sponsoren verwalten' },
   { key: 'tickets_admin', label: 'Tickets', description: 'Support-Tickets verwalten' },
   { key: 'alerts_admin', label: 'Alerts', description: 'System-Benachrichtigungen verwalten' },
   { key: 'wiki_admin', label: 'Admin Wiki', description: 'Admin Wiki (Non-Technical)' },

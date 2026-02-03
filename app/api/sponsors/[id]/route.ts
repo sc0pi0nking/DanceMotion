@@ -1,12 +1,13 @@
 /**
  * GET /api/sponsors/[id] - Get single sponsor
- * PUT /api/sponsors/[id] - Update sponsor (creator/admin only)
- * DELETE /api/sponsors/[id] - Delete sponsor (creator/admin only)
+ * PUT /api/sponsors/[id] - Update sponsor (admin with sponsors permission)
+ * DELETE /api/sponsors/[id] - Delete sponsor (admin with sponsors permission)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase';
 import { logAudit } from '@/lib/audit-logger';
+import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth';
 
 export async function GET(
   request: NextRequest,
@@ -56,29 +57,26 @@ export async function PUT(
   try {
     const { id } = await params;
 
-    // Get current user
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
+    // Check admin permissions
+    const currentUser = await getAdminUserWithPermissions();
+    if (!currentUser) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabaseServer.auth.getUser(token);
-
-    if (userError || !user) {
+    if (!currentUser.permissions.includes(PERMISSIONS.SPONSORS)) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
+        { error: 'Forbidden - Missing sponsors permission' },
+        { status: 403 }
       );
     }
 
-    // Get sponsor to check ownership
+    // Check sponsor exists
     const { data: sponsor, error: fetchError } = await supabaseServer
       .from('sponsors')
-      .select('created_by')
+      .select('name')
       .eq('id', id)
       .single();
 
@@ -86,13 +84,6 @@ export async function PUT(
       return NextResponse.json(
         { error: 'Sponsor not found' },
         { status: 404 }
-      );
-    }
-
-    if (sponsor.created_by !== user.id) {
-      return NextResponse.json(
-        { error: 'Forbidden' },
-        { status: 403 }
       );
     }
 
@@ -144,7 +135,7 @@ export async function PUT(
 
     // Log action
     await logAudit({
-      user_id: user.id,
+      user_id: currentUser.id,
       action: 'sponsor_updated',
       target_type: 'sponsors',
       target_id: id,
@@ -168,29 +159,26 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    // Get current user
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
+    // Check admin permissions
+    const currentUser = await getAdminUserWithPermissions();
+    if (!currentUser) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabaseServer.auth.getUser(token);
-
-    if (userError || !user) {
+    if (!currentUser.permissions.includes(PERMISSIONS.SPONSORS)) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
+        { error: 'Forbidden - Missing sponsors permission' },
+        { status: 403 }
       );
     }
 
-    // Get sponsor to check ownership
+    // Get sponsor to log details
     const { data: sponsor, error: fetchError } = await supabaseServer
       .from('sponsors')
-      .select('created_by, name')
+      .select('name')
       .eq('id', id)
       .single();
 
@@ -198,13 +186,6 @@ export async function DELETE(
       return NextResponse.json(
         { error: 'Sponsor not found' },
         { status: 404 }
-      );
-    }
-
-    if (sponsor.created_by !== user.id) {
-      return NextResponse.json(
-        { error: 'Forbidden' },
-        { status: 403 }
       );
     }
 
@@ -224,7 +205,7 @@ export async function DELETE(
 
     // Log action
     await logAudit({
-      user_id: user.id,
+      user_id: currentUser.id,
       action: 'sponsor_deleted',
       target_type: 'sponsors',
       target_id: id,

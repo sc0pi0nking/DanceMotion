@@ -1,11 +1,12 @@
 /**
  * GET /api/sponsors - Fetch all active sponsors
- * POST /api/sponsors - Create new sponsor (admin only)
+ * POST /api/sponsors - Create new sponsor (admin with sponsors permission)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase';
 import { logAudit } from '@/lib/audit-logger';
+import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
@@ -36,22 +37,19 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Get current user
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader) {
+    // Check admin permissions
+    const currentUser = await getAdminUserWithPermissions();
+    if (!currentUser) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabaseServer.auth.getUser(token);
-
-    if (userError || !user) {
+    if (!currentUser.permissions.includes(PERMISSIONS.SPONSORS)) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
+        { error: 'Forbidden - Missing sponsors permission' },
+        { status: 403 }
       );
     }
 
@@ -83,7 +81,7 @@ export async function POST(request: NextRequest) {
           logo_url: logo_url || null,
           website_url: website_url || null,
           category: category || 'general',
-          created_by: user.id,
+          created_by: currentUser.id,
         },
       ])
       .select()
@@ -105,7 +103,7 @@ export async function POST(request: NextRequest) {
 
     // Log action
     await logAudit({
-      user_id: user.id,
+      user_id: currentUser.id,
       action: 'sponsor_created',
       target_type: 'sponsors',
       target_id: sponsor.id,
