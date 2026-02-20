@@ -14,6 +14,7 @@ import "./gradients.css";
 export default function Home() {
   const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
+  const [groupsBannerUrl, setGroupsBannerUrl] = useState('');
 
   useEffect(() => {
     async function loadEvents() {
@@ -28,6 +29,20 @@ export default function Home() {
       }
     }
     loadEvents();
+
+    // Load groups banner image
+    async function loadGroupsBanner() {
+      try {
+        const res = await fetch('/api/content?keys=groups.banner_image_url');
+        if (!res.ok) return;
+        const data = await res.json();
+        const url = data?.data?.['groups.banner_image_url'];
+        if (typeof url === 'string' && url.trim().length > 0) {
+          setGroupsBannerUrl(url.trim());
+        }
+      } catch { /* silent fallback */ }
+    }
+    loadGroupsBanner();
   }, []);
 
   return (
@@ -53,6 +68,22 @@ export default function Home() {
             Verschiedene Stile, eine Community
           </p>
         </div>
+
+        {/* Configurable Groups Banner Image */}
+        {groupsBannerUrl && (
+          <div className="mb-16 w-full rounded-2xl overflow-hidden">
+            <img
+              src={groupsBannerUrl}
+              alt="Unsere Gruppen"
+              style={{
+                display: 'block',
+                width: '100%',
+                height: 'auto',
+                borderRadius: '1rem',
+              }}
+            />
+          </div>
+        )}
         
         {/* Alternating Groups - Text/Image Left-Right */}
         <div className="space-y-24">

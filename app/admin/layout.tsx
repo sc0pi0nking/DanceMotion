@@ -180,6 +180,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         { icon: Repeat, label: 'Wiederkehrend', href: '/admin/recurring', permission: 'recurring' },
         { icon: FileText, label: 'Inhalte', href: '/admin/content', permission: 'content' },
         { icon: ImageIcon, label: 'Hero Banner', href: '/admin/hero-banner', permission: 'content' },
+        { icon: ImageIcon, label: 'Gruppen Banner', href: '/admin/groups-banner', permission: 'content' },
         { icon: Images, label: 'Galerie', href: '/admin/gallery', permission: 'gallery' },
         { icon: FileDown, label: 'Dokumente', href: '/admin/documents', permission: 'documents' },
         { icon: HelpCircle, label: 'FAQs', href: '/admin/faqs', permission: 'faqs' },
