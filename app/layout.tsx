@@ -7,6 +7,7 @@ import ParallaxBackground from "./components/ParallaxBackground";
 import AnalyticsTracker from "./components/AnalyticsTracker";
 import CookieBanner from "./components/CookieBanner";
 import AlertsDisplay from "./components/AlertsDisplay";
+import PublicShell from "./components/PublicShell";
 import { getOrganizationSchema, getLocalBusinessSchema } from "@/lib/structured-data";
 
 const geistSans = Geist({
@@ -97,13 +98,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AnalyticsTracker />
         {/* Cookie Banner */}
         <CookieBanner />
-        {/* System Alerts */}
-        <AlertsDisplay />
-        {/* Global Parallax Background - fixed, behind everything */}
-        <ParallaxBackground />
-        <Header />
+        {/* Public-only elements (hidden on /admin/*) */}
+        <PublicShell>
+          {/* System Alerts */}
+          <AlertsDisplay />
+          {/* Global Parallax Background - fixed, behind everything */}
+          <ParallaxBackground />
+          <Header />
+        </PublicShell>
         <main className="relative z-10 flex-grow">{children}</main>
-        <Footer />
+        <PublicShell>
+          <Footer />
+        </PublicShell>
       </body>
     </html>
   );
