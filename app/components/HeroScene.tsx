@@ -20,6 +20,7 @@ const generateParticles = (count: number) => {
 export default function HeroScene() {
   const containerRef = useRef(null);
   const { scrollY } = useScroll();
+  const [heroBackgroundImage, setHeroBackgroundImage] = useState("");
   
   // Check for reduced motion preference
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -31,6 +32,25 @@ export default function HeroScene() {
     const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
     mediaQuery.addEventListener("change", handler);
     return () => mediaQuery.removeEventListener("change", handler);
+  }, []);
+
+  useEffect(() => {
+    const loadHeroBackground = async () => {
+      try {
+        const res = await fetch('/api/content?keys=hero.background_image_url');
+        if (!res.ok) return;
+
+        const data = await res.json();
+        const bg = data?.data?.['hero.background_image_url'];
+        if (typeof bg === 'string' && bg.trim().length > 0) {
+          setHeroBackgroundImage(bg.trim());
+        }
+      } catch {
+        // Silent fallback to default hero visuals
+      }
+    };
+
+    loadHeroBackground();
   }, []);
   
   // Parallax effect: Background moves slower than scroll
@@ -44,6 +64,19 @@ export default function HeroScene() {
 
   return (
     <section ref={containerRef} className="hero-scene relative min-h-[700px] w-full overflow-hidden">
+      {/* Optional admin-managed hero background image */}
+      {heroBackgroundImage && (
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `linear-gradient(180deg, rgba(2,6,23,0.45), rgba(2,6,23,0.65)), url(${heroBackgroundImage})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity: 0.6,
+          }}
+        />
+      )}
+
       {/* Parallax Background */}
       <motion.div
         style={{ y: prefersReducedMotion ? 0 : bgY, willChange: "transform" }}

@@ -19,6 +19,7 @@ export async function GET(req: Request) {
       'footer.contact.email',
       'footer.contact.phone',
       'footer.contact.address',
+      'hero.background_image_url',
     ]
 
     let keysToFetch = allowedPublicKeys

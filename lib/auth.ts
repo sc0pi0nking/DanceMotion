@@ -227,6 +227,7 @@ export const PAGE_PERMISSIONS: Record<string, Permission> = {
   '/admin/events': PERMISSIONS.EVENTS,
   '/admin/recurring': PERMISSIONS.RECURRING,
   '/admin/content': PERMISSIONS.CONTENT,
+  '/admin/hero-banner': PERMISSIONS.CONTENT,
   '/admin/gallery': PERMISSIONS.GALLERY,
   '/admin/documents': PERMISSIONS.DOCUMENTS,
   '/admin/faqs': PERMISSIONS.FAQS,

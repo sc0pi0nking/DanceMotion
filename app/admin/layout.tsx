@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { Calendar, FileText, BarChart3, Images, LogOut, Menu, X, FileDown, HelpCircle, Users, Book, Home, Share2, Repeat, Shield, Activity, LogIn, Settings, MessageSquare, AlertCircle } from 'lucide-react'
+import { Calendar, FileText, BarChart3, Images, LogOut, Menu, X, FileDown, HelpCircle, Users, Book, Home, Share2, Repeat, Shield, Activity, LogIn, Settings, MessageSquare, AlertCircle, ImageIcon } from 'lucide-react'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -179,6 +179,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         { icon: Calendar, label: 'Termine', href: '/admin/events', permission: 'events' },
         { icon: Repeat, label: 'Wiederkehrend', href: '/admin/recurring', permission: 'recurring' },
         { icon: FileText, label: 'Inhalte', href: '/admin/content', permission: 'content' },
+        { icon: ImageIcon, label: 'Hero Banner', href: '/admin/hero-banner', permission: 'content' },
         { icon: Images, label: 'Galerie', href: '/admin/gallery', permission: 'gallery' },
         { icon: FileDown, label: 'Dokumente', href: '/admin/documents', permission: 'documents' },
         { icon: HelpCircle, label: 'FAQs', href: '/admin/faqs', permission: 'faqs' },
