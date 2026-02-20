@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Save, X, Eye, EyeOff, GripVertical } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, Eye, EyeOff } from 'lucide-react';
 
 interface FAQ {
   id: string;
@@ -28,6 +28,7 @@ export default function FAQManager() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const [formData, setFormData] = useState({
     question: '',
@@ -41,15 +42,23 @@ export default function FAQManager() {
     fetchFAQs();
   }, []);
 
+  const showMessage = (type: 'success' | 'error', text: string) => {
+    setMessage({ type, text });
+    setTimeout(() => setMessage(null), 4000);
+  };
+
   const fetchFAQs = async () => {
     try {
-      const res = await fetch('/api/admin/faqs');
-      if (res.ok) {
-        const data = await res.json();
-        setFaqs(data);
+      const res = await fetch('/api/admin/faqs', { credentials: 'include' });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error || 'FAQs konnten nicht geladen werden');
       }
-    } catch (error) {
+      const data = await res.json();
+      setFaqs(data);
+    } catch (error: any) {
       console.error('Failed to load FAQs:', error);
+      showMessage('error', error.message || 'Fehler beim Laden der FAQs');
     } finally {
       setLoading(false);
     }
@@ -60,16 +69,22 @@ export default function FAQManager() {
       const res = await fetch('/api/admin/faqs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(formData),
       });
 
-      if (res.ok) {
-        fetchFAQs();
-        setIsCreating(false);
-        resetForm();
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error || 'FAQ konnte nicht erstellt werden');
       }
-    } catch (error) {
+
+      showMessage('success', '✅ FAQ erstellt');
+      fetchFAQs();
+      setIsCreating(false);
+      resetForm();
+    } catch (error: any) {
       console.error('Failed to create FAQ:', error);
+      showMessage('error', `❌ ${error.message}`);
     }
   };
 
@@ -78,15 +93,21 @@ export default function FAQManager() {
       const res = await fetch(`/api/admin/faqs/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(updates),
       });
 
-      if (res.ok) {
-        fetchFAQs();
-        setEditingId(null);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error || 'FAQ konnte nicht aktualisiert werden');
       }
-    } catch (error) {
+
+      showMessage('success', '✅ FAQ aktualisiert');
+      fetchFAQs();
+      setEditingId(null);
+    } catch (error: any) {
       console.error('Failed to update FAQ:', error);
+      showMessage('error', `❌ ${error.message}`);
     }
   };
 
@@ -96,13 +117,19 @@ export default function FAQManager() {
     try {
       const res = await fetch(`/api/admin/faqs/${id}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
 
-      if (res.ok) {
-        fetchFAQs();
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error || 'FAQ konnte nicht gelöscht werden');
       }
-    } catch (error) {
+
+      showMessage('success', '✅ FAQ gelöscht');
+      fetchFAQs();
+    } catch (error: any) {
       console.error('Failed to delete FAQ:', error);
+      showMessage('error', `❌ ${error.message}`);
     }
   };
 
@@ -131,21 +158,40 @@ export default function FAQManager() {
     });
   };
 
-  const filteredFAQs = filterCategory === 'all' 
-    ? faqs 
+  const filteredFAQs = filterCategory === 'all'
+    ? faqs
     : faqs.filter(f => f.category === filterCategory);
 
   if (loading) {
-    return <div className="p-8 text-center text-gray-500 dark:text-gray-400">Lädt FAQs...</div>;
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-teal-500 mx-auto mb-4"></div>
+          <p className="text-slate-400">Lädt FAQs...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-5">
+      {/* Message */}
+      {message && (
+        <div
+          className={`p-4 rounded-lg flex items-center gap-2 text-sm ${
+            message.type === 'success'
+              ? 'bg-green-500/20 text-green-400 border border-green-500/50'
+              : 'bg-red-500/20 text-red-400 border border-red-500/50'
+          }`}
+        >
+          {message.text}
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">FAQ Verwaltung</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm md:text-base">
+          <p className="text-slate-400 text-sm">
             {faqs.length} Fragen • {faqs.filter(f => f.published).length} veröffentlicht
           </p>
         </div>
@@ -154,21 +200,21 @@ export default function FAQManager() {
             setIsCreating(true);
             resetForm();
           }}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-medium transition w-full sm:w-auto"
         >
-          <Plus size={20} />
+          <Plus size={18} />
           Neue FAQ
         </button>
       </div>
 
       {/* Filter */}
-      <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:flex-wrap">
+      <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 md:flex-wrap">
         <button
           onClick={() => setFilterCategory('all')}
-          className={`px-3 md:px-4 py-2 rounded-lg transition-colors whitespace-nowrap text-sm md:text-base flex-shrink-0 ${
+          className={`px-3 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap flex-shrink-0 ${
             filterCategory === 'all'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              ? 'bg-teal-500 text-white'
+              : 'bg-slate-700 text-slate-300 hover:bg-slate-600 border border-slate-600'
           }`}
         >
           Alle ({faqs.length})
@@ -177,10 +223,10 @@ export default function FAQManager() {
           <button
             key={cat.value}
             onClick={() => setFilterCategory(cat.value)}
-            className={`px-3 md:px-4 py-2 rounded-lg transition-colors whitespace-nowrap text-sm md:text-base flex-shrink-0 ${
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap flex-shrink-0 ${
               filterCategory === cat.value
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                ? 'bg-teal-500 text-white'
+                : 'bg-slate-700 text-slate-300 hover:bg-slate-600 border border-slate-600'
             }`}
           >
             {cat.label} ({faqs.filter(f => f.category === cat.value).length})
@@ -190,90 +236,79 @@ export default function FAQManager() {
 
       {/* Create Form */}
       {isCreating && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 md:p-6 border-2 border-blue-500">
-          <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Neue FAQ erstellen</h3>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">
-                Kategorie
-              </label>
-              <select
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
-              >
-                {CATEGORIES.map(cat => (
-                  <option key={cat.value} value={cat.value}>{cat.label}</option>
-                ))}
-              </select>
-            </div>
+        <div className="bg-slate-800 border-2 border-teal-500/50 rounded-xl p-5 md:p-6 space-y-4">
+          <h3 className="text-lg font-bold text-white">Neue FAQ erstellen</h3>
 
-            <div>
-              <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">
-                Frage
-              </label>
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Kategorie</label>
+            <select
+              value={formData.category}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-teal-500 focus:outline-none"
+            >
+              {CATEGORIES.map(cat => (
+                <option key={cat.value} value={cat.value}>{cat.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Frage</label>
+            <input
+              type="text"
+              value={formData.question}
+              onChange={(e) => setFormData({ ...formData, question: e.target.value })}
+              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:border-teal-500 focus:outline-none"
+              placeholder="z.B. Was kostet eine Tanzstunde?"
+              maxLength={500}
+            />
+            <p className="text-xs text-slate-500 mt-1">{formData.question.length}/500 Zeichen</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Antwort</label>
+            <textarea
+              value={formData.answer}
+              onChange={(e) => setFormData({ ...formData, answer: e.target.value })}
+              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:border-teal-500 focus:outline-none resize-y"
+              rows={5}
+              placeholder="Die Antwort auf die Frage..."
+              maxLength={5000}
+            />
+            <p className="text-xs text-slate-500 mt-1">{formData.answer.length}/5000 Zeichen</p>
+          </div>
+
+          <div>
+            <label className="flex items-center gap-2 cursor-pointer">
               <input
-                type="text"
-                value={formData.question}
-                onChange={(e) => setFormData({ ...formData, question: e.target.value })}
-                className="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
-                placeholder="z.B. Was kostet eine Tanzstunde?"
-                maxLength={500}
+                type="checkbox"
+                checked={formData.published}
+                onChange={(e) => setFormData({ ...formData, published: e.target.checked })}
+                className="w-4 h-4 rounded border-slate-600 text-teal-500 focus:ring-teal-500"
               />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                {formData.question.length}/500 Zeichen
-              </p>
-            </div>
+              <span className="text-sm text-slate-300">Sofort veröffentlichen</span>
+            </label>
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">
-                Antwort
-              </label>
-              <textarea
-                value={formData.answer}
-                onChange={(e) => setFormData({ ...formData, answer: e.target.value })}
-                className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 resize-y"
-                rows={5}
-                placeholder="Die Antwort auf die Frage..."
-                maxLength={5000}
-              />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                {formData.answer.length}/5000 Zeichen
-              </p>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={formData.published}
-                  onChange={(e) => setFormData({ ...formData, published: e.target.checked })}
-                  className="w-4 h-4 text-blue-600 rounded"
-                />
-                <span className="text-sm text-gray-700 dark:text-gray-300">Sofort veröffentlichen</span>
-              </label>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={handleCreate}
-                disabled={!formData.question || !formData.answer}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <Save size={16} className="inline mr-2" />
-                Speichern
-              </button>
-              <button
-                onClick={() => {
-                  setIsCreating(false);
-                  resetForm();
-                }}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-900 dark:text-gray-100"
-              >
-                <X size={16} className="inline mr-2" />
-                Abbrechen
-              </button>
-            </div>
+          <div className="flex gap-3">
+            <button
+              onClick={handleCreate}
+              disabled={!formData.question.trim() || !formData.answer.trim()}
+              className="flex-1 inline-flex items-center justify-center gap-2 bg-teal-500 hover:bg-teal-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white py-2.5 px-4 rounded-lg font-medium transition"
+            >
+              <Save size={16} />
+              Speichern
+            </button>
+            <button
+              onClick={() => {
+                setIsCreating(false);
+                resetForm();
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium transition"
+            >
+              <X size={16} />
+              Abbrechen
+            </button>
           </div>
         </div>
       )}
@@ -283,21 +318,21 @@ export default function FAQManager() {
         {filteredFAQs.map((faq) => (
           <div
             key={faq.id}
-            className={`bg-white dark:bg-gray-800 rounded-lg shadow p-6 ${
-              !faq.published ? 'opacity-60 border-2 border-dashed border-gray-300 dark:border-gray-600' : ''
+            className={`bg-slate-800 border rounded-xl p-5 ${
+              !faq.published
+                ? 'opacity-60 border-dashed border-slate-500'
+                : 'border-slate-700'
             }`}
           >
             {editingId === faq.id ? (
-              // Edit Mode
+              /* Edit Mode */
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">
-                    Kategorie
-                  </label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Kategorie</label>
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-teal-500 focus:outline-none"
                   >
                     {CATEGORIES.map(cat => (
                       <option key={cat.value} value={cat.value}>{cat.label}</option>
@@ -306,26 +341,22 @@ export default function FAQManager() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">
-                    Frage
-                  </label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Frage</label>
                   <input
                     type="text"
                     value={formData.question}
                     onChange={(e) => setFormData({ ...formData, question: e.target.value })}
-                    className="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600"
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-teal-500 focus:outline-none"
                     maxLength={500}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-white">
-                    Antwort
-                  </label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Antwort</label>
                   <textarea
                     value={formData.answer}
                     onChange={(e) => setFormData({ ...formData, answer: e.target.value })}
-                    className="w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 resize-y"
+                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-teal-500 focus:outline-none resize-y"
                     rows={5}
                     maxLength={5000}
                   />
@@ -334,9 +365,9 @@ export default function FAQManager() {
                 <div className="flex gap-3">
                   <button
                     onClick={() => handleUpdate(faq.id, formData)}
-                    className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
+                    className="flex-1 inline-flex items-center justify-center gap-2 bg-teal-500 hover:bg-teal-600 text-white py-2.5 px-4 rounded-lg font-medium transition"
                   >
-                    <Save size={16} className="inline mr-2" />
+                    <Save size={16} />
                     Speichern
                   </button>
                   <button
@@ -344,59 +375,61 @@ export default function FAQManager() {
                       setEditingId(null);
                       resetForm();
                     }}
-                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium transition"
                   >
-                    <X size={16} className="inline mr-2" />
+                    <X size={16} />
                     Abbrechen
                   </button>
                 </div>
               </div>
             ) : (
-              // View Mode
+              /* View Mode */
               <div>
                 <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="px-2 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <span className="px-2 py-0.5 text-xs font-medium bg-teal-500/20 text-teal-300 rounded">
                         {CATEGORIES.find(c => c.value === faq.category)?.label || faq.category}
                       </span>
                       {!faq.published && (
-                        <span className="px-2 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 rounded">
+                        <span className="px-2 py-0.5 text-xs font-medium bg-slate-600 text-slate-300 rounded">
                           Entwurf
                         </span>
                       )}
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                    <h3 className="text-base font-bold text-white mb-2">
                       {faq.question}
                     </h3>
-                    <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                    <p className="text-slate-300 text-sm whitespace-pre-wrap">
                       {faq.answer}
                     </p>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-shrink-0">
                     <button
                       onClick={() => togglePublished(faq)}
-                      className={`p-2 rounded-lg transition-colors ${
+                      className={`p-2 rounded-lg transition ${
                         faq.published
-                          ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/30'
-                          : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600'
+                          ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
+                          : 'bg-slate-700 text-slate-400 hover:bg-slate-600'
                       }`}
-                      title={faq.published ? 'Veröffentlicht' : 'Entwurf'}
+                      title={faq.published ? 'Veröffentlicht – klicken zum Verbergen' : 'Entwurf – klicken zum Veröffentlichen'}
                     >
-                      {faq.published ? <Eye size={20} /> : <EyeOff size={20} />}
+                      {faq.published ? <Eye size={18} /> : <EyeOff size={18} />}
                     </button>
                     <button
                       onClick={() => startEdit(faq)}
-                      className="p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                      className="p-2 bg-teal-500/20 text-teal-400 rounded-lg hover:bg-teal-500/30 transition"
+                      title="Bearbeiten"
                     >
-                      <Edit2 size={20} />
+                      <Edit2 size={18} />
                     </button>
                     <button
                       onClick={() => handleDelete(faq.id)}
-                      className="p-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                      className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition"
+                      title="Löschen"
                     >
-                      <Trash2 size={20} />
+                      <Trash2 size={18} />
                     </button>
                   </div>
                 </div>
@@ -406,7 +439,7 @@ export default function FAQManager() {
         ))}
 
         {filteredFAQs.length === 0 && (
-          <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+          <div className="text-center py-12 text-slate-400">
             <p>Keine FAQs in dieser Kategorie</p>
           </div>
         )}

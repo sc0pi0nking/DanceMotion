@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import FAQAccordion from '@/app/components/FAQAccordion';
+import { supabaseServer } from '@/lib/supabase';
 
 export const metadata = {
   title: 'Häufig gestellte Fragen — DanceMotion Eschweiler',
@@ -10,15 +11,24 @@ export const revalidate = 3600;
 
 async function getFAQs() {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/faqs`, {
-      next: { revalidate: 3600 },
-    });
-    
-    if (!res.ok) return [];
-    return res.json();
-  } catch (error) {
-    console.error('Error fetching FAQs:', error);
+    const { data, error } = await supabaseServer
+      .from('faqs')
+      .select('*')
+      .eq('published', true)
+      .order('category', { ascending: true })
+      .order('order_index', { ascending: true });
+
+    if (error) {
+      // Graceful fallback during build or when DB is unreachable
+      if (process.env.NODE_ENV === 'production') {
+        console.error('Error fetching FAQs:', error.message);
+      }
+      return [];
+    }
+
+    return data || [];
+  } catch {
+    // Silent fallback - FAQs will load on next ISR revalidation
     return [];
   }
 }
