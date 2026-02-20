@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useEffect, useState } from "react";
+import React, { useMemo, useEffect, useState, useCallback } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import EditableContent from "./EditableContent";
@@ -19,9 +19,12 @@ const generateParticles = (count: number) => {
 
 export default function HeroScene() {
   const containerRef = useRef(null);
+  const imageRef = useRef<HTMLImageElement>(null);
+  const aspectRatioRef = useRef(0);
   const { scrollY } = useScroll();
   const [heroBackgroundImage, setHeroBackgroundImage] = useState("");
-  const [viewportWidth, setViewportWidth] = useState(1200);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [containerHeight, setContainerHeight] = useState(700);
   
   // Check for reduced motion preference
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -54,13 +57,33 @@ export default function HeroScene() {
     loadHeroBackground();
   }, []);
 
-  useEffect(() => {
-    const updateViewport = () => setViewportWidth(window.innerWidth || 1200);
-    updateViewport();
-
-    window.addEventListener('resize', updateViewport, { passive: true });
-    return () => window.removeEventListener('resize', updateViewport);
+  // Recalculate hero container height based on image aspect ratio + viewport width
+  const recalcHeight = useCallback(() => {
+    if (aspectRatioRef.current <= 0) return;
+    const w = window.innerWidth;
+    const h = Math.round(w / aspectRatioRef.current);
+    // Clamp between 400px and 900px for usability
+    setContainerHeight(Math.max(400, Math.min(h, 900)));
   }, []);
+
+  // When hero background image loads, read its natural dimensions
+  const handleImageLoad = useCallback(() => {
+    if (imageRef.current) {
+      const { naturalWidth, naturalHeight } = imageRef.current;
+      if (naturalWidth > 0 && naturalHeight > 0) {
+        aspectRatioRef.current = naturalWidth / naturalHeight;
+        recalcHeight();
+        setImageLoaded(true);
+      }
+    }
+  }, [recalcHeight]);
+
+  // Keep container height in sync with viewport width on resize
+  useEffect(() => {
+    if (!imageLoaded) return;
+    window.addEventListener('resize', recalcHeight, { passive: true });
+    return () => window.removeEventListener('resize', recalcHeight);
+  }, [imageLoaded, recalcHeight]);
   
   // Parallax effect: Background moves slower than scroll
   const bgY = useTransform(scrollY, [0, 500], [0, -150]);
@@ -70,34 +93,37 @@ export default function HeroScene() {
   
   // Animation repeat count (finite instead of infinite)
   const repeatCount = prefersReducedMotion ? 0 : 3;
-  const isMobile = viewportWidth < 768;
 
   return (
     <section
       ref={containerRef}
       className="hero-scene relative w-full overflow-hidden"
-      style={{ minHeight: heroBackgroundImage ? (isMobile ? '560px' : '700px') : '700px' }}
+      style={{
+        height: heroBackgroundImage && imageLoaded ? `${containerHeight}px` : undefined,
+        minHeight: heroBackgroundImage && imageLoaded ? undefined : '700px',
+      }}
     >
       {/* Optional admin-managed hero background image */}
       {heroBackgroundImage && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <img
+            ref={imageRef}
             src={heroBackgroundImage}
             alt="Hero Hintergrund"
-            className="w-full h-auto object-contain"
+            onLoad={handleImageLoad}
             style={{
               display: 'block',
-              maxHeight: isMobile ? '420px' : '620px',
-              margin: '0 auto',
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
             }}
           />
 
+          {/* Semi-transparent overlay for text readability */}
           <div
             className="absolute inset-0"
             style={{
-              background: isMobile
-                ? 'linear-gradient(180deg, rgba(2,6,23,0.10), rgba(2,6,23,0.30))'
-                : 'linear-gradient(180deg, rgba(2,6,23,0.20), rgba(2,6,23,0.45))',
+              background: 'linear-gradient(180deg, rgba(2,6,23,0.15) 0%, rgba(2,6,23,0.40) 100%)',
             }}
           />
         </div>
