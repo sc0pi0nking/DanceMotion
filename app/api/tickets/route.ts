@@ -4,7 +4,7 @@ import { supabaseServer } from '@/lib/supabase'
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { title, description, category, priority } = body
+    const { title, description, category, priority, attachments } = body
 
     if (!title || !description || !category) {
       return Response.json(
@@ -12,6 +12,11 @@ export async function POST(req: Request) {
         { status: 400 }
       )
     }
+
+    // Validate attachments if provided
+    const validAttachments = Array.isArray(attachments)
+      ? attachments.filter((url: string) => typeof url === 'string' && url.startsWith('http')).slice(0, 5)
+      : []
 
     const { data, error } = await supabaseServer
       .from('tickets')
@@ -22,6 +27,7 @@ export async function POST(req: Request) {
         priority: priority || 'normal',
         status: 'open',
         admin_notes: [],
+        attachments: validAttachments,
       }])
       .select()
 

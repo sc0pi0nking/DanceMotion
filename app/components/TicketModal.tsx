@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { X, AlertCircle } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { X, AlertCircle, ImagePlus } from 'lucide-react'
 
 const categories = [
   { id: 'bug', label: 'Fehler oder Problem', description: 'Etwas funktioniert nicht richtig' },
@@ -40,6 +40,64 @@ export default function TicketModal({ isOpen, onClose }: TicketModalProps) {
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [uploadedImages, setUploadedImages] = useState<string[]>([])
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  async function uploadImage(file: File) {
+    const fd = new FormData()
+    fd.append('file', file)
+
+    const res = await fetch('/api/tickets/upload', {
+      method: 'POST',
+      body: fd,
+    })
+
+    if (!res.ok) {
+      const data = await res.json()
+      throw new Error(data.error || 'Upload fehlgeschlagen')
+    }
+
+    const data = await res.json()
+    return data.url as string
+  }
+
+  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    if (uploadedImages.length + files.length > 3) {
+      setError('Maximal 3 Bilder erlaubt')
+      return
+    }
+
+    setUploading(true)
+    setError('')
+
+    try {
+      for (const file of Array.from(files)) {
+        if (file.size > 5 * 1024 * 1024) {
+          setError(`"${file.name}" ist zu groß (max. 5MB)`)
+          continue
+        }
+        if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
+          setError(`"${file.name}" hat ein ungültiges Format`)
+          continue
+        }
+        const url = await uploadImage(file)
+        setUploadedImages(prev => [...prev, url])
+      }
+    } catch (err: any) {
+      setError(err.message || 'Bild-Upload fehlgeschlagen')
+    } finally {
+      setUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  function removeImage(index: number) {
+    setUploadedImages(prev => prev.filter((_, i) => i !== index))
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -50,7 +108,10 @@ export default function TicketModal({ isOpen, onClose }: TicketModalProps) {
       const res = await fetch('/api/tickets', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          attachments: uploadedImages,
+        }),
       })
 
       if (res.ok) {
@@ -61,6 +122,7 @@ export default function TicketModal({ isOpen, onClose }: TicketModalProps) {
           category: 'question',
           priority: 'normal',
         })
+        setUploadedImages([])
         setTimeout(() => {
           setSubmitted(false)
           onClose()
@@ -191,6 +253,57 @@ export default function TicketModal({ isOpen, onClose }: TicketModalProps) {
               <p className="text-xs text-muted mt-1">{formData.description.length}/2000</p>
             </div>
 
+            {/* Image Upload */}
+            <div>
+              <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
+                Bilder anhängen (Optional, max. 3)
+              </label>
+
+              {uploadedImages.length < 3 && (
+                <div className="mb-3">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    multiple
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="flex items-center gap-2 px-4 py-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:border-accent hover:text-accent transition-colors disabled:opacity-50"
+                  >
+                    <ImagePlus size={18} />
+                    {uploading ? 'Wird hochgeladen...' : 'Bild(er) auswählen'}
+                  </button>
+                  <p className="text-xs text-muted mt-1">JPG, PNG, WEBP oder GIF (max. 5MB pro Bild)</p>
+                </div>
+              )}
+
+              {uploadedImages.length > 0 && (
+                <div className="flex flex-wrap gap-3">
+                  {uploadedImages.map((url, i) => (
+                    <div key={i} className="relative group">
+                      <img
+                        src={url}
+                        alt={`Anhang ${i + 1}`}
+                        className="w-20 h-20 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(i)}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Priority */}
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-900 dark:text-gray-100">
@@ -213,7 +326,7 @@ export default function TicketModal({ isOpen, onClose }: TicketModalProps) {
             <div className="flex gap-3 pt-4">
               <button
                 type="submit"
-                disabled={loading || !formData.title.trim() || !formData.description.trim()}
+                disabled={loading || uploading || !formData.title.trim() || !formData.description.trim()}
                 className="flex-1 px-4 py-2 bg-accent text-white rounded-lg font-semibold hover:opacity-90 disabled:opacity-50 transition-opacity"
               >
                 {loading ? 'Wird gesendet...' : 'Absenden'}

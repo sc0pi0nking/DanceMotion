@@ -14,7 +14,7 @@ export async function PATCH(
 
     const { id } = await params
     const body = await req.json()
-    const { action, status, note } = body
+    const { action, status, note, attachments } = body
 
     if (action === 'update_status') {
       const { data, error } = await supabaseServer
@@ -48,12 +48,19 @@ export async function PATCH(
       if (fetchError) throw fetchError
 
       const adminNotes = Array.isArray(ticket.admin_notes) ? ticket.admin_notes : []
+
+      // Validate note attachments if provided
+      const noteAttachments = Array.isArray(attachments)
+        ? attachments.filter((url: string) => typeof url === 'string' && url.startsWith('http')).slice(0, 5)
+        : []
+
       const updatedNotes = [
         ...adminNotes,
         {
           note,
-          created_by: 'Admin', // TODO: Get actual admin name from session
+          created_by: currentUser.email || 'Admin',
           created_at: new Date().toISOString(),
+          ...(noteAttachments.length > 0 ? { attachments: noteAttachments } : {}),
         },
       ]
 
