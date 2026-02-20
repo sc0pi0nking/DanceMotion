@@ -7,7 +7,7 @@ export const metadata = {
   description: 'Antworten auf häufig gestellte Fragen zu unseren Tanzkursen, Anmeldung, Events und mehr.',
 };
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 async function getFAQs() {
   try {
