@@ -1,13 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { ImageIcon, Save, RefreshCw, Eye, AlertCircle, CheckCircle } from 'lucide-react'
+import { useEffect, useState, type ChangeEvent } from 'react'
+import { ImageIcon, Save, RefreshCw, Eye, AlertCircle, CheckCircle, Upload } from 'lucide-react'
 import { AdminPageHeader } from '@/app/admin/components'
 
 export default function HeroBannerAdminPage() {
   const [imageUrl, setImageUrl] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   useEffect(() => {
@@ -62,6 +63,40 @@ export default function HeroBannerAdminPage() {
     setImageUrl('')
   }
 
+  const handleUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    try {
+      setUploading(true)
+      setMessage(null)
+
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const res = await fetch('/api/admin/hero-banner/upload', {
+        method: 'POST',
+        credentials: 'include',
+        body: formData,
+      })
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data?.error || 'Upload fehlgeschlagen')
+      }
+
+      const data = await res.json()
+      setImageUrl(data?.url || '')
+      setMessage({ type: 'success', text: '✅ Bild hochgeladen. Jetzt noch auf Speichern klicken.' })
+      setTimeout(() => setMessage(null), 3000)
+    } catch (err: any) {
+      setMessage({ type: 'error', text: `❌ ${err.message || 'Upload fehlgeschlagen'}` })
+    } finally {
+      setUploading(false)
+      e.target.value = ''
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -112,10 +147,35 @@ export default function HeroBannerAdminPage() {
             </p>
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Oder Bild hochladen</label>
+            <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium transition cursor-pointer">
+              {uploading ? (
+                <>
+                  <RefreshCw size={16} className="animate-spin" />
+                  Upload läuft...
+                </>
+              ) : (
+                <>
+                  <Upload size={16} />
+                  Bild auswählen
+                </>
+              )}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleUpload}
+                className="hidden"
+                disabled={uploading}
+              />
+            </label>
+            <p className="text-xs text-slate-500 mt-2">Erlaubte Formate: JPG, PNG, WEBP (max. 5MB)</p>
+          </div>
+
           <div className="flex flex-wrap gap-3">
             <button
               onClick={saveHeroBanner}
-              disabled={saving}
+              disabled={saving || uploading}
               className="inline-flex items-center gap-2 px-5 py-2.5 bg-teal-500 hover:bg-teal-600 disabled:bg-slate-600 text-white rounded-lg font-medium transition"
             >
               {saving ? (
