@@ -105,7 +105,7 @@ Nach den Migrationen muss Supabase den Schema Cache neu laden:
 Jetzt den Docker Container neu starten, damit die Fehler verschwinden:
 
 ```powershell
-ssh luca@192.168.178.104 "cd /opt/dancemotion/web && docker compose restart"
+ssh dev@dancemotion-prod "cd /opt/dancemotion/web && git pull origin main && docker compose up -d --build"
 ```
 
 ---

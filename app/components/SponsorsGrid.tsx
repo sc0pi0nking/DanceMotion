@@ -54,6 +54,8 @@ export default function SponsorsGrid() {
     ? sponsors.filter((s) => s.category === selectedCategory)
     : sponsors;
 
+  const sponsorCountLabel = `${filteredSponsors.length} ${filteredSponsors.length === 1 ? 'Eintrag' : 'Einträge'}`;
+
   const getCategoryLabel = (category: string) => {
     const cat = categories.find(c => c.value === category);
     return cat?.label || 'Sponsor';
@@ -69,8 +71,11 @@ export default function SponsorsGrid() {
 
   if (sponsors.length === 0) {
     return (
-      <div className="text-center py-20">
-        <p className="text-lg" style={{ color: "var(--muted)" }}>
+      <div
+        className="text-center py-12 md:py-16 rounded-2xl border"
+        style={{ backgroundColor: 'var(--panel)', borderColor: 'var(--border)' }}
+      >
+        <p className="text-lg" style={{ color: 'var(--muted)' }}>
           Noch keine Sponsoren vorhanden.
         </p>
       </div>
@@ -81,58 +86,86 @@ export default function SponsorsGrid() {
     <div className="space-y-8">
       {/* Filter Tabs */}
       {sponsors.length > 3 && (
-        <div className="flex flex-wrap gap-2 justify-center">
+        <div className="space-y-3">
+          <p className="text-sm text-center" style={{ color: 'var(--muted)' }}>
+            Kategorie filtern
+          </p>
+          <div className="flex flex-wrap gap-2 justify-center">
           {categories.map((cat) => (
             <button
               key={cat.value || 'all'}
               onClick={() => setSelectedCategory(cat.value)}
-              className="px-4 py-2 rounded-lg font-medium transition-all duration-300"
+              aria-pressed={selectedCategory === cat.value}
+              aria-label={cat.value ? `Sponsoren nach Kategorie ${cat.label} filtern` : 'Alle Sponsoren anzeigen'}
+              className="px-4 py-2 rounded-xl font-medium transition-all duration-200 hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
               style={{
-                backgroundColor: selectedCategory === cat.value ? "var(--accent)" : "var(--panel)",
-                color: selectedCategory === cat.value ? "white" : "var(--fg)",
-                border: selectedCategory === cat.value ? "none" : "1px solid var(--border)"
+                backgroundColor: selectedCategory === cat.value ? 'var(--accent)' : 'var(--panel)',
+                color: selectedCategory === cat.value ? 'white' : 'var(--fg)',
+                border: selectedCategory === cat.value ? '1px solid transparent' : '1px solid var(--border)',
+                boxShadow:
+                  selectedCategory === cat.value
+                    ? '0 8px 18px rgba(46,196,198,0.24)'
+                    : '0 2px 8px rgba(0,0,0,0.05)',
               }}
             >
               {cat.label}
             </button>
           ))}
+          </div>
+          <p className="text-xs text-center" style={{ color: 'var(--muted)' }}>
+            {sponsorCountLabel}
+          </p>
         </div>
       )}
 
       {/* Sponsors Grid */}
       {filteredSponsors.length === 0 ? (
-        <div className="text-center py-12">
-          <p style={{ color: "var(--muted)" }}>
+        <div className="text-center py-12 rounded-2xl border" style={{ backgroundColor: 'var(--panel)', borderColor: 'var(--border)' }}>
+          <p style={{ color: 'var(--muted)' }}>
             Keine Sponsoren in dieser Kategorie.
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
           {filteredSponsors.map((sponsor) => (
-            <div
+            <article
               key={sponsor.id}
-              className="group rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
-              style={{ 
-                backgroundColor: "var(--panel)", 
-                border: "1px solid var(--border)" 
+              className="group rounded-3xl overflow-hidden border transition-all duration-200 hover:-translate-y-1 focus-within:-translate-y-1"
+              style={{
+                backgroundColor: 'var(--panel)',
+                borderColor: 'var(--border)',
+                boxShadow: 'var(--card-shadow)',
               }}
             >
               {/* Logo Area */}
-              <div 
-                className="relative h-40 overflow-hidden flex items-center justify-center"
-                style={{ 
-                  backgroundColor: "var(--panel, #1e293b)", 
-                  backgroundImage: "linear-gradient(135deg, rgba(46,196,198,0.1), rgba(46,196,198,0.05))" 
+              <div
+                className="relative h-36 md:h-40 overflow-hidden flex items-center justify-center px-6"
+                style={{
+                  backgroundColor: 'var(--panel, #1e293b)',
+                  backgroundImage: 'linear-gradient(135deg, rgba(46,196,198,0.14), rgba(46,196,198,0.04))',
                 }}
               >
+                <div
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-px"
+                  style={{ backgroundColor: 'rgba(46,196,198,0.25)' }}
+                />
                 {sponsor.logo_url ? (
                   <img
                     src={sponsor.logo_url}
                     alt={sponsor.name}
-                    className="max-h-28 max-w-[80%] object-contain group-hover:scale-110 transition-transform duration-300"
+                    loading="lazy"
+                    decoding="async"
+                    className="max-h-24 md:max-h-28 max-w-[85%] object-contain transition-transform duration-200 group-hover:scale-105"
                   />
                 ) : (
-                  <div className="text-5xl font-bold text-teal-400/30">
+                  <div
+                    className="w-16 h-16 rounded-full flex items-center justify-center text-3xl font-bold"
+                    style={{
+                      color: 'var(--accent)',
+                      backgroundColor: 'rgba(46,196,198,0.12)',
+                      border: '1px solid rgba(46,196,198,0.25)',
+                    }}
+                  >
                     {sponsor.name.charAt(0).toUpperCase()}
                   </div>
                 )}
@@ -141,18 +174,18 @@ export default function SponsorsGrid() {
               {/* Content */}
               <div className="p-6">
                 <div className="flex items-start justify-between gap-2 mb-3">
-                  <h3 
+                  <h3
                     className="text-lg font-bold transition-colors"
-                    style={{ color: "var(--fg)" }}
+                    style={{ color: 'var(--fg)' }}
                   >
                     {sponsor.name}
                   </h3>
-                  <span 
+                  <span
                     className="flex-shrink-0 text-xs px-2 py-1 rounded-full"
-                    style={{ 
-                      backgroundColor: "rgba(46,196,198,0.1)", 
-                      color: "var(--accent)",
-                      border: "1px solid rgba(46,196,198,0.2)"
+                    style={{
+                      backgroundColor: 'rgba(46,196,198,0.1)',
+                      color: 'var(--accent)',
+                      border: '1px solid rgba(46,196,198,0.2)',
                     }}
                   >
                     {getCategoryLabel(sponsor.category)}
@@ -160,9 +193,9 @@ export default function SponsorsGrid() {
                 </div>
 
                 {sponsor.description && (
-                  <p 
+                  <p
                     className="text-sm mb-4 line-clamp-2"
-                    style={{ color: "var(--body-text, var(--muted))" }}
+                    style={{ color: 'var(--body-text, var(--muted))' }}
                   >
                     {sponsor.description}
                   </p>
@@ -173,15 +206,16 @@ export default function SponsorsGrid() {
                     href={sponsor.website_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-sm font-medium transition-colors"
-                    style={{ color: "var(--accent)" }}
+                    aria-label={`Website von ${sponsor.name} besuchen (öffnet in neuem Tab)`}
+                    className="inline-flex items-center gap-2 text-sm font-semibold transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                    style={{ color: 'var(--accent-dark, var(--accent))' }}
                   >
                     Website besuchen
                     <ExternalLink className="w-4 h-4" />
                   </a>
                 )}
               </div>
-            </div>
+            </article>
           ))}
         </div>
       )}

@@ -63,17 +63,53 @@ export default function AdminSponsorsManager() {
     fetchSponsors();
   }, []);
 
-  const fetchSponsors = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('sponsors')
-        .select('*')
-        .order('sort_order', { ascending: true });
+  const getAuthErrorMessage = (status: number) => {
+    if (status === 401) return 'Session abgelaufen. Bitte erneut anmelden.';
+    if (status === 403) return 'Keine Berechtigung für diese Aktion.';
+    return null;
+  };
 
-      if (error) throw error;
+  const parseErrorMessage = async (response: Response, fallback: string) => {
+    const authMessage = getAuthErrorMessage(response.status);
+    if (authMessage) return authMessage;
+
+    const errorData = await response.json().catch(() => ({}));
+    return errorData?.error || fallback;
+  };
+
+  const fetchSponsors = async () => {
+    setLoading(true);
+    try {
+      const adminRes = await fetch('/api/sponsors/admin', {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (adminRes.ok) {
+        const data = await adminRes.json();
+        setSponsors(data || []);
+        return;
+      }
+
+      if (adminRes.status !== 404) {
+        throw new Error(await parseErrorMessage(adminRes, 'Fehler beim Laden der Sponsoren'));
+      }
+
+      // Fallback: public endpoint (returns only active sponsors)
+      const fallbackRes = await fetch('/api/sponsors', {
+        method: 'GET',
+        credentials: 'include',
+      });
+
+      if (!fallbackRes.ok) {
+        throw new Error(await parseErrorMessage(fallbackRes, 'Fehler beim Laden der Sponsoren'));
+      }
+
+      const data = await fallbackRes.json();
       setSponsors(data || []);
     } catch (error) {
       console.error('Error fetching sponsors:', error);
+      alert(error instanceof Error ? error.message : 'Fehler beim Laden der Sponsoren');
     } finally {
       setLoading(false);
     }
@@ -185,38 +221,44 @@ export default function AdminSponsorsManager() {
     setSaving(true);
     try {
       if (editingSponsor) {
-        // Update existing
-        const { data, error } = await supabase
-          .from('sponsors')
-          .update(formData)
-          .eq('id', editingSponsor.id)
-          .select()
-          .single();
+        const res = await fetch(`/api/sponsors/${editingSponsor.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(formData),
+        });
 
-        if (error) throw error;
-        setSponsors(sponsors.map((s) => (s.id === editingSponsor.id ? data : s)));
-      } else {
-        // Add new
-        const session = await supabase.auth.getSession();
-        if (!session.data.session) {
-          alert('Nicht authentifiziert');
-          return;
+        if (!res.ok) {
+          throw new Error(await parseErrorMessage(res, 'Fehler beim Speichern des Sponsors'));
         }
 
-        const { data, error } = await supabase
-          .from('sponsors')
-          .insert([{ ...formData, created_by: session.data.session.user.id }])
-          .select()
-          .single();
+        const data = await res.json();
+        setSponsors(sponsors.map((s) => (s.id === editingSponsor.id ? data : s)));
+      } else {
+        // Add new via API (uses httpOnly admin_session cookie)
+        const res = await fetch('/api/sponsors', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(formData),
+        });
 
-        if (error) throw error;
+        if (!res.ok) {
+          throw new Error(await parseErrorMessage(res, 'Fehler beim Erstellen des Sponsors'));
+        }
+
+        const data = await res.json();
         setSponsors([...sponsors, data]);
       }
 
       setIsModalOpen(false);
     } catch (error) {
       console.error('Error saving sponsor:', error);
-      alert('Fehler beim Speichern');
+      alert(error instanceof Error ? error.message : 'Fehler beim Speichern');
     } finally {
       setSaving(false);
     }
@@ -227,13 +269,20 @@ export default function AdminSponsorsManager() {
 
     setSaving(true);
     try {
-      const { error } = await supabase.from('sponsors').delete().eq('id', deletingSponsor.id);
-      if (error) throw error;
+      const res = await fetch(`/api/sponsors/${deletingSponsor.id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (!res.ok) {
+        throw new Error(await parseErrorMessage(res, 'Fehler beim Löschen des Sponsors'));
+      }
+
       setSponsors(sponsors.filter((s) => s.id !== deletingSponsor.id));
       setIsDeleteModalOpen(false);
     } catch (error) {
       console.error('Error deleting sponsor:', error);
-      alert('Fehler beim Löschen');
+      alert(error instanceof Error ? error.message : 'Fehler beim Löschen');
     } finally {
       setSaving(false);
     }
@@ -241,17 +290,26 @@ export default function AdminSponsorsManager() {
 
   const handleToggleActive = async (sponsor: Sponsor) => {
     try {
-      const { error } = await supabase
-        .from('sponsors')
-        .update({ is_active: !sponsor.is_active })
-        .eq('id', sponsor.id);
+      const res = await fetch(`/api/sponsors/${sponsor.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ is_active: !sponsor.is_active }),
+      });
 
-      if (error) throw error;
+      if (!res.ok) {
+        throw new Error(await parseErrorMessage(res, 'Fehler beim Aktualisieren des Sponsor-Status'));
+      }
+
+      const updated = await res.json();
       setSponsors(sponsors.map((s) =>
-        s.id === sponsor.id ? { ...s, is_active: !s.is_active } : s
+        s.id === sponsor.id ? updated : s
       ));
     } catch (error) {
       console.error('Error toggling sponsor:', error);
+      alert(error instanceof Error ? error.message : 'Fehler beim Aktualisieren des Sponsor-Status');
     }
   };
 
@@ -261,14 +319,38 @@ export default function AdminSponsorsManager() {
     const sponsor2 = sponsors[index];
 
     try {
-      await supabase.from('sponsors').update({ sort_order: sponsor2.sort_order }).eq('id', sponsor1.id);
-      await supabase.from('sponsors').update({ sort_order: sponsor1.sort_order }).eq('id', sponsor2.id);
+      const res1 = await fetch(`/api/sponsors/${sponsor1.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ sort_order: sponsor2.sort_order }),
+      });
+
+      if (!res1.ok) {
+        throw new Error(await parseErrorMessage(res1, 'Fehler beim Verschieben des Sponsors'));
+      }
+
+      const res2 = await fetch(`/api/sponsors/${sponsor2.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ sort_order: sponsor1.sort_order }),
+      });
+
+      if (!res2.ok) {
+        throw new Error(await parseErrorMessage(res2, 'Fehler beim Verschieben des Sponsors'));
+      }
 
       const newSponsors = [...sponsors];
       [newSponsors[index - 1], newSponsors[index]] = [newSponsors[index], newSponsors[index - 1]];
       setSponsors(newSponsors);
     } catch (error) {
       console.error('Error moving sponsor:', error);
+      alert(error instanceof Error ? error.message : 'Fehler beim Verschieben des Sponsors');
     }
   };
 
@@ -278,14 +360,38 @@ export default function AdminSponsorsManager() {
     const sponsor2 = sponsors[index + 1];
 
     try {
-      await supabase.from('sponsors').update({ sort_order: sponsor2.sort_order }).eq('id', sponsor1.id);
-      await supabase.from('sponsors').update({ sort_order: sponsor1.sort_order }).eq('id', sponsor2.id);
+      const res1 = await fetch(`/api/sponsors/${sponsor1.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ sort_order: sponsor2.sort_order }),
+      });
+
+      if (!res1.ok) {
+        throw new Error(await parseErrorMessage(res1, 'Fehler beim Verschieben des Sponsors'));
+      }
+
+      const res2 = await fetch(`/api/sponsors/${sponsor2.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ sort_order: sponsor1.sort_order }),
+      });
+
+      if (!res2.ok) {
+        throw new Error(await parseErrorMessage(res2, 'Fehler beim Verschieben des Sponsors'));
+      }
 
       const newSponsors = [...sponsors];
       [newSponsors[index], newSponsors[index + 1]] = [newSponsors[index + 1], newSponsors[index]];
       setSponsors(newSponsors);
     } catch (error) {
       console.error('Error moving sponsor:', error);
+      alert(error instanceof Error ? error.message : 'Fehler beim Verschieben des Sponsors');
     }
   };
 

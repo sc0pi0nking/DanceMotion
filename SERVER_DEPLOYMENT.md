@@ -147,6 +147,18 @@ Dort siehst du den Router für `dancemotion.org`
 
 Wenn du Code änderungen machst:
 
+### Direkt von lokal per SSH deployen
+```bash
+# Standard deploy (git pull + restart ohne forced rebuild)
+ssh dev@dancemotion-prod "cd /opt/dancemotion/web && git pull origin main && docker compose up -d"
+
+# Deploy mit Rebuild (wenn Docker Image neu gebaut werden soll)
+ssh dev@dancemotion-prod "cd /opt/dancemotion/web && git pull origin main && docker compose up -d --build"
+
+# Alternative via IP
+ssh dev@192.168.178.116 "cd /opt/dancemotion/web && git pull origin main && docker compose up -d --build"
+```
+
 ### 1. Local committen & pushen
 ```bash
 # Auf deinem PC

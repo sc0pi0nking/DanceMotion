@@ -268,15 +268,18 @@ export default function WikiPage() {
           </h3>
         </div>
         <div style={{ color: 'var(--muted)' }} className="space-y-3">
-          <p><strong>Server:</strong> 192.168.178.104 | Path: /opt/dancemotion/web</p>
+          <p><strong>Server:</strong> dev@dancemotion-prod (oder dev@192.168.178.116) | Path: /opt/dancemotion/web</p>
           <CodeBlock
             id="deploy-flow"
             code={`1. Local: git add -A && git commit -m "message"
-2. Local: git push
-3. Server: git pull
-4. Server: docker compose down
-5. Server: docker compose up -d --build
-6. Deployed! Next.js Build Cache: ~15-25s`}
+2. Local: git push origin main
+3. Deploy (SSH Hostname):
+   ssh dev@dancemotion-prod "cd /opt/dancemotion/web && git pull origin main && docker compose up -d"
+4. Deploy mit Rebuild (bei Bedarf):
+   ssh dev@dancemotion-prod "cd /opt/dancemotion/web && git pull origin main && docker compose up -d --build"
+5. Alternative per IP:
+   ssh dev@192.168.178.116 "cd /opt/dancemotion/web && git pull origin main && docker compose up -d --build"
+6. Deployed!`}
             language="bash"
           />
         </div>

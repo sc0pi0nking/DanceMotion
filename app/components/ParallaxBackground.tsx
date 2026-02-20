@@ -3,10 +3,24 @@
 import React, { memo, useMemo, useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 
+// ==================== PERFORMANCE DETECTION ====================
+
 // Detect if user prefers reduced motion
 const prefersReducedMotion = (): boolean => {
   if (typeof window === "undefined") return false;
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+};
+
+// Detect if viewport is below threshold for full effects (< 1400px)
+const isSmallViewport = (): boolean => {
+  if (typeof window === "undefined") return true;
+  return window.innerWidth < 1400;
+};
+
+// Detect low-end CPU (< 4 cores)
+const isLowEndCPU = (): boolean => {
+  if (typeof window === "undefined") return false;
+  return (navigator.hardwareConcurrency ?? 4) < 4;
 };
 
 // Detect if device is low-end (mobile or old browser)
@@ -15,14 +29,39 @@ const isLowEndDevice = (): boolean => {
   
   const userAgent = navigator.userAgent;
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
-  
-  // Check if laptop/desktop with low RAM or old browser
   const isOldBrowser = /MSIE|Trident|Edge\/1[0-6]/.test(userAgent);
   
-  return isMobile || isOldBrowser;
+  return isMobile || isOldBrowser || isLowEndCPU();
 };
 
-// Generate subtle floating particles
+// Performance mode types
+type PerformanceMode = "full" | "reduced" | "lite" | "static";
+
+// Determine best performance mode based on device capabilities
+const getPerformanceMode = (): PerformanceMode => {
+  if (typeof window === "undefined") return "static";
+  
+  const reducedMotion = prefersReducedMotion();
+  const smallViewport = isSmallViewport();
+  const lowEndDevice = isLowEndDevice();
+  const lowCPU = isLowEndCPU();
+  
+  // Static: reduced motion OR (small viewport AND low-end)
+  if (reducedMotion || (smallViewport && lowEndDevice)) return "static";
+  
+  // Lite: low CPU or small viewport
+  if (lowCPU || smallViewport) return "lite";
+  
+  // Reduced: mobile/old browser but decent viewport
+  if (lowEndDevice) return "reduced";
+  
+  // Full: all checks pass
+  return "full";
+};
+
+// ==================== PARTICLE GENERATORS ====================
+
+// Generate subtle floating particles - REDUCED count
 const generateMeshParticles = (count: number) => {
   return Array.from({ length: count }, (_, i) => ({
     id: i,
@@ -34,8 +73,7 @@ const generateMeshParticles = (count: number) => {
   }));
 };
 
-// Generate floating bubbles like in Hero - these animate up/down and fade in/out
-// OPTIMIZED: Much fewer bubbles on low-end devices
+// Generate floating bubbles - REDUCED count
 const generateFloatingBubbles = (count: number) => {
   return Array.from({ length: count }, (_, i) => ({
     id: i,
@@ -48,58 +86,86 @@ const generateFloatingBubbles = (count: number) => {
   }));
 };
 
-// Memoized component to prevent unnecessary re-renders
+// ==================== STATIC BACKGROUND COMPONENT ====================
+// Ultra-lightweight static version for reduced motion / small viewports
+const StaticBackground = memo(() => (
+  <div className="fixed inset-0 pointer-events-none z-0 w-full h-full overflow-hidden">
+    <div 
+      className="absolute inset-0"
+      style={{
+        background: `
+          radial-gradient(ellipse 80% 50% at 20% 30%, var(--accent-light, rgba(46,196,198,0.12)) 0%, transparent 50%),
+          radial-gradient(ellipse 60% 40% at 80% 70%, var(--accent-light, rgba(46,196,198,0.10)) 0%, transparent 50%),
+          radial-gradient(ellipse 70% 35% at 50% 50%, var(--accent-light, rgba(46,196,198,0.08)) 0%, transparent 60%)
+        `,
+      }}
+    />
+  </div>
+));
+StaticBackground.displayName = "StaticBackground";
+
+// ==================== MAIN COMPONENT ====================
 const ParallaxBackgroundContent = memo(() => {
   const { scrollY } = useScroll();
   const [isMounted, setIsMounted] = useState(false);
-  const [shouldReduceMotion, setShouldReduceMotion] = useState(false);
-  const [isLowEnd, setIsLowEnd] = useState(false);
+  const [performanceMode, setPerformanceMode] = useState<PerformanceMode>("static");
   
-  // Only generate particles on client to avoid hydration mismatch
+  // Initialize on client
   useEffect(() => {
     setIsMounted(true);
-    setShouldReduceMotion(prefersReducedMotion());
-    setIsLowEnd(isLowEndDevice());
+    setPerformanceMode(getPerformanceMode());
+    
+    // Listen for viewport changes
+    const handleResize = () => setPerformanceMode(getPerformanceMode());
+    window.addEventListener("resize", handleResize, { passive: true });
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
   
-  // Individual element parallax - POSITIVE values = elements move DOWN (slower than scroll)
-  // OPTIMIZED: Disable parallax on low-end devices or if reduce-motion preference
-  const parallaxDisabled = shouldReduceMotion || isLowEnd;
+  // ==================== ALL HOOKS MUST BE CALLED BEFORE ANY EARLY RETURNS ====================
+  // React Hooks Rule: Hooks must always be called in the same order on every render
   
-  const orb1Y = useTransform(scrollY, [0, 3000], parallaxDisabled ? [0, 0] : [0, 150]);
-  const orb2Y = useTransform(scrollY, [0, 3000], parallaxDisabled ? [0, 0] : [0, 100]);
-  const orb3Y = useTransform(scrollY, [0, 3000], parallaxDisabled ? [0, 0] : [0, 200]);
-  const orb4Y = useTransform(scrollY, [0, 3000], parallaxDisabled ? [0, 0] : [0, 80]);
-  const orb5Y = useTransform(scrollY, [0, 3000], parallaxDisabled ? [0, 0] : [0, 180]);
-  const orb6Y = useTransform(scrollY, [0, 3000], parallaxDisabled ? [0, 0] : [0, 120]);
-  const orb7Y = useTransform(scrollY, [0, 3000], parallaxDisabled ? [0, 0] : [0, 250]);
-  const orb8Y = useTransform(scrollY, [0, 3000], parallaxDisabled ? [0, 0] : [0, 60]);
-
-  // Memoize particles - only generate on client
-  // OPTIMIZED: Reduce from 12 to 8 particles on low-end devices
-  const particles = useMemo(() => {
-    if (!isMounted) return [];
-    const count = isLowEnd ? 4 : 8;
-    return generateMeshParticles(count);
-  }, [isMounted, isLowEnd]);
+  // Parallax disabled for lite/static mode
+  const parallaxDisabled = performanceMode === "lite" || performanceMode === "static";
   
-  // Memoize floating bubbles - Hero-style animated bubbles
-  // OPTIMIZED: Reduce from 40 to 15 (or 0 on low-end if reduce-motion)
-  const floatingBubbles = useMemo(() => {
-    if (!isMounted) return [];
-    if (shouldReduceMotion && isLowEnd) return []; // Disable completely on low-end with reduce-motion
-    const count = isLowEnd ? 8 : 15;
-    return generateFloatingBubbles(count);
-  }, [isMounted, isLowEnd, shouldReduceMotion]);
+  // REDUCED: Only 3 parallax layers instead of 8
+  const orb1Y = useTransform(scrollY, [0, 3000], parallaxDisabled ? [0, 0] : [0, 100]);
+  const orb2Y = useTransform(scrollY, [0, 3000], parallaxDisabled ? [0, 0] : [0, 150]);
+  const orb3Y = useTransform(scrollY, [0, 3000], parallaxDisabled ? [0, 0] : [0, 80]);
   
   // Parallax transform for bubbles layer
-  const bubblesY = useTransform(scrollY, [0, 3000], parallaxDisabled ? [0, 0] : [0, 180]);
+  const bubblesY = useTransform(scrollY, [0, 3000], parallaxDisabled ? [0, 0] : [0, 120]);
+
+  // Particle counts based on mode
+  const particleCount = performanceMode === "full" ? 4 : 2;
+  const bubbleCount = performanceMode === "full" ? 6 : 0;
+  
+  // Memoize particles - returns empty array for static/lite mode
+  const particles = useMemo(() => {
+    if (!isMounted || performanceMode === "lite" || performanceMode === "static") return [];
+    return generateMeshParticles(particleCount);
+  }, [isMounted, performanceMode, particleCount]);
+  
+  // Memoize floating bubbles - disabled in lite/static mode
+  const floatingBubbles = useMemo(() => {
+    if (!isMounted || performanceMode !== "full") return [];
+    return generateFloatingBubbles(bubbleCount);
+  }, [isMounted, performanceMode, bubbleCount]);
+  
+  // Animation enabled only in full mode
+  const animationsEnabled = performanceMode === "full";
+  
+  // ==================== EARLY RETURNS AFTER ALL HOOKS ====================
+  // Early return for static mode - massive performance gain
+  if (performanceMode === "static") {
+    return <StaticBackground />;
+  }
 
   return (
     <div
       className="fixed inset-0 pointer-events-none z-0 w-full h-full parallax-bg overflow-hidden"
+      style={{ "--parallax-mode": performanceMode } as React.CSSProperties}
     >
-      {/* Subtler SVG background with gradient mesh effect - NOT like hero */}
+      {/* SVG background - OPTIMIZED: reduced filters and elements */}
       <svg
         className="w-full h-full pointer-events-none"
         viewBox="0 0 1200 2000"
@@ -107,7 +173,7 @@ const ParallaxBackgroundContent = memo(() => {
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          {/* Mesh gradient for organic feel - uses CSS variables */}
+          {/* Simplified gradient - no expensive blur */}
           <linearGradient id="meshGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="var(--mesh-gradient-1, rgba(46,196,198,0.16))" />
             <stop offset="50%" stopColor="var(--mesh-gradient-2, rgba(46,196,198,0.08))" />
@@ -131,37 +197,31 @@ const ParallaxBackgroundContent = memo(() => {
             <stop offset="100%" stopColor="rgba(46,196,198,0)" />
           </radialGradient>
 
+          {/* OPTIMIZED: Drastically reduced blur stdDeviation (was 50/80, now 15/25) */}
           <filter id="meshBlur">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="50" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation="15" />
           </filter>
           <filter id="meshBlur2">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="80" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation="25" />
           </filter>
-          <filter id="particleGlow">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
+          {/* OPTIMIZED: Removed particleGlow filter entirely - uses simpler opacity */}
         </defs>
 
         {/* Base gradient layer */}
         <rect width="1200" height="2000" fill="url(#meshGradient1)" opacity={0.6} />
 
-        {/* Mesh points - slow animation for organic feel */}
+        {/* OPTIMIZED: Only 2 mesh circles instead of 6, animations are conditional */}
         <motion.circle
           cx={150}
           cy={300}
           r={650}
           fill="url(#meshRadial1)"
-          filter="url(#meshBlur2)"
-          animate={{
+          filter={performanceMode === "full" ? "url(#meshBlur2)" : undefined}
+          animate={animationsEnabled ? {
             cx: [150, 200, 150],
             cy: [300, 380, 300],
-            r: [650, 680, 650],
-          }}
-          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+          } : undefined}
+          transition={animationsEnabled ? { duration: 25, repeat: Infinity, ease: "easeInOut" } : undefined}
         />
 
         <motion.circle
@@ -169,72 +229,25 @@ const ParallaxBackgroundContent = memo(() => {
           cy={1200}
           r={600}
           fill="url(#meshRadial2)"
-          filter="url(#meshBlur2)"
-          animate={{
+          filter={performanceMode === "full" ? "url(#meshBlur2)" : undefined}
+          animate={animationsEnabled ? {
             cx: [1050, 1000, 1050],
             cy: [1200, 1280, 1200],
-            r: [600, 640, 600],
-          }}
-          transition={{ duration: 28, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+          } : undefined}
+          transition={animationsEnabled ? { duration: 28, repeat: Infinity, ease: "easeInOut", delay: 3 } : undefined}
         />
 
-        {/* Additional depth layers */}
-        <motion.circle
-          cx={800}
-          cy={400}
-          r={350}
-          fill="url(#meshRadial3)"
-          filter="url(#meshBlur)"
-          animate={{
-            cx: [800, 830, 800],
-            cy: [400, 450, 400],
-            opacity: [0.4, 0.6, 0.4],
-          }}
-          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 5 }}
-        />
-
-        <motion.circle
-          cx={200}
-          cy={900}
-          r={400}
-          fill="url(#meshRadial3)"
-          filter="url(#meshBlur)"
-          animate={{
-            cx: [200, 250, 200],
-            cy: [900, 950, 900],
-            opacity: [0.3, 0.5, 0.3],
-          }}
-          transition={{ duration: 22, repeat: Infinity, ease: "easeInOut", delay: 8 }}
-        />
-
-        {/* Center accent orbs */}
-        <motion.circle
+        {/* OPTIMIZED: One static center orb instead of multiple animated ones */}
+        <circle
           cx={600}
-          cy={600}
+          cy={800}
           r={450}
           fill="url(#meshRadial3)"
-          filter="url(#meshBlur)"
-          animate={{
-            r: [450, 480, 450],
-            opacity: [0.3, 0.45, 0.3],
-          }}
-          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+          filter={performanceMode === "full" ? "url(#meshBlur)" : undefined}
+          opacity={0.35}
         />
 
-        <motion.circle
-          cx={600}
-          cy={1500}
-          r={500}
-          fill="url(#meshRadial3)"
-          filter="url(#meshBlur)"
-          animate={{
-            r: [500, 540, 500],
-            opacity: [0.25, 0.4, 0.25],
-          }}
-          transition={{ duration: 22, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-        />
-
-        {/* Floating particles for extra depth */}
+        {/* Floating particles - only in full mode, no filter */}
         {particles.map((particle) => (
           <motion.circle
             key={particle.id}
@@ -242,24 +255,23 @@ const ParallaxBackgroundContent = memo(() => {
             cy={`${particle.y}%`}
             r={particle.size}
             fill="var(--mesh-orb-1, rgba(46,196,198,0.3))"
-            filter="url(#particleGlow)"
             initial={{ opacity: 0 }}
-            animate={{
+            animate={animationsEnabled ? {
               opacity: [0, 0.4, 0],
               cy: [`${particle.y}%`, `${particle.y - 8}%`, `${particle.y}%`],
-            }}
-            transition={{
+            } : { opacity: 0.25 }}
+            transition={animationsEnabled ? {
               duration: particle.duration,
               repeat: Infinity,
               delay: particle.delay,
               ease: "easeInOut",
-            }}
+            } : undefined}
           />
         ))}
       </svg>
       
-      {/* Parallax overlay orbs - move at different speeds for depth */}
-      {/* Layer 1: Top area - hero complement */}
+      {/* OPTIMIZED: Only 3 parallax layers instead of 8 */}
+      {/* Layer 1: Top area */}
       <motion.div 
         className="absolute inset-0 pointer-events-none"
         style={{ y: orb1Y }}
@@ -268,285 +280,102 @@ const ParallaxBackgroundContent = memo(() => {
           className="absolute top-[5%] left-[5%] w-[500px] h-[500px] rounded-full opacity-40"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(60px)",
+            filter: performanceMode === "full" ? "blur(60px)" : "blur(30px)",
           }}
         />
         <div 
           className="absolute top-[8%] right-[15%] w-[400px] h-[400px] rounded-full opacity-35"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(70px)",
-          }}
-        />
-        <div 
-          className="absolute top-[12%] left-[40%] w-[350px] h-[350px] rounded-full opacity-30"
-          style={{
-            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(55px)",
+            filter: performanceMode === "full" ? "blur(70px)" : "blur(35px)",
           }}
         />
       </motion.div>
       
-      {/* Layer 2: Upper-mid section */}
+      {/* Layer 2: Mid section */}
       <motion.div 
         className="absolute inset-0 pointer-events-none"
         style={{ y: orb2Y }}
       >
         <div 
-          className="absolute top-[20%] right-[5%] w-[550px] h-[550px] rounded-full opacity-35"
+          className="absolute top-[35%] left-[8%] w-[600px] h-[600px] rounded-full opacity-32"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(80px)",
+            filter: performanceMode === "full" ? "blur(90px)" : "blur(40px)",
           }}
         />
         <div 
-          className="absolute top-[25%] left-[20%] w-[350px] h-[350px] rounded-full opacity-30"
+          className="absolute top-[50%] right-[10%] w-[500px] h-[500px] rounded-full opacity-35"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(60px)",
-          }}
-        />
-        <div 
-          className="absolute top-[18%] left-[55%] w-[400px] h-[400px] rounded-full opacity-28"
-          style={{
-            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(65px)",
+            filter: performanceMode === "full" ? "blur(85px)" : "blur(40px)",
           }}
         />
       </motion.div>
       
-      {/* Layer 3: Mid section */}
+      {/* Layer 3: Bottom section */}
       <motion.div 
         className="absolute inset-0 pointer-events-none"
         style={{ y: orb3Y }}
       >
         <div 
-          className="absolute top-[35%] left-[8%] w-[600px] h-[600px] rounded-full opacity-32"
+          className="absolute top-[70%] left-[5%] w-[550px] h-[550px] rounded-full opacity-32"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(90px)",
+            filter: performanceMode === "full" ? "blur(80px)" : "blur(35px)",
           }}
         />
         <div 
-          className="absolute top-[40%] right-[25%] w-[450px] h-[450px] rounded-full opacity-28"
+          className="absolute top-[80%] right-[8%] w-[500px] h-[500px] rounded-full opacity-30"
           style={{
             background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(75px)",
-          }}
-        />
-        <div 
-          className="absolute top-[32%] right-[8%] w-[380px] h-[380px] rounded-full opacity-25"
-          style={{
-            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(60px)",
+            filter: performanceMode === "full" ? "blur(90px)" : "blur(40px)",
           }}
         />
       </motion.div>
       
-      {/* Layer 4: Lower-mid section */}
-      <motion.div 
-        className="absolute inset-0 pointer-events-none"
-        style={{ y: orb4Y }}
-      >
-        <div 
-          className="absolute top-[50%] right-[10%] w-[500px] h-[500px] rounded-full opacity-35"
-          style={{
-            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(85px)",
-          }}
-        />
-        <div 
-          className="absolute top-[55%] left-[35%] w-[400px] h-[400px] rounded-full opacity-30"
-          style={{
-            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(70px)",
-          }}
-        />
-        <div 
-          className="absolute top-[48%] left-[5%] w-[450px] h-[450px] rounded-full opacity-28"
-          style={{
-            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(75px)",
-          }}
-        />
-      </motion.div>
-      
-      {/* Layer 5: Lower section */}
-      <motion.div 
-        className="absolute inset-0 pointer-events-none"
-        style={{ y: orb5Y }}
-      >
-        <div 
-          className="absolute top-[65%] left-[5%] w-[550px] h-[550px] rounded-full opacity-32"
-          style={{
-            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(80px)",
-          }}
-        />
-        <div 
-          className="absolute top-[70%] right-[20%] w-[380px] h-[380px] rounded-full opacity-28"
-          style={{
-            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(65px)",
-          }}
-        />
-        <div 
-          className="absolute top-[62%] right-[45%] w-[420px] h-[420px] rounded-full opacity-25"
-          style={{
-            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(70px)",
-          }}
-        />
-      </motion.div>
-      
-      {/* Layer 6: Bottom section */}
-      <motion.div 
-        className="absolute inset-0 pointer-events-none"
-        style={{ y: orb6Y }}
-      >
-        <div 
-          className="absolute top-[80%] right-[8%] w-[600px] h-[600px] rounded-full opacity-30"
-          style={{
-            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(90px)",
-          }}
-        />
-        <div 
-          className="absolute top-[85%] left-[25%] w-[450px] h-[450px] rounded-full opacity-25"
-          style={{
-            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(75px)",
-          }}
-        />
-        <div 
-          className="absolute top-[78%] left-[60%] w-[380px] h-[380px] rounded-full opacity-28"
-          style={{
-            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(65px)",
-          }}
-        />
-      </motion.div>
-      
-      {/* Layer 7: Extra depth - scattered smaller orbs */}
-      <motion.div 
-        className="absolute inset-0 pointer-events-none"
-        style={{ y: orb7Y }}
-      >
-        <div 
-          className="absolute top-[15%] left-[45%] w-[300px] h-[300px] rounded-full opacity-35"
-          style={{
-            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(50px)",
-          }}
-        />
-        <div 
-          className="absolute top-[45%] left-[60%] w-[280px] h-[280px] rounded-full opacity-32"
-          style={{
-            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(45px)",
-          }}
-        />
-        <div 
-          className="absolute top-[75%] left-[50%] w-[320px] h-[320px] rounded-full opacity-28"
-          style={{
-            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(55px)",
-          }}
-        />
-        <div 
-          className="absolute top-[28%] left-[75%] w-[260px] h-[260px] rounded-full opacity-30"
-          style={{
-            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(45px)",
-          }}
-        />
-      </motion.div>
-      
-      {/* Layer 8: Accent smaller orbs for density */}
-      <motion.div 
-        className="absolute inset-0 pointer-events-none"
-        style={{ y: orb8Y }}
-      >
-        <div 
-          className="absolute top-[30%] right-[40%] w-[250px] h-[250px] rounded-full opacity-38"
-          style={{
-            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(40px)",
-          }}
-        />
-        <div 
-          className="absolute top-[60%] left-[15%] w-[220px] h-[220px] rounded-full opacity-35"
-          style={{
-            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(35px)",
-          }}
-        />
-        <div 
-          className="absolute top-[90%] right-[35%] w-[280px] h-[280px] rounded-full opacity-30"
-          style={{
-            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(45px)",
-          }}
-        />
-        <div 
-          className="absolute top-[52%] right-[60%] w-[240px] h-[240px] rounded-full opacity-32"
-          style={{
-            background: "radial-gradient(circle, var(--accent) 0%, transparent 70%)",
-            filter: "blur(40px)",
-          }}
-        />
-      </motion.div>
-      
-      {/* Floating Bubbles Layer - Hero-style animated bubbles that float and fade */}
-      <motion.div 
-        className="absolute inset-0 pointer-events-none overflow-hidden"
-        style={{ y: bubblesY }}
-      >
-        <svg
-          className="absolute inset-0 w-full h-full pointer-events-none"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="xMidYMid slice"
-          xmlns="http://www.w3.org/2000/svg"
+      {/* Floating Bubbles Layer - only in full mode */}
+      {floatingBubbles.length > 0 && (
+        <motion.div 
+          className="absolute inset-0 pointer-events-none overflow-hidden"
+          style={{ y: bubblesY }}
         >
-          <defs>
-            <filter id="bubbleGlow">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="0.3" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
-          
-          {floatingBubbles.map((bubble) => (
-            <motion.circle
-              key={`bubble-${bubble.id}`}
-              cx={bubble.x}
-              cy={bubble.y}
-              r={bubble.size / 10}
-              fill="var(--accent)"
-              filter="url(#bubbleGlow)"
-              initial={{ opacity: 0 }}
-              animate={{
-                opacity: [0, 0.6, 0],
-                cy: [bubble.y, bubble.y - bubble.floatDistance, bubble.y],
-              }}
-              transition={{
-                duration: bubble.duration,
-                repeat: Infinity,
-                delay: bubble.delay,
-                ease: "easeInOut",
-              }}
-            />
-          ))}
-        </svg>
-      </motion.div>
+          <svg
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            viewBox="0 0 100 100"
+            preserveAspectRatio="xMidYMid slice"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            {floatingBubbles.map((bubble) => (
+              <motion.circle
+                key={`bubble-${bubble.id}`}
+                cx={bubble.x}
+                cy={bubble.y}
+                r={bubble.size / 10}
+                fill="var(--accent)"
+                initial={{ opacity: 0 }}
+                animate={{
+                  opacity: [0, 0.6, 0],
+                  cy: [bubble.y, bubble.y - bubble.floatDistance, bubble.y],
+                }}
+                transition={{
+                  duration: bubble.duration,
+                  repeat: Infinity,
+                  delay: bubble.delay,
+                  ease: "easeInOut",
+                }}
+              />
+            ))}
+          </svg>
+        </motion.div>
+      )}
     </div>
   );
 });
 
 ParallaxBackgroundContent.displayName = "ParallaxBackgroundContent";
 
+// ==================== EXPORT ====================
 export default memo(function ParallaxBackground() {
   return <ParallaxBackgroundContent />;
 });

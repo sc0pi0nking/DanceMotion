@@ -17,6 +17,7 @@
   --panel: #ffffff;
   --border: oklch(0.922 0 0);
   --accent: oklch(0.97 0 0);
+  --accent-light: rgba(46, 196, 198, 0.15); /* Light teal for backgrounds/highlights */
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -175,10 +176,15 @@ html[data-theme="dark"] body {
   position: sticky;
   top: 0;
   z-index: 50;
+  /* Fallback for browsers without backdrop-filter support */
+  background: var(--bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
-  transition: all 300ms cubic-bezier(0.2, 0.9, 0.2, 1);
+  transition: backdrop-filter 300ms cubic-bezier(0.2, 0.9, 0.2, 1),
+              box-shadow 300ms cubic-bezier(0.2, 0.9, 0.2, 1),
+              border-color 300ms cubic-bezier(0.2, 0.9, 0.2, 1);
+  will-change: backdrop-filter;
 }
 
 html[data-theme="light"] .site-header {
@@ -231,7 +237,7 @@ html[data-theme="dark"] .site-header.scrolled {
   font-size: 15px;
   color: var(--accent);
   border: 1.5px solid rgba(46, 196, 198, 0.3);
-  transition: all 200ms ease;
+  transition: border-color 200ms ease, background 200ms ease;
 }
 
 .site-logo:hover .site-logo-mark {
@@ -251,7 +257,7 @@ html[data-theme="dark"] .site-header.scrolled {
   font-size: 14px;
   letter-spacing: 0.3px;
   border-radius: 8px;
-  transition: all 200ms ease;
+  transition: color 200ms ease, background-color 200ms ease;
   overflow: hidden;
 }
 
@@ -297,14 +303,17 @@ html[data-theme="dark"] .site-header.scrolled {
 
 .tile-card:active {
   transform: translateY(-2px);
-  transition: all 100ms ease;
+  transition: transform 100ms ease, box-shadow 100ms ease;
 }
 
 /* Accent button - with gradient hover effect */
 .btn-accent {
   background: var(--accent);
   color: var(--bg);
-  transition: all 300ms cubic-bezier(0.2, 0.9, 0.2, 1);
+  transition: transform 300ms cubic-bezier(0.2, 0.9, 0.2, 1),
+              box-shadow 300ms cubic-bezier(0.2, 0.9, 0.2, 1),
+              background 300ms cubic-bezier(0.2, 0.9, 0.2, 1);
+  will-change: transform;
   position: relative;
   overflow: hidden;
 }
@@ -436,10 +445,11 @@ html[data-theme="light"] .btn-accent:hover {
   .card {
     border-radius: 0.5rem;
     padding: 1rem;
-    transition: all 300ms ease;
+    transition: border-color 300ms ease, box-shadow 300ms ease, transform 300ms ease;
     color: var(--fg);
     background-color: var(--panel);
     border: 1px solid var(--border);
+    will-change: transform;
   }
 
   .card:hover,
@@ -451,7 +461,7 @@ html[data-theme="light"] .btn-accent:hover {
 
   .card:active {
     transform: scale(0.95);
-    transition: all 100ms ease;
+    transition: transform 100ms ease, box-shadow 100ms ease;
   }
 }
 
@@ -541,12 +551,14 @@ html[data-theme="dark"] .glassmorphism {
   @apply transition-all duration-300 hover:scale-105;
 }
 
+/* .group-card-glass - Auskommentiert: nicht in Verwendung
 .group-card-glass {
   background: rgba(var(--panel-rgb, 255, 255, 255), 0.7);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(46, 196, 198, 0.15);
   box-shadow: 0 8px 32px rgba(46, 196, 198, 0.08);
 }
+*/
 
 /* === 3D Flip Card Effect === */
 .flip-card {
@@ -701,7 +713,13 @@ html[data-theme="light"] .tile-card .tile-card-content::before {
 html[data-theme="light"] .tile-card { 
   box-shadow: 0 8px 20px rgba(26,20,16,0.06);
   background: linear-gradient(135deg, rgba(46,196,198,0.12), transparent 30%);
-  transition: all 300ms cubic-bezier(0.2, 0.9, 0.2, 1);
+  transition: box-shadow 300ms cubic-bezier(0.2, 0.9, 0.2, 1), 
+              transform 300ms cubic-bezier(0.2, 0.9, 0.2, 1),
+              background 300ms cubic-bezier(0.2, 0.9, 0.2, 1);
+  will-change: transform, box-shadow;
+}
+
+html[data-theme="light"] .tile-card:hover {
   animation: glowPulse 4s ease-in-out infinite;
 }
 
@@ -1040,3 +1058,19 @@ html[data-theme="dark"] .glass {
   }
 }
 
+/* Performance mode for laptops and reduced motion */
+@media (prefers-reduced-motion: reduce), (max-width: 1366px) {
+  .tile-card,
+  /* .group-card-glass - auskommentiert */
+  .glassmorphism {
+    animation: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  
+  .parallax-bg,
+  [class*="parallax"] {
+    animation: none !important;
+    transform: none !important;
+  }
+}

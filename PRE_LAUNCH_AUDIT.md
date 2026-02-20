@@ -199,7 +199,7 @@ git status
 git add -A
 git commit -m "Release: Sprint 4 Final - Settings Optimization & Pre-Launch Audit"
 git push
-ssh dev@192.168.178.116 "cd /opt/dancemotion/web && git pull && docker compose down && docker compose up -d --build"
+ssh dev@dancemotion-prod "cd /opt/dancemotion/web && git pull origin main && docker compose up -d --build"
 ```
 
 ### 3. **Post-Deployment Tests**
@@ -254,7 +254,7 @@ ssh dev@192.168.178.116
 cd /opt/dancemotion/web
 git log --oneline -5
 git reset --hard <commit-hash>
-docker compose down && docker compose up -d --build
+docker compose up -d --build
 ```
 
 ### Health Checks

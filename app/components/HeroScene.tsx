@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import EditableContent from "./EditableContent";
 
-// Generate floating particles
+// Generate floating particles (reduced count for performance)
 const generateParticles = (count: number) => {
   return Array.from({ length: count }, (_, i) => ({
     id: i,
@@ -21,17 +21,32 @@ export default function HeroScene() {
   const containerRef = useRef(null);
   const { scrollY } = useScroll();
   
+  // Check for reduced motion preference
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mediaQuery.matches);
+    
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener("change", handler);
+    return () => mediaQuery.removeEventListener("change", handler);
+  }, []);
+  
   // Parallax effect: Background moves slower than scroll
   const bgY = useTransform(scrollY, [0, 500], [0, -150]);
 
-  // Memoize particles to prevent regeneration on re-renders
-  const particles = useMemo(() => generateParticles(20), []);
+  // Memoize particles to prevent regeneration on re-renders (reduced from 20 to 7)
+  const particles = useMemo(() => generateParticles(7), []);
+  
+  // Animation repeat count (finite instead of infinite)
+  const repeatCount = prefersReducedMotion ? 0 : 3;
 
   return (
     <section ref={containerRef} className="hero-scene relative min-h-[700px] w-full overflow-hidden">
       {/* Parallax Background */}
       <motion.div
-        style={{ y: bgY }}
+        style={{ y: prefersReducedMotion ? 0 : bgY, willChange: "transform" }}
         className="absolute inset-0 pointer-events-none"
       >
         {/* SVG background layers with motion */}
@@ -58,13 +73,13 @@ export default function HeroScene() {
               <stop offset="100%" stopColor="rgba(46,196,198,0)" />
             </radialGradient>
             <filter id="blur2">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="40" />
+              <feGaussianBlur in="SourceGraphic" stdDeviation="10" />
             </filter>
             <filter id="blur3">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="60" />
+              <feGaussianBlur in="SourceGraphic" stdDeviation="12" />
             </filter>
             <filter id="blur4">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="80" />
+              <feGaussianBlur in="SourceGraphic" stdDeviation="15" />
             </filter>
             <filter id="glow">
               <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
@@ -83,11 +98,12 @@ export default function HeroScene() {
             ry={400}
             fill="url(#heroGradient1)"
             opacity={0.6}
-            animate={{ 
+            style={{ willChange: "transform, opacity" }}
+            animate={prefersReducedMotion ? {} : { 
               rx: [800, 850, 800],
               ry: [400, 420, 400],
             }}
-            transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" } as any}
+            transition={{ duration: 20, repeat: repeatCount, ease: "easeInOut" } as any}
           />
 
           {/* Layer 1: Large organic wave shapes */}
@@ -95,8 +111,9 @@ export default function HeroScene() {
             d="M -50 180 Q 300 80, 600 150 T 1300 180 L 1300 700 L -50 700 Z"
             fill="url(#heroGradient1)"
             opacity={0.4}
-            animate={{ d: "M -50 200 Q 300 100, 600 170 T 1300 200 L 1300 700 L -50 700 Z" }}
-            transition={{ duration: 8, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" } as any}
+            style={{ willChange: "d" }}
+            animate={prefersReducedMotion ? {} : { d: "M -50 200 Q 300 100, 600 170 T 1300 200 L 1300 700 L -50 700 Z" }}
+            transition={{ duration: 8, repeat: repeatCount, repeatType: "reverse", ease: "easeInOut" } as any}
           />
 
           {/* Layer 2: Primary radial burst center-left */}
@@ -106,12 +123,13 @@ export default function HeroScene() {
             r={450}
             fill="url(#heroBurst)"
             filter="url(#blur4)"
-            animate={{
+            style={{ willChange: "transform" }}
+            animate={prefersReducedMotion ? {} : {
               cx: [200, 250, 200],
               cy: [250, 220, 250],
               r: [450, 480, 450],
             }}
-            transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" } as any}
+            transition={{ duration: 15, repeat: repeatCount, ease: "easeInOut" } as any}
           />
 
           {/* Layer 3: Secondary radial glow right side */}
@@ -121,12 +139,13 @@ export default function HeroScene() {
             r={380}
             fill="url(#heroGlow)"
             filter="url(#blur3)"
-            animate={{
+            style={{ willChange: "transform, opacity" }}
+            animate={prefersReducedMotion ? {} : {
               cx: [1000, 950, 1000],
               cy: [400, 450, 400],
               opacity: [0.5, 0.7, 0.5],
             }}
-            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 2 } as any}
+            transition={{ duration: 18, repeat: repeatCount, ease: "easeInOut", delay: 2 } as any}
           />
 
           {/* Layer 4: Floating orb top-right */}
@@ -136,12 +155,13 @@ export default function HeroScene() {
             r={150}
             fill="url(#heroGlow)"
             filter="url(#blur2)"
-            animate={{
+            style={{ willChange: "transform, opacity" }}
+            animate={prefersReducedMotion ? {} : {
               cx: [900, 920, 880, 900],
               cy: [120, 150, 100, 120],
               opacity: [0.3, 0.5, 0.3],
             }}
-            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" } as any}
+            transition={{ duration: 12, repeat: repeatCount, ease: "easeInOut" } as any}
           />
 
           {/* Layer 5: Small accent orb bottom-left */}
@@ -151,11 +171,12 @@ export default function HeroScene() {
             r={100}
             fill="url(#heroGlow)"
             filter="url(#blur2)"
-            animate={{
+            style={{ willChange: "transform, opacity" }}
+            animate={prefersReducedMotion ? {} : {
               cy: [550, 520, 550],
               opacity: [0.2, 0.4, 0.2],
             }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 } as any}
+            transition={{ duration: 10, repeat: repeatCount, ease: "easeInOut", delay: 1 } as any}
           />
 
           {/* Accent geometric lines for energy */}
@@ -167,8 +188,9 @@ export default function HeroScene() {
             stroke="var(--hero-line-color, rgba(46,196,198,0.12))"
             strokeWidth={1.5}
             filter="url(#glow)"
-            animate={{ opacity: [0.1, 0.25, 0.1] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" } as any}
+            style={{ willChange: "opacity" }}
+            animate={prefersReducedMotion ? {} : { opacity: [0.1, 0.25, 0.1] }}
+            transition={{ duration: 8, repeat: repeatCount, ease: "easeInOut" } as any}
           />
           <motion.line
             x1={850}
@@ -177,11 +199,12 @@ export default function HeroScene() {
             y2={520}
             stroke="var(--hero-line-color, rgba(46,196,198,0.10))"
             strokeWidth={1}
-            animate={{ opacity: [0.05, 0.15, 0.05] }}
-            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 3 } as any}
+            style={{ willChange: "opacity" }}
+            animate={prefersReducedMotion ? {} : { opacity: [0.05, 0.15, 0.05] }}
+            transition={{ duration: 12, repeat: repeatCount, ease: "easeInOut", delay: 3 } as any}
           />
 
-          {/* Floating particles */}
+          {/* Floating particles (reduced count for performance) */}
           {particles.map((particle) => (
             <motion.circle
               key={particle.id}
@@ -191,13 +214,14 @@ export default function HeroScene() {
               fill="var(--hero-particle-color, rgba(46,196,198,0.4))"
               filter="url(#glow)"
               initial={{ opacity: 0 }}
-              animate={{
+              style={{ willChange: "transform, opacity" }}
+              animate={prefersReducedMotion ? { opacity: 0.3 } : {
                 opacity: [0, 0.6, 0],
                 cy: [`${particle.y}%`, `${particle.y - 15}%`, `${particle.y}%`],
               }}
               transition={{
                 duration: particle.duration,
-                repeat: Infinity,
+                repeat: repeatCount,
                 delay: particle.delay,
                 ease: "easeInOut",
               } as any}
@@ -209,15 +233,17 @@ export default function HeroScene() {
       {/* Content overlay */}
       <motion.div
         className="relative z-10 mx-auto max-w-6xl px-6 py-40 flex flex-col justify-center"
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.2 }}
+        transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: 0.2 }}
+        style={{ willChange: "transform, opacity" }}
       >
         <div className="max-w-3xl">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: 0.3 }}
+            style={{ willChange: "transform, opacity" }}
           >
             <EditableContent
               contentKey="hero.title"
@@ -229,9 +255,10 @@ export default function HeroScene() {
           </motion.div>
           <motion.div
             className="mt-6"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: 0.4 }}
+            style={{ willChange: "transform, opacity" }}
           >
             <EditableContent
               contentKey="hero.subtitle"
@@ -243,9 +270,10 @@ export default function HeroScene() {
           </motion.div>
           <motion.div
             className="mt-8"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: 0.5 }}
+            style={{ willChange: "transform, opacity" }}
           >
             <a
               href="#groups"
@@ -265,8 +293,9 @@ export default function HeroScene() {
       {/* Subtle scroll indicator */}
       <motion.div
         className="absolute bottom-8 left-1/2 translate-x-[-50%]"
-        animate={{ y: [0, 8, 0] }}
-        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" } as any}
+        animate={prefersReducedMotion ? {} : { y: [0, 8, 0] }}
+        transition={{ duration: 3, repeat: repeatCount, ease: "easeInOut" } as any}
+        style={{ willChange: "transform" }}
       >
         <svg
           width="24"

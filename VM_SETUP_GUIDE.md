@@ -63,7 +63,7 @@ git clone https://github.com/sc0pi0nking/DanceMotion.git web
 cd web
 
 # .env Datei kopieren von Alt-Server
-scp luca@192.168.178.104:/opt/dancemotion/web/.env .
+scp dev@192.168.178.116:/opt/dancemotion/web/.env .
 ```
 
 ---

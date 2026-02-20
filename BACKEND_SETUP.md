@@ -137,6 +137,15 @@ Wenn alles lokal funktioniert:
 - Nutze Vercel Secrets Management
 - Ändere Default Password nach Go-Live!
 
+### 6.3 Self-Hosted Deployment (VM)
+Für VM-Deployments nutze den neuen Host:
+
+```bash
+ssh dev@dancemotion-prod "cd /opt/dancemotion/web && git pull origin main && docker compose up -d --build"
+# alternativ:
+ssh dev@192.168.178.116 "cd /opt/dancemotion/web && git pull origin main && docker compose up -d --build"
+```
+
 ---
 
 ## 📁 Datei-Übersicht
