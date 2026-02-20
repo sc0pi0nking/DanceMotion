@@ -21,6 +21,8 @@ export default function HeroScene() {
   const containerRef = useRef(null);
   const { scrollY } = useScroll();
   const [heroBackgroundImage, setHeroBackgroundImage] = useState("");
+  const [heroImageRatio, setHeroImageRatio] = useState<number | null>(null);
+  const [heroMinHeight, setHeroMinHeight] = useState(700);
   
   // Check for reduced motion preference
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -52,6 +54,44 @@ export default function HeroScene() {
 
     loadHeroBackground();
   }, []);
+
+  useEffect(() => {
+    if (!heroBackgroundImage) {
+      setHeroImageRatio(null);
+      setHeroMinHeight(700);
+      return;
+    }
+
+    let cancelled = false;
+
+    const updateHeightByRatio = (ratio: number) => {
+      const viewportWidth = window.innerWidth || 1200;
+      const calculated = Math.round(viewportWidth / ratio);
+      const clamped = Math.max(520, Math.min(760, calculated));
+      if (!cancelled) setHeroMinHeight(clamped);
+    };
+
+    const img = new Image();
+    img.onload = () => {
+      if (cancelled) return;
+      const ratio = img.naturalWidth / img.naturalHeight;
+      if (Number.isFinite(ratio) && ratio > 0) {
+        setHeroImageRatio(ratio);
+        updateHeightByRatio(ratio);
+      }
+    };
+    img.src = heroBackgroundImage;
+
+    const onResize = () => {
+      if (heroImageRatio) updateHeightByRatio(heroImageRatio);
+    };
+
+    window.addEventListener('resize', onResize, { passive: true });
+    return () => {
+      cancelled = true;
+      window.removeEventListener('resize', onResize);
+    };
+  }, [heroBackgroundImage, heroImageRatio]);
   
   // Parallax effect: Background moves slower than scroll
   const bgY = useTransform(scrollY, [0, 500], [0, -150]);
@@ -63,14 +103,19 @@ export default function HeroScene() {
   const repeatCount = prefersReducedMotion ? 0 : 3;
 
   return (
-    <section ref={containerRef} className="hero-scene relative min-h-[700px] w-full overflow-hidden">
+    <section
+      ref={containerRef}
+      className="hero-scene relative w-full overflow-hidden"
+      style={{ minHeight: heroBackgroundImage ? `${heroMinHeight}px` : '700px' }}
+    >
       {/* Optional admin-managed hero background image */}
       {heroBackgroundImage && (
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
             backgroundImage: `linear-gradient(180deg, rgba(2,6,23,0.45), rgba(2,6,23,0.65)), url(${heroBackgroundImage})`,
-            backgroundSize: 'cover',
+            backgroundSize: 'contain',
+            backgroundRepeat: 'no-repeat',
             backgroundPosition: 'center',
             opacity: 0.6,
           }}
