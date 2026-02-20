@@ -21,8 +21,7 @@ export default function HeroScene() {
   const containerRef = useRef(null);
   const { scrollY } = useScroll();
   const [heroBackgroundImage, setHeroBackgroundImage] = useState("");
-  const [heroImageRatio, setHeroImageRatio] = useState<number | null>(null);
-  const [heroMinHeight, setHeroMinHeight] = useState(700);
+  const [viewportWidth, setViewportWidth] = useState(1200);
   
   // Check for reduced motion preference
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -56,42 +55,12 @@ export default function HeroScene() {
   }, []);
 
   useEffect(() => {
-    if (!heroBackgroundImage) {
-      setHeroImageRatio(null);
-      setHeroMinHeight(700);
-      return;
-    }
+    const updateViewport = () => setViewportWidth(window.innerWidth || 1200);
+    updateViewport();
 
-    let cancelled = false;
-
-    const updateHeightByRatio = (ratio: number) => {
-      const viewportWidth = window.innerWidth || 1200;
-      const calculated = Math.round(viewportWidth / ratio);
-      const clamped = Math.max(520, Math.min(760, calculated));
-      if (!cancelled) setHeroMinHeight(clamped);
-    };
-
-    const img = new Image();
-    img.onload = () => {
-      if (cancelled) return;
-      const ratio = img.naturalWidth / img.naturalHeight;
-      if (Number.isFinite(ratio) && ratio > 0) {
-        setHeroImageRatio(ratio);
-        updateHeightByRatio(ratio);
-      }
-    };
-    img.src = heroBackgroundImage;
-
-    const onResize = () => {
-      if (heroImageRatio) updateHeightByRatio(heroImageRatio);
-    };
-
-    window.addEventListener('resize', onResize, { passive: true });
-    return () => {
-      cancelled = true;
-      window.removeEventListener('resize', onResize);
-    };
-  }, [heroBackgroundImage, heroImageRatio]);
+    window.addEventListener('resize', updateViewport, { passive: true });
+    return () => window.removeEventListener('resize', updateViewport);
+  }, []);
   
   // Parallax effect: Background moves slower than scroll
   const bgY = useTransform(scrollY, [0, 500], [0, -150]);
@@ -101,25 +70,37 @@ export default function HeroScene() {
   
   // Animation repeat count (finite instead of infinite)
   const repeatCount = prefersReducedMotion ? 0 : 3;
+  const isMobile = viewportWidth < 768;
 
   return (
     <section
       ref={containerRef}
       className="hero-scene relative w-full overflow-hidden"
-      style={{ minHeight: heroBackgroundImage ? `${heroMinHeight}px` : '700px' }}
+      style={{ minHeight: heroBackgroundImage ? (isMobile ? '560px' : '700px') : '700px' }}
     >
       {/* Optional admin-managed hero background image */}
       {heroBackgroundImage && (
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage: `linear-gradient(180deg, rgba(2,6,23,0.45), rgba(2,6,23,0.65)), url(${heroBackgroundImage})`,
-            backgroundSize: 'contain',
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
-            opacity: 0.6,
-          }}
-        />
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <img
+            src={heroBackgroundImage}
+            alt="Hero Hintergrund"
+            className="w-full h-auto object-contain"
+            style={{
+              display: 'block',
+              maxHeight: isMobile ? '420px' : '620px',
+              margin: '0 auto',
+            }}
+          />
+
+          <div
+            className="absolute inset-0"
+            style={{
+              background: isMobile
+                ? 'linear-gradient(180deg, rgba(2,6,23,0.10), rgba(2,6,23,0.30))'
+                : 'linear-gradient(180deg, rgba(2,6,23,0.20), rgba(2,6,23,0.45))',
+            }}
+          />
+        </div>
       )}
 
       {/* Parallax Background */}
