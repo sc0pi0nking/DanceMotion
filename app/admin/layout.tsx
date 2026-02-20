@@ -344,7 +344,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden w-full lg:pl-20 xl:pl-0 min-w-0">
+      <main className="flex-1 flex flex-col overflow-hidden w-full lg:pl-20 xl:pl-0 min-w-0 min-h-0">
         {/* Header */}
         <header className="h-16 bg-slate-800 border-b border-slate-700 px-4 md:px-6 flex items-center justify-between sticky top-0 z-30">
           <div className="flex items-center gap-3">
@@ -389,7 +389,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </header>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6 admin-scroll">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 min-h-0 admin-scroll">
           {children}
         </div>
       </main>

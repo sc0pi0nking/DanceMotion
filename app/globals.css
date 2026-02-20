@@ -158,9 +158,10 @@ body.admin-shell {
 }
 
 .admin-shell .admin-scroll {
-  height: calc(100vh - 4rem);
+  min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+  padding-bottom: 2rem;
 }
 
 html[data-theme="light"] body {
