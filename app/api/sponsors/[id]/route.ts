@@ -15,14 +15,12 @@ function validateExternalUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
 
-    if (parsed.protocol === 'https:') {
+    // Allow both http:// and https:// URLs (matching database constraint ^https?://)
+    if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
       return true;
     }
 
-    const isDev = process.env.NODE_ENV !== 'production';
-    const isLocalhost = parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1' || parsed.hostname === '::1';
-
-    return isDev && parsed.protocol === 'http:' && isLocalhost;
+    return false;
   } catch {
     return false;
   }
@@ -119,14 +117,14 @@ export async function PUT(
 
     if (typeof website_url === 'string' && website_url.trim().length > 0 && !validateExternalUrl(website_url.trim())) {
       return NextResponse.json(
-        { error: 'Invalid website_url. Only https:// URLs are allowed (http:// only for localhost in development).' },
+        { error: 'Invalid website_url. URL must start with http:// or https://' },
         { status: 400 }
       );
     }
 
     if (typeof logo_url === 'string' && logo_url.trim().length > 0 && !validateExternalUrl(logo_url.trim())) {
       return NextResponse.json(
-        { error: 'Invalid logo_url. Only https:// URLs are allowed (http:// only for localhost in development).' },
+        { error: 'Invalid logo_url. URL must start with http:// or https://' },
         { status: 400 }
       );
     }
