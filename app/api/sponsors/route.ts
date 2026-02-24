@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Parse body
-    const { name, description, logo_url, website_url, category } = await request.json();
+    const { name, description, logo_url, website_url, category, social_links } = await request.json();
 
     // Validation
     if (!name || name.trim().length === 0) {
@@ -121,6 +121,7 @@ export async function POST(request: NextRequest) {
           logo_url: typeof logo_url === 'string' ? logo_url.trim() || null : null,
           website_url: typeof website_url === 'string' ? website_url.trim() || null : null,
           category: category || 'general',
+          social_links: social_links || {},
           created_by: currentUser.id,
         },
       ])

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Plus, Edit2, Trash2, ArrowUp, ArrowDown, Eye, EyeOff, ExternalLink, Building2, Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Plus, Edit2, Trash2, ArrowUp, ArrowDown, Eye, EyeOff, ExternalLink, Building2, Upload, X, Image as ImageIcon, Instagram, Facebook, Globe } from 'lucide-react';
 import {
   AdminCard,
   StatCard,
@@ -26,6 +26,12 @@ interface Sponsor {
   sort_order: number;
   is_active: boolean;
   created_at: string;
+  social_links?: {
+    instagram?: string;
+    facebook?: string;
+    tiktok?: string;
+    youtube?: string;
+  };
 }
 
 const categories = [
@@ -55,6 +61,7 @@ export default function AdminSponsorsManager() {
     logo_url: '',
     website_url: '',
     category: 'general',
+    social_links: { instagram: '', facebook: '', tiktok: '', youtube: '' },
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -122,6 +129,7 @@ export default function AdminSponsorsManager() {
       logo_url: '',
       website_url: '',
       category: 'general',
+      social_links: { instagram: '', facebook: '', tiktok: '', youtube: '' },
     });
     setIsModalOpen(true);
   };
@@ -202,6 +210,12 @@ export default function AdminSponsorsManager() {
       logo_url: sponsor.logo_url || '',
       website_url: sponsor.website_url || '',
       category: sponsor.category,
+      social_links: {
+        instagram: sponsor.social_links?.instagram || '',
+        facebook: sponsor.social_links?.facebook || '',
+        tiktok: sponsor.social_links?.tiktok || '',
+        youtube: sponsor.social_links?.youtube || '',
+      },
     });
     setIsModalOpen(true);
   };
@@ -314,39 +328,28 @@ export default function AdminSponsorsManager() {
 
   const handleMoveUp = async (index: number) => {
     if (index === 0) return;
-    const sponsor1 = sponsors[index - 1];
-    const sponsor2 = sponsors[index];
+    
+    // Swap positions in local array
+    const newSponsors = [...sponsors];
+    [newSponsors[index - 1], newSponsors[index]] = [newSponsors[index], newSponsors[index - 1]];
 
+    // Assign sequential sort_order based on new positions
     try {
-      const res1 = await fetch(`/api/sponsors/${sponsor1.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ sort_order: sponsor2.sort_order }),
-      });
-
-      if (!res1.ok) {
-        throw new Error(await parseErrorMessage(res1, 'Fehler beim Verschieben des Sponsors'));
+      const updates = newSponsors.map((s, i) => 
+        fetch(`/api/sponsors/${s.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ sort_order: i }),
+        })
+      );
+      
+      const results = await Promise.all(updates);
+      if (results.some(r => !r.ok)) {
+        throw new Error('Sort update failed');
       }
 
-      const res2 = await fetch(`/api/sponsors/${sponsor2.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ sort_order: sponsor1.sort_order }),
-      });
-
-      if (!res2.ok) {
-        throw new Error(await parseErrorMessage(res2, 'Fehler beim Verschieben des Sponsors'));
-      }
-
-      const newSponsors = [...sponsors];
-      [newSponsors[index - 1], newSponsors[index]] = [newSponsors[index], newSponsors[index - 1]];
-      setSponsors(newSponsors);
+      setSponsors(newSponsors.map((s, i) => ({ ...s, sort_order: i })));
     } catch (error) {
       console.error('Error moving sponsor:', error);
       alert(error instanceof Error ? error.message : 'Fehler beim Verschieben des Sponsors');
@@ -355,39 +358,28 @@ export default function AdminSponsorsManager() {
 
   const handleMoveDown = async (index: number) => {
     if (index === sponsors.length - 1) return;
-    const sponsor1 = sponsors[index];
-    const sponsor2 = sponsors[index + 1];
 
+    // Swap positions in local array
+    const newSponsors = [...sponsors];
+    [newSponsors[index], newSponsors[index + 1]] = [newSponsors[index + 1], newSponsors[index]];
+
+    // Assign sequential sort_order based on new positions
     try {
-      const res1 = await fetch(`/api/sponsors/${sponsor1.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ sort_order: sponsor2.sort_order }),
-      });
-
-      if (!res1.ok) {
-        throw new Error(await parseErrorMessage(res1, 'Fehler beim Verschieben des Sponsors'));
+      const updates = newSponsors.map((s, i) => 
+        fetch(`/api/sponsors/${s.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ sort_order: i }),
+        })
+      );
+      
+      const results = await Promise.all(updates);
+      if (results.some(r => !r.ok)) {
+        throw new Error('Sort update failed');
       }
 
-      const res2 = await fetch(`/api/sponsors/${sponsor2.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ sort_order: sponsor1.sort_order }),
-      });
-
-      if (!res2.ok) {
-        throw new Error(await parseErrorMessage(res2, 'Fehler beim Verschieben des Sponsors'));
-      }
-
-      const newSponsors = [...sponsors];
-      [newSponsors[index], newSponsors[index + 1]] = [newSponsors[index + 1], newSponsors[index]];
-      setSponsors(newSponsors);
+      setSponsors(newSponsors.map((s, i) => ({ ...s, sort_order: i })));
     } catch (error) {
       console.error('Error moving sponsor:', error);
       alert(error instanceof Error ? error.message : 'Fehler beim Verschieben des Sponsors');
@@ -483,7 +475,7 @@ export default function AdminSponsorsManager() {
                       <div>
                         <p className="font-medium text-white">{sponsor.name}</p>
                         {sponsor.description && (
-                          <p className="text-sm text-slate-400 truncate max-w-xs">{sponsor.description}</p>
+                          <p className="text-sm text-slate-400 max-w-md">{sponsor.description}</p>
                         )}
                         {sponsor.website_url && (
                           <a 
@@ -663,6 +655,51 @@ export default function AdminSponsorsManager() {
                 onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
                 placeholder="https://..."
               />
+            </div>
+          </div>
+
+          {/* Social Media Links */}
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Social Media Links
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex items-center gap-2">
+                <Instagram className="w-4 h-4 text-pink-400 flex-shrink-0" />
+                <AdminInput
+                  type="url"
+                  value={formData.social_links.instagram}
+                  onChange={(e) => setFormData({ ...formData, social_links: { ...formData.social_links, instagram: e.target.value } })}
+                  placeholder="https://instagram.com/..."
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Facebook className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                <AdminInput
+                  type="url"
+                  value={formData.social_links.facebook}
+                  onChange={(e) => setFormData({ ...formData, social_links: { ...formData.social_links, facebook: e.target.value } })}
+                  placeholder="https://facebook.com/..."
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-slate-300 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.2a6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.34-6.34V8.73a8.19 8.19 0 004.76 1.52V6.8a4.84 4.84 0 01-1-.11z"/></svg>
+                <AdminInput
+                  type="url"
+                  value={formData.social_links.tiktok}
+                  onChange={(e) => setFormData({ ...formData, social_links: { ...formData.social_links, tiktok: e.target.value } })}
+                  placeholder="https://tiktok.com/@..."
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-red-400 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                <AdminInput
+                  type="url"
+                  value={formData.social_links.youtube}
+                  onChange={(e) => setFormData({ ...formData, social_links: { ...formData.social_links, youtube: e.target.value } })}
+                  placeholder="https://youtube.com/..."
+                />
+              </div>
             </div>
           </div>
 

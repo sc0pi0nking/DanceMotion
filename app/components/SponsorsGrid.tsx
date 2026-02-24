@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Instagram, Facebook } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 interface Sponsor {
@@ -12,6 +12,12 @@ interface Sponsor {
   website_url?: string;
   category: string;
   is_active: boolean;
+  social_links?: {
+    instagram?: string;
+    facebook?: string;
+    tiktok?: string;
+    youtube?: string;
+  };
 }
 
 export default function SponsorsGrid() {
@@ -194,26 +200,55 @@ export default function SponsorsGrid() {
 
                 {sponsor.description && (
                   <p
-                    className="text-sm mb-4 line-clamp-2"
+                    className="text-sm mb-4"
                     style={{ color: 'var(--body-text, var(--muted))' }}
                   >
                     {sponsor.description}
                   </p>
                 )}
 
-                {sponsor.website_url && (
-                  <a
-                    href={sponsor.website_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`Website von ${sponsor.name} besuchen (öffnet in neuem Tab)`}
-                    className="inline-flex items-center gap-2 text-sm font-semibold transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-                    style={{ color: 'var(--accent-dark, var(--accent))' }}
-                  >
-                    Website besuchen
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
-                )}
+                {/* Links Row */}
+                <div className="flex items-center gap-3 flex-wrap">
+                  {sponsor.website_url && (
+                    <a
+                      href={sponsor.website_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Website von ${sponsor.name} besuchen (öffnet in neuem Tab)`}
+                      className="inline-flex items-center gap-2 text-sm font-semibold transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                      style={{ color: 'var(--accent-dark, var(--accent))' }}
+                    >
+                      Website besuchen
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  )}
+
+                  {/* Social Icons */}
+                  {sponsor.social_links && Object.values(sponsor.social_links).some(Boolean) && (
+                    <div className="flex items-center gap-2 ml-auto">
+                      {sponsor.social_links.instagram && (
+                        <a href={sponsor.social_links.instagram} target="_blank" rel="noopener noreferrer" aria-label={`${sponsor.name} auf Instagram`} className="transition-colors hover:opacity-80" style={{ color: 'var(--muted)' }}>
+                          <Instagram className="w-5 h-5 hover:text-pink-400 transition-colors" />
+                        </a>
+                      )}
+                      {sponsor.social_links.facebook && (
+                        <a href={sponsor.social_links.facebook} target="_blank" rel="noopener noreferrer" aria-label={`${sponsor.name} auf Facebook`} className="transition-colors hover:opacity-80" style={{ color: 'var(--muted)' }}>
+                          <Facebook className="w-5 h-5 hover:text-blue-400 transition-colors" />
+                        </a>
+                      )}
+                      {sponsor.social_links.tiktok && (
+                        <a href={sponsor.social_links.tiktok} target="_blank" rel="noopener noreferrer" aria-label={`${sponsor.name} auf TikTok`} className="transition-colors hover:opacity-80" style={{ color: 'var(--muted)' }}>
+                          <svg className="w-5 h-5 hover:text-slate-100 transition-colors" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 00-.79-.05A6.34 6.34 0 003.15 15.2a6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.34-6.34V8.73a8.19 8.19 0 004.76 1.52V6.8a4.84 4.84 0 01-1-.11z"/></svg>
+                        </a>
+                      )}
+                      {sponsor.social_links.youtube && (
+                        <a href={sponsor.social_links.youtube} target="_blank" rel="noopener noreferrer" aria-label={`${sponsor.name} auf YouTube`} className="transition-colors hover:opacity-80" style={{ color: 'var(--muted)' }}>
+                          <svg className="w-5 h-5 hover:text-red-400 transition-colors" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </article>
           ))}

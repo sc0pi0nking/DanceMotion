@@ -108,7 +108,7 @@ export async function PUT(
 
     // Parse body
     const body = await request.json();
-    const { name, description, logo_url, website_url, category, is_active, sort_order } = body;
+    const { name, description, logo_url, website_url, category, is_active, sort_order, social_links } = body;
 
     if (category !== undefined && !ALLOWED_SPONSOR_CATEGORIES.includes(category)) {
       return NextResponse.json(
@@ -148,6 +148,7 @@ export async function PUT(
     if (category !== undefined) updateData.category = category;
     if (is_active !== undefined) updateData.is_active = is_active;
     if (sort_order !== undefined) updateData.sort_order = sort_order;
+    if (social_links !== undefined) updateData.social_links = social_links;
     
     updateData.updated_at = new Date().toISOString();
 
