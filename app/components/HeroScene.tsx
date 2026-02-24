@@ -100,7 +100,7 @@ export default function HeroScene() {
       className="hero-scene relative w-full overflow-hidden"
       style={{
         height: heroBackgroundImage && imageLoaded ? `${containerHeight}px` : undefined,
-        minHeight: heroBackgroundImage && imageLoaded ? undefined : '700px',
+        minHeight: heroBackgroundImage && imageLoaded ? undefined : '600px',
       }}
     >
       {/* Optional admin-managed hero background image */}
@@ -317,7 +317,7 @@ export default function HeroScene() {
 
       {/* Content overlay */}
       <motion.div
-        className="relative z-10 mx-auto max-w-6xl px-6 py-40 flex flex-col justify-center"
+        className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 py-16 sm:py-24 md:py-32 lg:py-40 flex flex-col justify-center h-full"
         initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: 0.2 }}
@@ -333,7 +333,7 @@ export default function HeroScene() {
             <EditableContent
               contentKey="hero.title"
               defaultValue="Bewegung ist Ausdruck"
-              className="text-5xl font-bold leading-tight"
+              className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight"
               style={{ color: "var(--fg)" }}
               as="h1"
             />
@@ -348,7 +348,7 @@ export default function HeroScene() {
             <EditableContent
               contentKey="hero.subtitle"
               defaultValue="DanceMotion ist eine offene Tanzgemeinschaft — voller Energie, Kreativität und Wärme. Wir laden dich ein, dich selbst auszudrücken und Teil unserer Bühne zu werden."
-              className="text-lg leading-relaxed"
+              className="text-base sm:text-lg leading-relaxed"
               style={{ color: "var(--muted)" }}
               multiline
             />

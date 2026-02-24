@@ -10,26 +10,33 @@ export async function GET() {
 
     if (error) throw error
 
-    // Transform to flat image list, filtering out hidden images
-    const images = data.flatMap((gallery) => 
-      (gallery.images as any[]).map((image: any, index: number) => {
-        const imageUrl = typeof image === 'string' ? image : image.url
-        const imageTitle = typeof image === 'string' ? '' : (image.title || '')
-        const imageDescription = typeof image === 'string' ? '' : (image.description || '')
-        const isHidden = typeof image === 'string' ? false : (image.is_hidden || false)
-        
-        return {
-          id: `${gallery.id}-${index}`,
-          url: imageUrl,
-          title: imageTitle || gallery.title,
-          description: imageDescription,
-          category: gallery.category,
-          is_hidden: isHidden,
-        }
-      }).filter(img => !img.is_hidden) // Filter out hidden images
-    )
+    // Return albums with cover image and image count
+    const albums = (data || []).map((gallery) => {
+      const images = (gallery.images as any[]) || []
+      const visibleImages = images.filter((img) => {
+        if (typeof img === 'string') return true
+        return !img.is_hidden
+      })
 
-    return Response.json(images)
+      const coverImage = visibleImages[0]
+      const coverUrl = coverImage
+        ? typeof coverImage === 'string'
+          ? coverImage
+          : coverImage.url
+        : null
+
+      return {
+        id: gallery.id,
+        title: gallery.title,
+        category: gallery.category,
+        description: gallery.description || '',
+        cover_image: coverUrl,
+        image_count: visibleImages.length,
+        created_at: gallery.created_at,
+      }
+    }).filter((album) => album.image_count > 0)
+
+    return Response.json(albums)
   } catch (error: any) {
     console.error('GET /api/gallery error:', error)
     return Response.json(

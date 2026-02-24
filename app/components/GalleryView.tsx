@@ -1,36 +1,49 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Image from 'next/image'
-import { X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Camera, Images, Calendar } from 'lucide-react'
+import Link from 'next/link'
 
-interface GalleryImage {
+interface Album {
   id: string
-  url: string
-  title?: string
-  category?: string
+  title: string
+  category: string
+  description: string
+  cover_image: string | null
+  image_count: number
+  created_at: string
 }
 
-interface GalleryViewProps {
-  category?: string
+const categoryLabels: Record<string, string> = {
+  all: 'Alle',
+  general: 'Allgemein',
+  performances: 'Auftritte',
+  training: 'Training',
+  events: 'Events',
 }
 
-export default function GalleryView({ category }: GalleryViewProps) {
-  const [images, setImages] = useState<GalleryImage[]>([])
+const categoryColors: Record<string, string> = {
+  general: 'bg-slate-500',
+  performances: 'bg-purple-500',
+  training: 'bg-teal-500',
+  events: 'bg-amber-500',
+}
+
+export default function GalleryView() {
+  const [albums, setAlbums] = useState<Album[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedImage, setSelectedImage] = useState<number | null>(null)
-  const [selectedCategory, setSelectedCategory] = useState(category || 'all')
+  const [selectedCategory, setSelectedCategory] = useState('all')
 
   useEffect(() => {
-    loadGallery()
+    loadAlbums()
   }, [])
 
-  async function loadGallery() {
+  async function loadAlbums() {
     try {
       const res = await fetch('/api/gallery')
       if (res.ok) {
         const data = await res.json()
-        setImages(data)
+        setAlbums(data)
       }
     } catch (error) {
       console.error('Failed to load gallery:', error)
@@ -39,16 +52,19 @@ export default function GalleryView({ category }: GalleryViewProps) {
     }
   }
 
-  const filteredImages = selectedCategory === 'all' 
-    ? images 
-    : images.filter(img => img.category === selectedCategory)
+  const filteredAlbums = selectedCategory === 'all'
+    ? albums
+    : albums.filter((a) => a.category === selectedCategory)
 
-  const categories = ['all', ...Array.from(new Set(images.map(img => img.category).filter(Boolean)))]
+  const categories = ['all', ...Array.from(new Set(albums.map((a) => a.category).filter(Boolean)))]
 
-  const openLightbox = (index: number) => setSelectedImage(index)
-  const closeLightbox = () => setSelectedImage(null)
-  const nextImage = () => setSelectedImage((prev) => prev !== null ? (prev + 1) % filteredImages.length : null)
-  const prevImage = () => setSelectedImage((prev) => prev !== null ? (prev - 1 + filteredImages.length) % filteredImages.length : null)
+  function formatDate(dateStr: string) {
+    return new Date(dateStr).toLocaleDateString('de-DE', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    })
+  }
 
   if (loading) {
     return (
@@ -65,93 +81,98 @@ export default function GalleryView({ category }: GalleryViewProps) {
         {categories.map((cat) => (
           <button
             key={cat}
-            onClick={() => setSelectedCategory(cat || 'all')}
+            onClick={() => setSelectedCategory(cat)}
             className="px-4 py-2 rounded-full text-sm font-medium transition-all"
             style={{
               backgroundColor: selectedCategory === cat ? 'var(--accent)' : 'rgba(var(--accent-rgb), 0.1)',
               color: selectedCategory === cat ? 'var(--bg)' : 'var(--fg)',
             }}
           >
-            {cat === 'all' ? 'Alle' : cat}
+            {categoryLabels[cat] || cat}
           </button>
         ))}
       </div>
 
-      {/* Masonry Grid */}
-      <div className="columns-1 md:columns-2 lg:columns-3 gap-4 space-y-4">
-        {filteredImages.map((image, index) => (
-          <div
-            key={image.id}
-            className="break-inside-avoid cursor-pointer group relative overflow-hidden rounded-lg"
-            onClick={() => openLightbox(index)}
+      {/* Album Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredAlbums.map((album) => (
+          <Link
+            key={album.id}
+            href={`/galerie/${album.id}`}
+            className="group block rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1"
+            style={{
+              backgroundColor: 'var(--card-bg, rgba(var(--accent-rgb), 0.05))',
+              border: '1px solid var(--border, rgba(var(--accent-rgb), 0.1))',
+            }}
           >
-            <div className="relative aspect-auto">
-              <img
-                src={image.url}
-                alt={image.title || 'Gallery image'}
-                className="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-105"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-              {image.title && (
-                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <p className="text-white font-medium">{image.title}</p>
+            {/* Cover Image */}
+            <div className="relative aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-gray-800">
+              {album.cover_image ? (
+                <img
+                  src={album.cover_image}
+                  alt={album.title}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <Camera size={48} className="text-gray-300 dark:text-gray-600" />
                 </div>
               )}
+
+              {/* Overlay gradient */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+              {/* Category badge */}
+              <div className="absolute top-3 left-3">
+                <span
+                  className={`${categoryColors[album.category] || 'bg-slate-500'} text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-lg`}
+                >
+                  {categoryLabels[album.category] || album.category}
+                </span>
+              </div>
+
+              {/* Image count badge */}
+              <div className="absolute top-3 right-3">
+                <span className="bg-black/60 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-full flex items-center gap-1.5">
+                  <Images size={14} />
+                  {album.image_count}
+                </span>
+              </div>
             </div>
-          </div>
+
+            {/* Info */}
+            <div className="p-4 space-y-2">
+              <h3
+                className="text-lg font-bold line-clamp-1 group-hover:underline decoration-2 underline-offset-2"
+                style={{ color: 'var(--fg)' }}
+              >
+                {album.title}
+              </h3>
+
+              {album.description && (
+                <p className="text-sm line-clamp-2" style={{ color: 'var(--muted)' }}>
+                  {album.description}
+                </p>
+              )}
+
+              <div className="flex items-center gap-1.5 text-xs pt-1" style={{ color: 'var(--muted)' }}>
+                <Calendar size={13} />
+                {formatDate(album.created_at)}
+              </div>
+            </div>
+          </Link>
         ))}
       </div>
 
-      {filteredImages.length === 0 && (
+      {filteredAlbums.length === 0 && (
         <div className="text-center py-20">
-          <p className="text-muted">Keine Bilder in dieser Kategorie</p>
-        </div>
-      )}
-
-      {/* Lightbox */}
-      {selectedImage !== null && (
-        <div 
-          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
-          onClick={closeLightbox}
-        >
-          <button
-            onClick={(e) => { e.stopPropagation(); closeLightbox(); }}
-            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-          >
-            <X size={24} className="text-white" />
-          </button>
-          
-          <button
-            onClick={(e) => { e.stopPropagation(); prevImage(); }}
-            className="absolute left-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-          >
-            <ChevronLeft size={32} className="text-white" />
-          </button>
-
-          <div className="max-w-7xl max-h-[90vh] px-4" onClick={(e) => e.stopPropagation()}>
-            <img
-              src={filteredImages[selectedImage].url}
-              alt={filteredImages[selectedImage].title || 'Gallery image'}
-              className="max-w-full max-h-[90vh] object-contain"
-            />
-            {filteredImages[selectedImage].title && (
-              <p className="text-white text-center mt-4 text-lg">
-                {filteredImages[selectedImage].title}
-              </p>
-            )}
-          </div>
-
-          <button
-            onClick={(e) => { e.stopPropagation(); nextImage(); }}
-            className="absolute right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-          >
-            <ChevronRight size={32} className="text-white" />
-          </button>
-
-          <div className="absolute bottom-4 text-white text-sm">
-            {selectedImage + 1} / {filteredImages.length}
-          </div>
+          <Camera size={48} className="mx-auto mb-4 opacity-30" style={{ color: 'var(--muted)' }} />
+          <p className="text-lg font-medium" style={{ color: 'var(--muted)' }}>
+            {selectedCategory === 'all'
+              ? 'Noch keine Alben vorhanden'
+              : 'Keine Alben in dieser Kategorie'}
+          </p>
         </div>
       )}
     </div>
