@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { Plus, Edit2, Trash2, ArrowUp, ArrowDown, Eye, EyeOff, ExternalLink, Building2, Upload, X, Image as ImageIcon } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
 import {
   AdminCard,
   StatCard,
@@ -147,23 +146,23 @@ export default function AdminSponsorsManager() {
         return;
       }
 
-      const fileName = `sponsor-${Date.now()}-${Math.random().toString(36).substring(7)}.${file.name.split('.').pop()}`;
-      
-      const { error: uploadErr } = await supabase.storage
-        .from('sponsor-images')
-        .upload(fileName, file, {
-          contentType: file.type,
-          upsert: false
-        });
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
 
-      if (uploadErr) {
-        console.error('Upload error:', uploadErr);
-        alert(`Upload fehlgeschlagen: ${uploadErr.message}`);
+      const res = await fetch('/api/admin/sponsors/upload', {
+        method: 'POST',
+        body: formDataUpload,
+        credentials: 'include',
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        alert(`Upload fehlgeschlagen: ${err.error}`);
         return;
       }
 
-      const { data: publicUrl } = supabase.storage.from('sponsor-images').getPublicUrl(fileName);
-      setFormData(prev => ({ ...prev, logo_url: publicUrl.publicUrl }));
+      const { url } = await res.json();
+      setFormData(prev => ({ ...prev, logo_url: url }));
     } catch (error) {
       console.error('Error uploading image:', error);
       alert('Fehler beim Hochladen');
@@ -181,12 +180,12 @@ export default function AdminSponsorsManager() {
     // Only delete if it's from our storage
     if (formData.logo_url.includes('sponsor-images')) {
       try {
-        const urlParts = formData.logo_url.split('/');
-        const fileName = urlParts[urlParts.length - 1];
-
-        await supabase.storage
-          .from('sponsor-images')
-          .remove([fileName]);
+        await fetch('/api/admin/sponsors/upload', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ url: formData.logo_url }),
+        });
       } catch (error) {
         console.error('Error deleting image:', error);
       }
