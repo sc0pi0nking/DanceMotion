@@ -1,5 +1,38 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase';
+import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth';
+
+// GET - Einzelne Event-Anfrage abrufen
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const currentUser = await getAdminUserWithPermissions();
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.EVENTS)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const { id } = await params;
+    const supabase = supabaseServer;
+
+    const { data, error } = await supabase
+      .from('event_requests')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+
+    return NextResponse.json(data);
+  } catch (error: any) {
+    console.error('Error fetching event request:', error);
+    return NextResponse.json(
+      { error: error.message || 'Failed to fetch event request' },
+      { status: 500 }
+    );
+  }
+}
 
 // PATCH - Event-Anfrage aktualisieren (Status, Notizen, etc.)
 export async function PATCH(
@@ -7,6 +40,11 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const currentUser = await getAdminUserWithPermissions();
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.EVENTS)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const { id } = await params;
     const supabase = supabaseServer;
     const body = await request.json();
@@ -43,6 +81,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const currentUser = await getAdminUserWithPermissions();
+    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.EVENTS)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const { id } = await params;
     const supabase = supabaseServer;
 

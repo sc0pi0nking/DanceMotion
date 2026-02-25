@@ -5,7 +5,6 @@ Disallow: /api
 
 # Sitemap
 Sitemap: https://dancemotion.org/sitemap.xml
-Sitemap: https://dancemotion.org/sitemap-de.xml
 
 # Crawl-delay (optional - respektiere Server)
 Crawl-delay: 1

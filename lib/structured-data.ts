@@ -1,34 +1,41 @@
 /**
  * JSON-LD Structured Data
  * Schema.org markup for SEO
+ * 
+ * TODO: Echte Kontaktdaten aus Admin-Settings laden
  */
+
+// Site configuration - should be moved to admin settings
+const SITE_CONFIG = {
+  name: 'DanceMotion Eschweiler',
+  url: 'https://dancemotion.org',
+  email: 'kontakt@dancemotion.org',
+  city: 'Eschweiler',
+  postalCode: '52249',
+  region: 'NRW',
+  country: 'DE',
+};
 
 export function getOrganizationSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'DanceMotion Eschweiler',
-    url: 'https://dancemotion.org',
-    logo: 'https://dancemotion.org/logo.png',
+    name: SITE_CONFIG.name,
+    url: SITE_CONFIG.url,
+    logo: `${SITE_CONFIG.url}/logo.png`,
     description: 'Offene Tanzgemeinschaft in Eschweiler: Little Joys, Smileys, Emotion & Events',
     address: {
       '@type': 'PostalAddress',
-      streetAddress: 'Straße und Hausnummer',
-      addressLocality: 'Eschweiler',
-      addressRegion: 'NRW',
-      postalCode: '52249',
-      addressCountry: 'DE',
+      addressLocality: SITE_CONFIG.city,
+      addressRegion: SITE_CONFIG.region,
+      postalCode: SITE_CONFIG.postalCode,
+      addressCountry: SITE_CONFIG.country,
     },
     contact: {
       '@type': 'ContactPoint',
       contactType: 'Customer Service',
-      telephone: '+49-XXX-XXXXXX',
-      email: 'kontakt@dancemotion.org',
+      email: SITE_CONFIG.email,
     },
-    sameAs: [
-      'https://www.facebook.com/dancemotion',
-      'https://www.instagram.com/dancemotion',
-    ],
   };
 }
 
@@ -36,36 +43,21 @@ export function getLocalBusinessSchema() {
   return {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
-    '@id': 'https://dancemotion.org',
-    name: 'DanceMotion Eschweiler',
-    image: 'https://dancemotion.org/og-image.jpg',
+    '@id': SITE_CONFIG.url,
+    name: SITE_CONFIG.name,
+    image: `${SITE_CONFIG.url}/og-image.jpg`,
     description: 'Tanzschule mit offenen Tanzgruppen und Events',
     address: {
       '@type': 'PostalAddress',
-      streetAddress: 'Straße und Hausnummer',
-      addressLocality: 'Eschweiler',
-      addressRegion: 'NRW',
-      postalCode: '52249',
-      addressCountry: 'DE',
+      addressLocality: SITE_CONFIG.city,
+      addressRegion: SITE_CONFIG.region,
+      postalCode: SITE_CONFIG.postalCode,
+      addressCountry: SITE_CONFIG.country,
     },
     priceRange: '€€',
-    telephone: '+49-XXX-XXXXXX',
-    url: 'https://dancemotion.org',
-    openingHoursSpecification: [
-      {
-        '@type': 'OpeningHoursSpecification',
-        dayOfWeek: ['Monday', 'Wednesday'],
-        opens: '16:00',
-        closes: '20:00',
-      },
-      {
-        '@type': 'OpeningHoursSpecification',
-        dayOfWeek: ['Tuesday', 'Thursday'],
-        opens: '17:00',
-        closes: '21:00',
-      },
-    ],
-    areaServed: ['Eschweiler', 'NRW', 'Deutschland'],
+    email: SITE_CONFIG.email,
+    url: SITE_CONFIG.url,
+    areaServed: [SITE_CONFIG.city, SITE_CONFIG.region, 'Deutschland'],
   };
 }
 

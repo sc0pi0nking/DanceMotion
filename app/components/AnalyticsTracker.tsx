@@ -13,9 +13,9 @@ export default function AnalyticsTracker() {
     // Don't track if DNT is set
     if (navigator.doNotTrack === '1') return
 
-    // Check if user has explicitly rejected cookies
+    // Check if user has explicitly accepted cookies (echtes Opt-In DSGVO)
     const cookiePreference = localStorage.getItem('dancemotion_cookies_accepted')
-    if (cookiePreference === 'rejected') return
+    if (cookiePreference !== 'true') return  // Echtes Opt-In
 
     // Track page view
     const trackPageView = () => {

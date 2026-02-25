@@ -7,19 +7,17 @@ const nextConfig: NextConfig = {
     formats: ["image/webp", "image/avif"],
     // Cache optimized images
     minimumCacheTTL: 31536000, // 1 year
-    // Allow Supabase Storage URLs and external images
+    // Allow Supabase Storage URLs
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**.supabase.co",
+        hostname: "*.supabase.co",
       },
       {
         protocol: "https",
-        hostname: "**",
+        hostname: "sbbrjdfcxvbbcswnbyki.supabase.co",
       },
     ],
-    // Disable optimization in Docker to avoid sharp issues
-    unoptimized: process.env.NODE_ENV === 'production',
   },
   
   // Performance: Enable experimental features

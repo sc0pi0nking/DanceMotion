@@ -11,19 +11,15 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Build-time environment variables (from build args)
+# Note: SUPABASE_SERVICE_ROLE_KEY is NOT included here - it's only injected at runtime
+# Note: ADMIN_EMAIL/ADMIN_PASSWORD are NOT included - they come via env_file at runtime only
 ARG NEXT_PUBLIC_SUPABASE_URL
 ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
-ARG SUPABASE_SERVICE_ROLE_KEY
-ARG ADMIN_EMAIL
-ARG ADMIN_PASSWORD
 ARG NEXT_PUBLIC_APP_URL
 
 # Set as environment variables during build
 ENV NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
 ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-ENV SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
-ENV ADMIN_EMAIL=${ADMIN_EMAIL}
-ENV ADMIN_PASSWORD=${ADMIN_PASSWORD}
 ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 
 # Increase Node.js memory limit to prevent SIGSEGV during build
@@ -41,13 +37,8 @@ RUN apk add --no-cache libc6-compat
 
 COPY --from=build /app ./
 
-# Runtime environment variables (werden von docker-compose gesetzt)
-ENV NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
-ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-ENV SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
-ENV ADMIN_EMAIL=${ADMIN_EMAIL}
-ENV ADMIN_PASSWORD=${ADMIN_PASSWORD}
-ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+# Runtime environment variables (werden von docker-compose via env_file gesetzt)
+# SUPABASE_SERVICE_ROLE_KEY wird NUR zur Runtime injiziert (nicht im Image)
 
 EXPOSE 3000
 CMD ["npm", "run", "start"]

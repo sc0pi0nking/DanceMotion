@@ -6,11 +6,10 @@ services:
       context: .
       dockerfile: dockerfile
       args:
+        # Note: SUPABASE_SERVICE_ROLE_KEY is NOT passed as build arg - only at runtime via env_file
+        # Note: ADMIN_EMAIL/ADMIN_PASSWORD are NOT passed as build args - only at runtime via env_file
         NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
         NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-        SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
-        ADMIN_EMAIL: ${ADMIN_EMAIL}
-        ADMIN_PASSWORD: ${ADMIN_PASSWORD}
         NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-https://dancemotion.org}
     container_name: dancemotion-web
     restart: unless-stopped

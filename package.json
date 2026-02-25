@@ -8,9 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "deploy:prod": "ssh dev@dancemotion-prod \"cd /opt/dancemotion/web ; git pull origin main ; docker compose up -d\"",
-    "deploy:prod:rebuild": "ssh dev@dancemotion-prod \"cd /opt/dancemotion/web ; git pull origin main ; docker compose up -d --build\"",
-    "deploy:prod:ip": "ssh dev@192.168.178.116 \"cd /opt/dancemotion/web ; git pull origin main ; docker compose up -d\"",
-    "deploy:prod:ip:rebuild": "ssh dev@192.168.178.116 \"cd /opt/dancemotion/web ; git pull origin main ; docker compose up -d --build\""
+    "deploy:prod:rebuild": "ssh dev@dancemotion-prod \"cd /opt/dancemotion/web ; git pull origin main ; docker compose up -d --build\""
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.90.1",

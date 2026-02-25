@@ -57,7 +57,7 @@ export default function EventRequestsManager() {
 
   const fetchRequests = async () => {
     try {
-      const res = await fetch('/api/event-requests');
+      const res = await fetch('/api/admin/event-requests');
       if (res.ok) {
         const data = await res.json();
         setRequests(data);
@@ -71,7 +71,7 @@ export default function EventRequestsManager() {
 
   const updateStatus = async (id: string, status: string) => {
     try {
-      const res = await fetch(`/api/event-requests/${id}`, {
+      const res = await fetch(`/api/admin/event-requests/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
@@ -90,7 +90,7 @@ export default function EventRequestsManager() {
 
   const updateNotes = async (id: string, notes: string) => {
     try {
-      const res = await fetch(`/api/event-requests/${id}`, {
+      const res = await fetch(`/api/admin/event-requests/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ notes }),
@@ -108,7 +108,7 @@ export default function EventRequestsManager() {
     if (!confirm('Anfrage wirklich löschen?')) return;
 
     try {
-      const res = await fetch(`/api/event-requests/${id}`, {
+      const res = await fetch(`/api/admin/event-requests/${id}`, {
         method: 'DELETE',
       });
 

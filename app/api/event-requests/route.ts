@@ -1,27 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase';
 
-// GET - Alle Event-Anfragen abrufen (nur für Admins/Event-Manager)
-export async function GET() {
-  try {
-    const supabase = supabaseServer;
-    
-    const { data: requests, error } = await supabase
-      .from('event_requests')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-
-    return NextResponse.json(requests || []);
-  } catch (error: any) {
-    console.error('Error fetching event requests:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to fetch event requests' },
-      { status: 500 }
-    );
-  }
-}
+// NOTE: GET wurde entfernt - Admin-Zugriff auf Event-Anfragen nur über /api/admin/event-requests
 
 // POST - Neue Event-Anfrage erstellen (öffentlich)
 export async function POST(request: NextRequest) {

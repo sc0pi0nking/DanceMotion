@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Check } from 'lucide-react'
+import { X } from 'lucide-react'
 
 export default function CookieBanner() {
   const [isVisible, setIsVisible] = useState(false)
@@ -49,19 +49,18 @@ export default function CookieBanner() {
               </p>
             </div>
 
-            {/* Actions */}
+            {/* Actions - DSGVO: Gleichwertige Buttons ohne Dark Patterns */}
             <div className="flex items-center gap-2 flex-shrink-0">
               <button
                 onClick={handleReject}
-                className="px-3 py-2 text-xs md:text-sm text-slate-300 hover:text-slate-100 border border-slate-600 hover:border-slate-500 rounded-lg transition"
+                className="px-4 py-2 text-xs md:text-sm bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition font-medium"
               >
                 Ablehnen
               </button>
               <button
                 onClick={handleAccept}
-                className="px-4 py-2 text-xs md:text-sm bg-teal-600 hover:bg-teal-500 text-white rounded-lg transition flex items-center gap-2 font-medium"
+                className="px-4 py-2 text-xs md:text-sm bg-teal-600 hover:bg-teal-500 text-white rounded-lg transition font-medium"
               >
-                <Check className="w-4 h-4" />
                 Akzeptieren
               </button>
               <button
