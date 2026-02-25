@@ -22,6 +22,8 @@ services:
       NODE_ENV: production
     labels:
       - "traefik.enable=true"
+      - "traefik.http.routers.dancemotion-http.rule=Host(`dancemotion.org`)"
+      - "traefik.http.routers.dancemotion-http.entrypoints=web"
       - "traefik.http.routers.dancemotion.rule=Host(`dancemotion.org`)"
       - "traefik.http.routers.dancemotion.entrypoints=web,websecure"
       - "traefik.http.routers.dancemotion.tls=true"
