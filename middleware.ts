@@ -9,15 +9,6 @@ export function middleware(request: NextRequest) {
   response.headers.set('X-XSS-Protection', '1; mode=block');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   
-  // HTTPS redirect
-  if (process.env.NODE_ENV === 'production' && 
-      request.headers.get('x-forwarded-proto') === 'http') {
-    return NextResponse.redirect(
-      `https://${request.headers.get('host')}${request.nextUrl.pathname}`,
-      { status: 308 }
-    );
-  }
-
   // HSTS Header (for HTTPS)
   if (process.env.NODE_ENV === 'production') {
     response.headers.set(
