@@ -1,4 +1,5 @@
 import { supabaseServer } from './supabase'
+import { tiles } from './site-data'
 
 export interface EngagementMetrics {
   bounceRate: number // Percentage of single-page sessions
@@ -38,59 +39,108 @@ export interface GroupEngagement {
   engagementRate: number // Percentage
 }
 
+interface AnalyticsPageviewRow {
+  session_hash: string
+  path: string
+  referrer: string | null
+  device_type: string | null
+  browser: string | null
+  created_at: string
+}
+
+function getStartDate(daysBack: number): Date {
+  const startDate = new Date()
+  startDate.setDate(startDate.getDate() - daysBack)
+  return startDate
+}
+
+function slugifyText(input: string): string {
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+}
+
+async function fetchPageviews(daysBack: number): Promise<AnalyticsPageviewRow[]> {
+  const startDate = getStartDate(daysBack)
+
+  const { data, error } = await supabaseServer
+    .from('analytics_pageviews')
+    .select('session_hash, path, referrer, device_type, browser, created_at')
+    .gte('created_at', startDate.toISOString())
+    .order('created_at', { ascending: true })
+
+  if (error) {
+    console.error('Error fetching pageviews:', error)
+    return []
+  }
+
+  return (data || []) as AnalyticsPageviewRow[]
+}
+
+function buildSessionMap(pageviews: AnalyticsPageviewRow[]) {
+  const sessions = new Map<
+    string,
+    {
+      first: number
+      last: number
+      pageCount: number
+      dates: Set<string>
+      hasConversion: boolean
+      rows: AnalyticsPageviewRow[]
+    }
+  >()
+
+  for (const row of pageviews) {
+    const timestamp = new Date(row.created_at).getTime()
+    const dateKey = row.created_at.slice(0, 10)
+
+    if (!sessions.has(row.session_hash)) {
+      sessions.set(row.session_hash, {
+        first: timestamp,
+        last: timestamp,
+        pageCount: 0,
+        dates: new Set<string>(),
+        hasConversion: false,
+        rows: [],
+      })
+    }
+
+    const session = sessions.get(row.session_hash)!
+    session.first = Math.min(session.first, timestamp)
+    session.last = Math.max(session.last, timestamp)
+    session.pageCount += 1
+    session.dates.add(dateKey)
+    session.rows.push(row)
+
+    if (row.path.includes('/formulare') || row.path.includes('/api/contact') || row.path.includes('/api/event-requests')) {
+      session.hasConversion = true
+    }
+  }
+
+  return sessions
+}
+
 /**
  * Calculate user engagement metrics
  */
 export async function getEngagementMetrics(daysBack: number = 7): Promise<EngagementMetrics> {
   try {
-    const startDate = new Date()
-    startDate.setDate(startDate.getDate() - daysBack)
-    const startDateStr = startDate.toISOString().split('T')[0]
+    const pageviews = await fetchPageviews(daysBack)
+    const sessions = buildSessionMap(pageviews)
 
-    // Fetch session data
-    const { data: sessions, error } = await supabaseServer.rpc('get_session_metrics', {
-      p_start_date: startDateStr,
-    })
-
-    if (error) {
-      console.error('Error fetching session metrics:', error)
-      return {
-        bounceRate: 0,
-        avgSessionDuration: 0,
-        pageViewsPerSession: 0,
-        returnVisitorRate: 0,
-        conversionEvents: 0,
-      }
-    }
-
-    // Calculate metrics from sessions
-    let totalSessions = 0
+    const totalSessions = sessions.size
     let singlePageSessions = 0
     let totalSessionDuration = 0
-    let totalPageViews = 0
     let returningVisitors = 0
-    let uniqueSessionIds = new Set<string>()
     let conversionCount = 0
 
-    if (sessions) {
-      sessions.forEach((session: any) => {
-        totalSessions++
-        uniqueSessionIds.add(session.session_hash)
-        totalSessionDuration += session.session_duration || 0
-        totalPageViews += session.page_count || 1
-
-        if ((session.page_count || 1) === 1) {
-          singlePageSessions++
-        }
-
-        if (session.visit_count > 1) {
-          returningVisitors++
-        }
-
-        if (session.conversion_event) {
-          conversionCount++
-        }
-      })
+    for (const [, session] of sessions) {
+      if (session.pageCount === 1) singlePageSessions++
+      totalSessionDuration += Math.max(0, Math.round((session.last - session.first) / 1000))
+      if (session.dates.size > 1) returningVisitors++
+      if (session.hasConversion) conversionCount++
     }
 
     return {
@@ -104,11 +154,11 @@ export async function getEngagementMetrics(daysBack: number = 7): Promise<Engage
           : 0,
       pageViewsPerSession:
         totalSessions > 0
-          ? Math.round((totalPageViews / totalSessions) * 10) / 10
+          ? Math.round((pageviews.length / totalSessions) * 10) / 10
           : 0,
       returnVisitorRate:
-        uniqueSessionIds.size > 0
-          ? Math.round((returningVisitors / uniqueSessionIds.size) * 100)
+        totalSessions > 0
+          ? Math.round((returningVisitors / totalSessions) * 100)
           : 0,
       conversionEvents: conversionCount,
     }
@@ -129,31 +179,57 @@ export async function getEngagementMetrics(daysBack: number = 7): Promise<Engage
  */
 export async function getEventPopularity(daysBack: number = 30): Promise<EventPopularity[]> {
   try {
-    const startDate = new Date()
-    startDate.setDate(startDate.getDate() - daysBack)
+    const startDate = getStartDate(daysBack)
     const startDateStr = startDate.toISOString().split('T')[0]
 
-    // Fetch event pageview data
-    const { data: eventData, error } = await supabaseServer.rpc('get_event_popularity', {
-      p_start_date: startDateStr,
-    })
+    const [pageviews, eventsResult] = await Promise.all([
+      fetchPageviews(daysBack),
+      supabaseServer
+        .from('events')
+        .select('id, title, date')
+        .eq('is_published', true)
+        .gte('date', startDateStr)
+        .order('date', { ascending: true })
+        .limit(100),
+    ])
 
-    if (error) {
-      console.error('Error fetching event popularity:', error)
+    if (eventsResult.error) {
+      console.error('Error fetching events for popularity:', eventsResult.error)
       return []
     }
 
-    if (!eventData) return []
+    const events = eventsResult.data || []
 
-    return eventData.map((event: any) => ({
-      eventId: event.id,
-      eventName: event.name,
-      eventDate: event.date,
-      pageViews: event.page_views || 0,
-      uniqueVisitors: event.unique_visitors || 0,
-      clickThroughRate: event.page_views > 0 ? Math.round((event.ctr_clicks / event.page_views) * 100) : 0,
-      conversionRate: event.page_views > 0 ? Math.round((event.conversions / event.page_views) * 100) : 0,
-    }))
+    return events
+      .map((event: any) => {
+        const eventSlug = slugifyText(event.title || '')
+        const related = pageviews.filter((pv) => {
+          const path = pv.path || ''
+          return (
+            path.includes(`/termine/${event.id}`) ||
+            path.includes(`/termine/${eventSlug}`) ||
+            path.includes(String(event.id))
+          )
+        })
+
+        const uniqueSessions = new Set(related.map((entry) => entry.session_hash)).size
+        const conversionSessions = new Set(
+          related
+            .filter((entry) => entry.path.includes('/formulare') || entry.path.includes('/api/event-requests'))
+            .map((entry) => entry.session_hash)
+        ).size
+
+        return {
+          eventId: event.id,
+          eventName: event.title,
+          eventDate: event.date,
+          pageViews: related.length,
+          uniqueVisitors: uniqueSessions,
+          clickThroughRate: 0,
+          conversionRate: related.length > 0 ? Math.round((conversionSessions / related.length) * 100) : 0,
+        }
+      })
+      .filter((event) => event.pageViews > 0 || event.uniqueVisitors > 0)
   } catch (error) {
     console.error('Error getting event popularity:', error)
     return []
@@ -165,14 +241,12 @@ export async function getEventPopularity(daysBack: number = 30): Promise<EventPo
  */
 export async function getPerformanceMetrics(daysBack: number = 7): Promise<PerformanceMetrics> {
   try {
-    const startDate = new Date()
-    startDate.setDate(startDate.getDate() - daysBack)
-    const startDateStr = startDate.toISOString().split('T')[0]
+    const startDate = getStartDate(daysBack)
 
-    // Fetch performance data
-    const { data: perfData, error } = await supabaseServer.rpc('get_performance_metrics', {
-      p_start_date: startDateStr,
-    })
+    const { data: perfData, error } = await supabaseServer
+      .from('performance_metrics')
+      .select('data, device_type')
+      .gte('created_at', startDate.toISOString())
 
     if (error) {
       console.error('Error fetching performance metrics:', error)
@@ -211,16 +285,22 @@ export async function getPerformanceMetrics(daysBack: number = 7): Promise<Perfo
     let desktopCount = 0
 
     perfData.forEach((metric: any) => {
-      totalLoadTime += metric.page_load_time || 0
-      totalFCP += metric.fcp || 0
-      totalLCP += metric.lcp || 0
-      totalCLS += metric.cls || 0
+      const data = metric.data || {}
+      const pageLoadTime = Number(data.pageLoadTime || 0)
+      const fcp = Number(data.fcp || 0)
+      const lcp = Number(data.lcp || 0)
+      const cls = Number(data.cls || 0)
+
+      totalLoadTime += pageLoadTime
+      totalFCP += fcp
+      totalLCP += lcp
+      totalCLS += cls
 
       if (metric.device_type === 'mobile') {
-        mobileLoadTime += metric.page_load_time || 0
+        mobileLoadTime += pageLoadTime
         mobileCount++
       } else if (metric.device_type === 'desktop') {
-        desktopLoadTime += metric.page_load_time || 0
+        desktopLoadTime += pageLoadTime
         desktopCount++
       }
     })
@@ -256,33 +336,61 @@ export async function getPerformanceMetrics(daysBack: number = 7): Promise<Perfo
  */
 export async function getGroupEngagement(daysBack: number = 30): Promise<GroupEngagement[]> {
   try {
-    const startDate = new Date()
-    startDate.setDate(startDate.getDate() - daysBack)
-    const startDateStr = startDate.toISOString().split('T')[0]
+    const pageviews = await fetchPageviews(daysBack)
+    const sessions = buildSessionMap(pageviews)
 
-    // Fetch group engagement data
-    const { data: groupData, error } = await supabaseServer.rpc('get_group_engagement', {
-      p_start_date: startDateStr,
-    })
+    const pathDurations = new Map<string, { totalSeconds: number; count: number }>()
 
-    if (error) {
-      console.error('Error fetching group engagement:', error)
-      return []
+    for (const [, session] of sessions) {
+      const sorted = [...session.rows].sort(
+        (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      )
+
+      for (let i = 0; i < sorted.length - 1; i++) {
+        const current = sorted[i]
+        const next = sorted[i + 1]
+        const deltaSeconds = Math.max(
+          0,
+          Math.min(
+            1800,
+            Math.round(
+              (new Date(next.created_at).getTime() - new Date(current.created_at).getTime()) / 1000
+            )
+          )
+        )
+
+        const existing = pathDurations.get(current.path) || { totalSeconds: 0, count: 0 }
+        existing.totalSeconds += deltaSeconds
+        existing.count += 1
+        pathDurations.set(current.path, existing)
+      }
     }
 
-    if (!groupData) return []
+    return tiles.map((group) => {
+      const matching = pageviews.filter((pv) => (pv.path || '').includes(`/gruppen/${group.slug}`))
+      const uniqueVisitors = new Set(matching.map((item) => item.session_hash)).size
 
-    return groupData.map((group: any) => ({
-      groupId: group.id,
-      groupName: group.name,
-      pageViews: group.page_views || 0,
-      uniqueVisitors: group.unique_visitors || 0,
-      avgTimeOnPage: group.avg_time_on_page || 0,
-      engagementRate:
-        group.page_views > 0
-          ? Math.round((group.unique_visitors / group.page_views) * 100)
-          : 0,
-    }))
+      let durationTotal = 0
+      let durationCount = 0
+      for (const [path, stats] of pathDurations.entries()) {
+        if (path.includes(`/gruppen/${group.slug}`)) {
+          durationTotal += stats.totalSeconds
+          durationCount += stats.count
+        }
+      }
+
+      const pageViews = matching.length
+      const avgTimeOnPage = durationCount > 0 ? Math.round(durationTotal / durationCount) : 0
+
+      return {
+        groupId: group.slug,
+        groupName: group.title,
+        pageViews,
+        uniqueVisitors,
+        avgTimeOnPage,
+        engagementRate: pageViews > 0 ? Math.round((uniqueVisitors / pageViews) * 100) : 0,
+      }
+    })
   } catch (error) {
     console.error('Error getting group engagement:', error)
     return []
@@ -294,24 +402,22 @@ export async function getGroupEngagement(daysBack: number = 30): Promise<GroupEn
  */
 export async function getTrafficSources(daysBack: number = 7): Promise<Record<string, number>> {
   try {
-    const startDate = new Date()
-    startDate.setDate(startDate.getDate() - daysBack)
-    const startDateStr = startDate.toISOString().split('T')[0]
-
-    const { data: referrerData, error } = await supabaseServer.rpc('get_traffic_sources', {
-      p_start_date: startDateStr,
-    })
-
-    if (error) {
-      console.error('Error fetching traffic sources:', error)
-      return {}
-    }
-
+    const pageviews = await fetchPageviews(daysBack)
     const sources: Record<string, number> = {}
-    if (referrerData) {
-      referrerData.forEach((item: any) => {
-        sources[item.source] = item.count || 0
-      })
+
+    for (const pageview of pageviews) {
+      const referrer = (pageview.referrer || '').toLowerCase()
+
+      let source = 'Direct'
+      if (!referrer) source = 'Direct'
+      else if (referrer.includes('google')) source = 'Google'
+      else if (referrer.includes('facebook')) source = 'Facebook'
+      else if (referrer.includes('instagram')) source = 'Instagram'
+      else if (referrer.includes('youtube')) source = 'YouTube'
+      else if (referrer.includes('whatsapp')) source = 'WhatsApp'
+      else source = 'Other'
+
+      sources[source] = (sources[source] || 0) + 1
     }
 
     return sources
@@ -328,27 +434,32 @@ export async function getUserFlows(
   daysBack: number = 7
 ): Promise<Array<{ path: string; nextPage: string; count: number }>> {
   try {
-    const startDate = new Date()
-    startDate.setDate(startDate.getDate() - daysBack)
-    const startDateStr = startDate.toISOString().split('T')[0]
+    const pageviews = await fetchPageviews(daysBack)
+    const sessions = buildSessionMap(pageviews)
+    const transitions = new Map<string, number>()
 
-    const { data: flowData, error } = await supabaseServer.rpc('get_user_flows', {
-      p_start_date: startDateStr,
-    })
+    for (const [, session] of sessions) {
+      const sorted = [...session.rows].sort(
+        (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      )
 
-    if (error) {
-      console.error('Error fetching user flows:', error)
-      return []
+      for (let i = 0; i < sorted.length - 1; i++) {
+        const current = sorted[i]
+        const next = sorted[i + 1]
+
+        const delta = new Date(next.created_at).getTime() - new Date(current.created_at).getTime()
+        if (delta <= 30 * 60 * 1000) {
+          const key = `${current.path}___${next.path}`
+          transitions.set(key, (transitions.get(key) || 0) + 1)
+        }
+      }
     }
 
-    if (!flowData) return []
-
-    return flowData
-      .map((flow: any) => ({
-        path: flow.current_page,
-        nextPage: flow.next_page,
-        count: flow.transition_count || 0,
-      }))
+    return Array.from(transitions.entries())
+      .map(([key, count]) => {
+        const [path, nextPage] = key.split('___')
+        return { path, nextPage, count }
+      })
       .sort((a: { count: number }, b: { count: number }) => b.count - a.count)
       .slice(0, 20) // Top 20 transitions
   } catch (error) {

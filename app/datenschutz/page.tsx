@@ -29,7 +29,7 @@ export default function DatenschutzPage() {
           <h2 className="text-lg font-semibold mb-2" style={{ color: "var(--fg)" }}>Erfassung von Daten</h2>
           <EditableContent
             contentKey="datenschutz.data_collection"
-            defaultValue="Wenn Sie unsere Website besuchen, werden automatisch Informationen über den Zugriff erfasst (z.B. Datum, Uhrzeit, Browser). Diese Informationen werden zu statistischen Zwecken genutzt."
+            defaultValue="Wenn Sie unsere Website besuchen, werden technische Basisdaten zur Auslieferung der Seite verarbeitet. Eine darüber hinausgehende Analyse Ihres Nutzungsverhaltens (anonymisierte Analytics) erfolgt ausschließlich nach Ihrer ausdrücklichen Einwilligung über den Cookie-Banner (Art. 6 Abs. 1 lit. a DSGVO). Ohne Einwilligung findet kein Analytics-Tracking statt."
             style={{ color: "var(--muted)" }}
             multiline
           />
@@ -78,7 +78,17 @@ export default function DatenschutzPage() {
           <h2 className="text-lg font-semibold mb-2" style={{ color: "var(--fg)" }}>Cookies</h2>
           <EditableContent
             contentKey="datenschutz.cookies"
-            defaultValue="Unsere Website nutzt Cookies für die Theme-Auswahl (hell/dunkel). Diese Cookies werden lokal in Ihrem Browser gespeichert und enthalten keine personenbezogenen Daten."
+            defaultValue="Unsere Website verwendet einen Consent-Eintrag im Browser, um Ihre Auswahl im Cookie-Banner zu speichern (Einwilligung/Ablehnung). Bei erteilter Einwilligung werden zusätzlich anonyme Nutzungsdaten (z. B. Seitenaufrufe, Gerätetyp, Referrer-Domain) zu Statistikzwecken verarbeitet. Es werden keine personenbezogenen Profile erstellt und keine Werbe-Cookies gesetzt."
+            style={{ color: "var(--muted)" }}
+            multiline
+          />
+        </section>
+
+        <section>
+          <h2 className="text-lg font-semibold mb-2" style={{ color: "var(--fg)" }}>Analytics mit Einwilligung</h2>
+          <EditableContent
+            contentKey="datenschutz.analytics_consent"
+            defaultValue="Wenn Sie im Cookie-Banner zustimmen, erfassen wir anonymisierte Nutzungsstatistiken zur Verbesserung unseres Angebots (z. B. Absprungrate, durchschnittliche Sitzungsdauer, meistbesuchte Seiten). Rechtsgrundlage ist Ihre Einwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO. Sie können Ihre Entscheidung jederzeit über den Cookie-Banner widerrufen, indem Sie die Analyse-Cookies ablehnen."
             style={{ color: "var(--muted)" }}
             multiline
           />

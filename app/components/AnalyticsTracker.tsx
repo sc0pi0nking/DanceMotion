@@ -7,19 +7,16 @@ export default function AnalyticsTracker() {
   const pathname = usePathname()
 
   useEffect(() => {
-    // Don't track admin pages
-    if (pathname.startsWith('/admin')) return
-    
-    // Don't track if DNT is set
-    if (navigator.doNotTrack === '1') return
-
-    // Check if user has explicitly accepted cookies (echtes Opt-In DSGVO)
-    const cookiePreference = localStorage.getItem('dancemotion_cookies_accepted')
-    if (cookiePreference !== 'true') return  // Echtes Opt-In
-
-    // Track page view
     const trackPageView = () => {
       try {
+        if (pathname.startsWith('/admin')) return
+        if (navigator.doNotTrack === '1') return
+
+        const consent = localStorage.getItem('dancemotion_cookie_consent')
+        const legacyConsent = localStorage.getItem('dancemotion_cookies_accepted')
+        const hasOptIn = consent === 'accepted' || legacyConsent === 'true'
+        if (!hasOptIn) return
+
         const data = {
           path: pathname,
           referrer: document.referrer || null,
@@ -43,9 +40,19 @@ export default function AnalyticsTracker() {
       }
     }
 
-    // Small delay to ensure page is fully loaded
     const timeout = setTimeout(trackPageView, 100)
-    return () => clearTimeout(timeout)
+
+    const onConsentChanged = () => {
+      trackPageView()
+    }
+
+    window.addEventListener('dancemotion-consent-changed', onConsentChanged)
+
+    return () => {
+      clearTimeout(timeout)
+      window.removeEventListener('dancemotion-consent-changed', onConsentChanged)
+    }
+
   }, [pathname])
 
   // This component doesn't render anything

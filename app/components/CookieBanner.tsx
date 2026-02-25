@@ -8,22 +8,24 @@ export default function CookieBanner() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Check if user has already accepted
-    const accepted = localStorage.getItem('dancemotion_cookies_accepted')
-    if (!accepted) {
+    const consent = localStorage.getItem('dancemotion_cookie_consent')
+    if (!consent) {
       setIsVisible(true)
     }
     setIsLoading(false)
   }, [])
 
   const handleAccept = () => {
+    localStorage.setItem('dancemotion_cookie_consent', 'accepted')
     localStorage.setItem('dancemotion_cookies_accepted', 'true')
+    window.dispatchEvent(new Event('dancemotion-consent-changed'))
     setIsVisible(false)
   }
 
   const handleReject = () => {
-    // User explicitly rejected - still remember it
+    localStorage.setItem('dancemotion_cookie_consent', 'rejected')
     localStorage.setItem('dancemotion_cookies_accepted', 'rejected')
+    window.dispatchEvent(new Event('dancemotion-consent-changed'))
     setIsVisible(false)
   }
 
