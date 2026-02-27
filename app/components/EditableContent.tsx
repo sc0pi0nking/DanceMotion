@@ -46,7 +46,14 @@ export default function EditableContent({
         const res = await fetch(`/api/admin/content/${contentKey}`)
         if (res.ok) {
           const data = await res.json()
-          const value = typeof data.value === 'string' ? data.value : data.value?.text || defaultValue
+          let value = defaultValue
+
+          if (typeof data.value === 'string') {
+            value = data.value
+          } else if (data.value && typeof data.value === 'object' && typeof data.value.text === 'string') {
+            value = data.value.text
+          }
+
           setContent(value)
           setEditValue(value)
         }
