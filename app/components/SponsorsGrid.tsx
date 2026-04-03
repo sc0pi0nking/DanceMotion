@@ -24,7 +24,7 @@ export default function SponsorsGrid() {
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [imageModes, setImageModes] = useState<Record<string, 'contain' | 'cover'>>({});
+  const [isPortraitImage, setIsPortraitImage] = useState<Record<string, boolean>>({});
 
   const categories = [
     { value: null, label: 'Alle' },
@@ -73,11 +73,11 @@ export default function SponsorsGrid() {
     if (!img.naturalWidth || !img.naturalHeight) return;
 
     const ratio = img.naturalWidth / img.naturalHeight;
-    const nextMode: 'contain' | 'cover' = ratio < 0.9 ? 'cover' : 'contain';
+    const portrait = ratio < 0.95;
 
-    setImageModes((prev) => {
-      if (prev[sponsorId] === nextMode) return prev;
-      return { ...prev, [sponsorId]: nextMode };
+    setIsPortraitImage((prev) => {
+      if (prev[sponsorId] === portrait) return prev;
+      return { ...prev, [sponsorId]: portrait };
     });
   };
 
@@ -159,7 +159,9 @@ export default function SponsorsGrid() {
             >
               {/* Logo Area */}
               <div
-                className="relative h-48 md:h-52 overflow-hidden flex items-center justify-center px-2"
+                className={`relative overflow-hidden flex items-center justify-center px-2 ${
+                  isPortraitImage[sponsor.id] ? 'h-64 md:h-72' : 'h-52 md:h-56'
+                }`}
                 style={{
                   backgroundColor: 'var(--panel, #1e293b)',
                   backgroundImage: 'linear-gradient(135deg, rgba(46,196,198,0.14), rgba(46,196,198,0.04))',
@@ -176,11 +178,7 @@ export default function SponsorsGrid() {
                     loading="lazy"
                     decoding="async"
                     onLoad={(event) => handleImageLoad(sponsor.id, event)}
-                    className={`h-full w-full transition-transform duration-200 group-hover:scale-105 ${
-                      imageModes[sponsor.id] === 'cover'
-                        ? 'object-cover object-center p-0'
-                        : 'object-contain p-2 md:p-3'
-                    }`}
+                    className="h-full w-full object-contain p-2 md:p-3 transition-transform duration-200 group-hover:scale-105"
                   />
                 ) : (
                   <div
