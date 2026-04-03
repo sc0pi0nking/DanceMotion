@@ -24,6 +24,7 @@ export default function SponsorsGrid() {
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [imageModes, setImageModes] = useState<Record<string, 'contain' | 'cover'>>({});
 
   const categories = [
     { value: null, label: 'Alle' },
@@ -65,6 +66,19 @@ export default function SponsorsGrid() {
   const getCategoryLabel = (category: string) => {
     const cat = categories.find(c => c.value === category);
     return cat?.label || 'Sponsor';
+  };
+
+  const handleImageLoad = (sponsorId: string, event: React.SyntheticEvent<HTMLImageElement>) => {
+    const img = event.currentTarget;
+    if (!img.naturalWidth || !img.naturalHeight) return;
+
+    const ratio = img.naturalWidth / img.naturalHeight;
+    const nextMode: 'contain' | 'cover' = ratio < 0.9 ? 'cover' : 'contain';
+
+    setImageModes((prev) => {
+      if (prev[sponsorId] === nextMode) return prev;
+      return { ...prev, [sponsorId]: nextMode };
+    });
   };
 
   if (loading) {
@@ -145,7 +159,7 @@ export default function SponsorsGrid() {
             >
               {/* Logo Area */}
               <div
-                className="relative h-44 md:h-48 overflow-hidden flex items-center justify-center px-4"
+                className="relative h-48 md:h-52 overflow-hidden flex items-center justify-center px-2"
                 style={{
                   backgroundColor: 'var(--panel, #1e293b)',
                   backgroundImage: 'linear-gradient(135deg, rgba(46,196,198,0.14), rgba(46,196,198,0.04))',
@@ -161,7 +175,12 @@ export default function SponsorsGrid() {
                     alt={sponsor.name}
                     loading="lazy"
                     decoding="async"
-                    className="h-full w-full max-h-full max-w-full object-contain p-4 transition-transform duration-200 group-hover:scale-105"
+                    onLoad={(event) => handleImageLoad(sponsor.id, event)}
+                    className={`h-full w-full transition-transform duration-200 group-hover:scale-105 ${
+                      imageModes[sponsor.id] === 'cover'
+                        ? 'object-cover object-center p-0'
+                        : 'object-contain p-2 md:p-3'
+                    }`}
                   />
                 ) : (
                   <div

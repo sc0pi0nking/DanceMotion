@@ -10,6 +10,8 @@ interface EditableContentProps {
   style?: React.CSSProperties
   as?: 'p' | 'h1' | 'h2' | 'h3' | 'div' | 'span'
   multiline?: boolean
+  editButtonClassName?: string
+  editIconClassName?: string
 }
 
 export default function EditableContent({
@@ -19,6 +21,8 @@ export default function EditableContent({
   style,
   as: Component = 'p',
   multiline = false,
+  editButtonClassName,
+  editIconClassName,
 }: EditableContentProps) {
   const Wrapper = Component === 'span' ? 'span' : 'div'
   const [isAdmin, setIsAdmin] = useState(false)
@@ -147,10 +151,10 @@ export default function EditableContent({
           <Component className={className} style={style}>{content}</Component>
           <button
             onClick={() => setIsEditing(true)}
-            className="absolute -right-8 top-0 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-accent/10"
+            className={editButtonClassName || 'absolute -right-8 top-0 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-accent/10'}
             title="Bearbeiten"
           >
-            <Pencil size={16} className="text-accent" />
+            <Pencil size={16} className={editIconClassName || 'text-accent'} />
           </button>
         </>
       )}

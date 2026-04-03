@@ -46,6 +46,8 @@ export default function SmileysPage() {
               defaultValue="Trainingszeiten"
               as="span"
               className="text-2xl font-semibold"
+              editButtonClassName="absolute -right-8 top-0 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-white/20"
+              editIconClassName="text-white"
             />
           </h2>
           <div className="space-y-4">
@@ -58,6 +60,8 @@ export default function SmileysPage() {
                   className="font-medium whitespace-pre-line"
                   multiline
                   as="div"
+                  editButtonClassName="absolute -right-8 top-0 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-white/20"
+                  editIconClassName="text-white"
                 />
               </div>
             </div>
@@ -67,6 +71,8 @@ export default function SmileysPage() {
                 contentKey="smileys.training_location"
                 defaultValue="Turnhalle am Talbahnhof, Eschweiler"
                 className="font-medium"
+                editButtonClassName="absolute -right-8 top-0 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-white/20"
+                editIconClassName="text-white"
               />
             </div>
           </div>
