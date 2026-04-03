@@ -27,6 +27,12 @@ export async function GET(req: Request) {
     
     if (keysParam) {
       const requestedKeys = keysParam.split(',').map(k => k.trim())
+
+      // Explicitly block any settings-like keys in public API
+      if (requestedKeys.some(k => k.toLowerCase().startsWith('settings') || k.toLowerCase().includes('system_setting'))) {
+        return Response.json({ error: 'Forbidden key requested' }, { status: 403 })
+      }
+
       // Filter to only allowed keys
       keysToFetch = requestedKeys.filter(k => allowedPublicKeys.includes(k))
     }

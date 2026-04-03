@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabase'
+import { getClientIp, rateLimit } from '@/lib/rate-limiter'
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
@@ -7,6 +8,15 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 // POST - Anonymous ticket image upload (no auth required)
 export async function POST(request: NextRequest) {
   try {
+    const clientIp = getClientIp(request)
+    const rl = rateLimit(`tickets:upload:${clientIp}`, 10, 60 * 60 * 1000)
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: 'Too many uploads. Please try again later.' },
+        { status: 429 }
+      )
+    }
+
     const formData = await request.formData()
     const file = formData.get('file') as File | null
 
@@ -14,7 +24,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Keine Datei übermittelt' }, { status: 400 })
     }
 
-    if (!ALLOWED_TYPES.includes(file.type)) {
+    const mimeType = (file.type || '').toLowerCase()
+    if (!ALLOWED_TYPES.includes(mimeType)) {
       return NextResponse.json(
         { error: 'Ungültiges Dateiformat. Erlaubt: JPG, PNG, WEBP, GIF' },
         { status: 400 }
@@ -32,7 +43,7 @@ export async function POST(request: NextRequest) {
     const { error: uploadError } = await supabaseServer.storage
       .from('images')
       .upload(filePath, file, {
-        contentType: file.type,
+        contentType: mimeType,
         upsert: false,
       })
 

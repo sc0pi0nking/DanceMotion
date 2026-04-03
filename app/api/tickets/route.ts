@@ -1,8 +1,18 @@
 import { supabaseServer } from '@/lib/supabase'
+import { getClientIp, rateLimit } from '@/lib/rate-limiter'
 
 // POST - Create anonymous ticket
 export async function POST(req: Request) {
   try {
+    const clientIp = getClientIp(req)
+    const rl = rateLimit(`tickets:create:${clientIp}`, 5, 60 * 60 * 1000)
+    if (!rl.success) {
+      return Response.json(
+        { error: 'Too many ticket submissions. Please try again later.' },
+        { status: 429 }
+      )
+    }
+
     const body = await req.json()
     const { title, description, category, priority, attachments } = body
 

@@ -1,21 +1,5 @@
-import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
+import { requirePermission, PERMISSIONS } from '@/lib/auth'
 import { supabaseServer } from '@/lib/supabase'
-
-// Helper to check admin permissions
-async function checkAdminPermission() {
-  try {
-    const user = await getAdminUserWithPermissions()
-    if (!user) {
-      return { authorized: false, user: null }
-    }
-
-    const hasPermission = user.permissions.includes(PERMISSIONS.ALERTS_ADMIN)
-    return { authorized: hasPermission, user }
-  } catch (error) {
-    console.error('Permission check failed:', error)
-    return { authorized: false, user: null }
-  }
-}
 
 // DELETE - Remove alert
 export async function DELETE(
@@ -23,13 +7,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { authorized } = await checkAdminPermission()
-    if (!authorized) {
-      return Response.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
+    await requirePermission(PERMISSIONS.ALERTS_ADMIN)
 
     const { id } = await params
     const { error } = await supabaseServer
@@ -41,6 +19,13 @@ export async function DELETE(
 
     return Response.json({ success: true })
   } catch (error: any) {
+    if (error?.message?.startsWith?.('Unauthorized')) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    if (error?.message?.startsWith?.('Forbidden')) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     return Response.json(
       { error: error.message },
       { status: 500 }

@@ -1,14 +1,10 @@
-import { getAdminSession } from '@/lib/auth'
+import { requirePermission, PERMISSIONS } from '@/lib/auth'
 import { supabaseServer } from '@/lib/supabase'
 import { getSystemSettings } from '@/lib/settings'
 
 export async function GET() {
   try {
-    const user = await getAdminSession()
-
-    if (!user) {
-      return Response.json({ error: 'Not authenticated' }, { status: 401 })
-    }
+    const user = await requirePermission(PERMISSIONS.DASHBOARD)
 
     // Get system settings for session timeout
     const settings = await getSystemSettings()
@@ -18,25 +14,10 @@ export async function GET() {
       .from('admin_users_with_roles')
       .select('*')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
-    if (error || !adminUser) {
-      // User exists in auth but not in admin_users - treat as basic admin
-      const userWithRole = {
-        id: user.id,
-        email: user.email,
-        name: null,
-        role: 'admin',
-        role_name: 'admin',
-        permissions: ['dashboard', 'events', 'recurring', 'content', 'gallery', 'documents', 'faqs', 'team', 'social', 'users', 'roles', 'analytics', 'settings'],
-        is_active: true,
-      }
-      return Response.json({ 
-        user: userWithRole,
-        session: {
-          timeout_minutes: settings.session_timeout_minutes,
-        }
-      })
+    if (error || !adminUser || !adminUser.is_active) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     const userWithRole = {
@@ -56,6 +37,15 @@ export async function GET() {
       }
     })
   } catch (error: unknown) {
+    if (error instanceof Error) {
+      if (error.message.startsWith('Unauthorized')) {
+        return Response.json({ error: 'Not authenticated' }, { status: 401 })
+      }
+      if (error.message.startsWith('Forbidden')) {
+        return Response.json({ error: 'Forbidden' }, { status: 403 })
+      }
+    }
+
     const message = error instanceof Error ? error.message : 'Unknown error'
     return Response.json({ error: message }, { status: 500 })
   }

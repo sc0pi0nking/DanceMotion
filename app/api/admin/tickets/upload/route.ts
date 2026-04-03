@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabase'
-import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
+import { requirePermission, PERMISSIONS } from '@/lib/auth'
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
@@ -8,10 +8,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 // POST - Admin ticket image upload (requires tickets_admin permission)
 export async function POST(request: NextRequest) {
   try {
-    const currentUser = await getAdminUserWithPermissions()
-    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.TICKETS_ADMIN)) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
+    await requirePermission(PERMISSIONS.TICKETS_ADMIN)
 
     const formData = await request.formData()
     const file = formData.get('file') as File | null
@@ -54,6 +51,13 @@ export async function POST(request: NextRequest) {
       path: filePath,
     })
   } catch (error: any) {
+    if (error?.message?.startsWith?.('Unauthorized')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    if (error?.message?.startsWith?.('Forbidden')) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     console.error('Admin ticket image upload error:', error)
     return NextResponse.json({ error: error.message || 'Upload fehlgeschlagen' }, { status: 500 })
   }

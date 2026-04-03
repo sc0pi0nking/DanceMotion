@@ -1,5 +1,5 @@
 import { supabaseServer } from '@/lib/supabase'
-import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
+import { requirePermission, PERMISSIONS } from '@/lib/auth'
 
 // PATCH - Update ticket status or add note
 export async function PATCH(
@@ -7,10 +7,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const currentUser = await getAdminUserWithPermissions()
-    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.TICKETS_ADMIN)) {
-      return Response.json({ error: 'Forbidden' }, { status: 403 })
-    }
+    const currentUser = await requirePermission(PERMISSIONS.TICKETS_ADMIN)
 
     const { id } = await params
     const body = await req.json()
@@ -82,6 +79,13 @@ export async function PATCH(
       { status: 400 }
     )
   } catch (error: any) {
+    if (error?.message?.startsWith?.('Unauthorized')) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    if (error?.message?.startsWith?.('Forbidden')) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     console.error('PATCH /api/admin/tickets/[id] error:', error)
     return Response.json(
       { error: error.message },
@@ -96,10 +100,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const currentUser = await getAdminUserWithPermissions()
-    if (!currentUser || !currentUser.permissions.includes(PERMISSIONS.TICKETS_ADMIN)) {
-      return Response.json({ error: 'Forbidden' }, { status: 403 })
-    }
+    await requirePermission(PERMISSIONS.TICKETS_ADMIN)
 
     const { id } = await params
 
@@ -112,6 +113,13 @@ export async function DELETE(
 
     return Response.json({ success: true })
   } catch (error: any) {
+    if (error?.message?.startsWith?.('Unauthorized')) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    if (error?.message?.startsWith?.('Forbidden')) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     console.error('DELETE /api/admin/tickets/[id] error:', error)
     return Response.json(
       { error: error.message },

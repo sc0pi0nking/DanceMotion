@@ -1,5 +1,5 @@
 import { supabaseServer } from '@/lib/supabase'
-import { getAdminUserWithPermissions } from '@/lib/auth'
+import { requirePermission, PERMISSIONS } from '@/lib/auth'
 import { getSystemSettings } from '@/lib/settings'
 import { validatePassword } from '@/lib/password-validation'
 import { logUserAction } from '@/lib/audit-logger'
@@ -7,11 +7,7 @@ import type { NextRequest } from 'next/server'
 
 export async function POST(req: NextRequest) {
   try {
-    const currentUser = await getAdminUserWithPermissions()
-    
-    if (!currentUser) {
-      return Response.json({ error: 'Not authenticated' }, { status: 401 })
-    }
+    const currentUser = await requirePermission(PERMISSIONS.DASHBOARD)
 
     const { newPassword, confirmPassword } = await req.json()
 
@@ -64,6 +60,13 @@ export async function POST(req: NextRequest) {
 
     return Response.json({ success: true })
   } catch (error) {
+    if (error instanceof Error && error.message.startsWith('Unauthorized')) {
+      return Response.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+    if (error instanceof Error && error.message.startsWith('Forbidden')) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     console.error('Change password error:', error)
     return Response.json({ error: 'Ein Fehler ist aufgetreten' }, { status: 500 })
   }

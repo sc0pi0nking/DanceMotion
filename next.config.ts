@@ -1,5 +1,15 @@
 import type { NextConfig } from "next";
 
+const supabaseHostname = (() => {
+  try {
+    const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    if (!rawUrl) return null;
+    return new URL(rawUrl).hostname;
+  } catch {
+    return null;
+  }
+})();
+
 const nextConfig: NextConfig = {
   // Image optimization
   images: {
@@ -7,17 +17,16 @@ const nextConfig: NextConfig = {
     formats: ["image/webp", "image/avif"],
     // Cache optimized images
     minimumCacheTTL: 31536000, // 1 year
-    // Allow Supabase Storage URLs and external images (Sponsor logos)
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "**.supabase.co",
-      },
-      {
-        protocol: "https",
-        hostname: "**",
-      },
-    ],
+    // Restrict remote image loading to Supabase storage only
+    remotePatterns: supabaseHostname
+      ? [
+          {
+            protocol: "https",
+            hostname: supabaseHostname,
+            pathname: "/storage/v1/object/public/**",
+          },
+        ]
+      : [],
     // Disable optimization in Docker to avoid sharp issues
     unoptimized: process.env.NODE_ENV === 'production',
   },

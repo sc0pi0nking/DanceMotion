@@ -8,8 +8,9 @@ export async function GET() {
     const { data, error } = await supabaseServer
       .from('system_alerts')
       .select('*')
+      .eq('visible_to_admins_only', false)
       .lte('start_date', now)
-      .gte('end_date', now)
+      .gt('end_date', now)
       .order('priority', { ascending: false })
       .order('created_at', { ascending: false })
 

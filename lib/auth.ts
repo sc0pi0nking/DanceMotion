@@ -78,8 +78,8 @@ export async function requireAdminSession() {
 }
 
 /**
- * Lädt den User mit allen Rollen-Informationen und Permissions
- * Fallback: Wenn User admin@dancemotion.de ist und keine Rolle hat, bekommt er alle Permissions
+ * Lädt den User mit Rollen-Informationen und Permissions.
+ * Sicherheitsregel: Kein impliziter Role/Permission-Fallback.
  */
 export async function getAdminUserWithPermissions(): Promise<AdminUser | null> {
   try {
@@ -91,17 +91,13 @@ export async function getAdminUserWithPermissions(): Promise<AdminUser | null> {
       .from('admin_users_with_roles')
       .select('*')
       .eq('id', session.id)
-      .single()
+      .maybeSingle()
 
     if (!error && data) {
-      // Wenn User keine Rolle hat aber admin@dancemotion.de ist - gib alle Permissions
-      if (!data.role_id && session.email === 'admin@dancemotion.de') {
-        return {
-          ...data,
-          permissions: Object.values(PERMISSIONS)
-        } as AdminUser
+      if (!data.is_active) {
+        return null
       }
-      
+
       return {
         ...data,
         permissions: Array.isArray(data.permissions) ? data.permissions : []
@@ -113,9 +109,13 @@ export async function getAdminUserWithPermissions(): Promise<AdminUser | null> {
       .from('admin_users')
       .select('*')
       .eq('id', session.id)
-      .single()
+      .maybeSingle()
 
     if (userError || !userData) {
+      return null
+    }
+
+    if (!userData.is_active) {
       return null
     }
 
@@ -136,11 +136,6 @@ export async function getAdminUserWithPermissions(): Promise<AdminUser | null> {
         roleDescription = roleData.description
         permissions = Array.isArray(roleData.permissions) ? roleData.permissions : []
       }
-    }
-
-    // Super-Fallback für admin@dancemotion.de ohne Rolle
-    if (permissions.length === 0 && session.email === 'admin@dancemotion.de') {
-      permissions = Object.values(PERMISSIONS)
     }
 
     return {
@@ -206,10 +201,6 @@ export async function requirePermission(permission: Permission): Promise<AdminUs
   
   if (!user) {
     throw new Error('Unauthorized: Not logged in')
-  }
-  
-  if (!user.is_active) {
-    throw new Error('Unauthorized: Account deactivated')
   }
   
   if (!user.permissions.includes(permission)) {
