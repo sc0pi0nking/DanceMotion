@@ -8,7 +8,7 @@ interface EditableContentProps {
   defaultValue: string
   className?: string
   style?: React.CSSProperties
-  as?: 'p' | 'h1' | 'h2' | 'h3' | 'div'
+  as?: 'p' | 'h1' | 'h2' | 'h3' | 'div' | 'span'
   multiline?: boolean
 }
 
@@ -20,6 +20,7 @@ export default function EditableContent({
   as: Component = 'p',
   multiline = false,
 }: EditableContentProps) {
+  const Wrapper = Component === 'span' ? 'span' : 'div'
   const [isAdmin, setIsAdmin] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [content, setContent] = useState(defaultValue)
@@ -43,15 +44,17 @@ export default function EditableContent({
   useEffect(() => {
     async function loadContent() {
       try {
-        const res = await fetch(`/api/admin/content/${contentKey}`)
+        const res = await fetch(`/api/content/${encodeURIComponent(contentKey)}`)
         if (res.ok) {
           const data = await res.json()
           let value = defaultValue
 
-          if (typeof data.value === 'string') {
+          if (typeof data?.value === 'string') {
             value = data.value
-          } else if (data.value && typeof data.value === 'object' && typeof data.value.text === 'string') {
+          } else if (data?.value && typeof data.value === 'object' && typeof data.value.text === 'string') {
             value = data.value.text
+          } else if (typeof data?.text === 'string') {
+            value = data.text
           }
 
           setContent(value)
@@ -103,7 +106,7 @@ export default function EditableContent({
   }
 
   return (
-    <div className="group relative">
+    <Wrapper className={Component === 'span' ? 'group relative inline-flex items-center' : 'group relative'}>
       {isEditing ? (
         <div className="space-y-2">
           {multiline ? (
@@ -151,6 +154,6 @@ export default function EditableContent({
           </button>
         </>
       )}
-    </div>
+    </Wrapper>
   )
 }

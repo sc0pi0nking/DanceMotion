@@ -117,10 +117,15 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { id, ...updates } = body;
+    const { id, ...rawUpdates } = body;
 
     if (!id) {
       return NextResponse.json({ success: false, error: 'ID ist erforderlich' }, { status: 400 });
+    }
+
+    const updates = {
+      ...rawUpdates,
+      ...(rawUpdates.time === '' ? { time: null } : {}),
     }
 
     const { data, error } = await supabaseServer
@@ -131,6 +136,33 @@ export async function PUT(request: NextRequest) {
       .single();
 
     if (error) throw error;
+
+    const futureEventFieldMap = [
+      'title',
+      'time',
+      'location',
+      'city',
+      'category',
+      'groups',
+      'note',
+      'href',
+    ] as const
+
+    const futureEventUpdates: Record<string, any> = {}
+    for (const field of futureEventFieldMap) {
+      if (Object.prototype.hasOwnProperty.call(updates, field)) {
+        futureEventUpdates[field] = updates[field]
+      }
+    }
+
+    if (Object.keys(futureEventUpdates).length > 0) {
+      const today = new Date().toISOString().split('T')[0]
+      await supabaseServer
+        .from('events')
+        .update(futureEventUpdates)
+        .eq('recurring_event_id', id)
+        .gte('date', today)
+    }
 
     return NextResponse.json({ success: true, data });
   } catch (error) {

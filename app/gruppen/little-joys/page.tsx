@@ -57,7 +57,12 @@ export default function LittleJoysPage() {
         <section className="rounded-2xl p-8 md:p-12" style={{ backgroundColor: "var(--accent)", color: "var(--bg)" }}>
           <h2 className="text-2xl font-semibold mb-6 flex items-center gap-3">
             <Calendar size={28} />
-            Trainingszeiten
+            <EditableContent
+              contentKey="little-joys.training_heading"
+              defaultValue="Trainingszeiten"
+              as="span"
+              className="text-2xl font-semibold"
+            />
           </h2>
           <div className="space-y-4">
             <div className="flex items-start gap-3">

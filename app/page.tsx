@@ -145,9 +145,13 @@ export default function Home() {
                 <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-full px-3 py-1" 
                      style={{ backgroundColor: "var(--badge-bg-subtle)" }}>
                   <span className="h-2 w-2 rounded-full" style={{ backgroundColor: "var(--accent-dot)" }}></span>
-                  <span className="text-xs font-semibold" style={{ color: "var(--accent)" }}>
-                    Tanzgruppe
-                  </span>
+                  <EditableContent
+                    contentKey="home.groups.badge_label"
+                    defaultValue="Tanzgruppe"
+                    as="span"
+                    className="text-xs font-semibold"
+                    style={{ color: "var(--accent)" }}
+                  />
                 </div>
                 
                 <h3 className="text-3xl font-bold leading-tight" style={{ color: "var(--fg)" }}>

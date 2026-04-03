@@ -145,7 +145,7 @@ export default function SponsorsGrid() {
             >
               {/* Logo Area */}
               <div
-                className="relative h-36 md:h-40 overflow-hidden flex items-center justify-center px-6"
+                className="relative h-44 md:h-48 overflow-hidden flex items-center justify-center px-4"
                 style={{
                   backgroundColor: 'var(--panel, #1e293b)',
                   backgroundImage: 'linear-gradient(135deg, rgba(46,196,198,0.14), rgba(46,196,198,0.04))',
@@ -161,7 +161,7 @@ export default function SponsorsGrid() {
                     alt={sponsor.name}
                     loading="lazy"
                     decoding="async"
-                    className="max-h-24 md:max-h-28 max-w-[85%] object-contain transition-transform duration-200 group-hover:scale-105"
+                    className="h-full w-full max-h-full max-w-full object-contain p-4 transition-transform duration-200 group-hover:scale-105"
                   />
                 ) : (
                   <div
