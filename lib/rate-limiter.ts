@@ -13,6 +13,14 @@ interface RateLimitEntry {
 
 const rateLimitStore = new Map<string, RateLimitEntry>();
 
+function cleanupExpiredEntries(now: number): void {
+  for (const [key, value] of rateLimitStore.entries()) {
+    if (now > value.resetTime) {
+      rateLimitStore.delete(key);
+    }
+  }
+}
+
 /**
  * Simple rate limiter
  * @param identifier - Unique identifier (IP, user ID, etc.)
@@ -25,6 +33,7 @@ export function rateLimit(
   windowMs: number = 60000 // 1 minute
 ): { success: boolean; remaining: number; reset: number } {
   const now = Date.now();
+  cleanupExpiredEntries(now);
   const entry = rateLimitStore.get(identifier);
 
   if (!entry || now > entry.resetTime) {
@@ -89,17 +98,11 @@ export function checkRateLimit(
 /**
  * Get client IP from request
  */
-export function getClientIp(request: NextRequest): string {
+export function getClientIp(request: Request | NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for');
-  return forwarded ? forwarded.split(',')[0] : (request.headers.get('x-real-ip') || 'unknown');
+  return forwarded ? forwarded.split(',')[0].trim() : (request.headers.get('x-real-ip') || 'unknown');
 }
 
-// Cleanup old entries every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, value] of rateLimitStore.entries()) {
-    if (now > value.resetTime) {
-      rateLimitStore.delete(key);
-    }
-  }
-}, 5 * 60 * 1000);
+export function resetRateLimitStore(): void {
+  rateLimitStore.clear();
+}
