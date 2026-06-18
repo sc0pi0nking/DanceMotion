@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DanceMotion 2.0 — Gruppendetail: Emotion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet" />
+  <style>
+    /* ── RESET ─────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:     #0A0A0A;
+      --fg:     #F9F7F4;
+      --muted:  #888;
+      --panel:  #111;
+      --border: #1e1e1e;
+      --accent: #2EC4C6;
+      --group:  #a855f7;   /* group color — from groups.color in DB */
+      --radius: 20px;
+    }
+
+    html { scroll-behavior: smooth; overflow-x: hidden; }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Inter', system-ui, sans-serif;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* ── GRAIN ──────────────────────────────── */
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.045;
+      pointer-events: none;
+      z-index: 9000;
+    }
+
+    /* ── CURSOR ─────────────────────────────── */
+    #cur {
+      width:10px; height:10px; background: var(--accent);
+      border-radius:50%; position:fixed; top:0; left:0;
+      pointer-events:none; z-index:9999;
+      transform:translate(-50%,-50%);
+      transition: width .15s, height .15s;
+    }
+    #cur-ring {
+      width:38px; height:38px;
+      border: 1.5px solid rgba(46,196,198,.45);
+      border-radius:50%; position:fixed; top:0; left:0;
+      pointer-events:none; z-index:9998;
+      transform:translate(-50%,-50%);
+      transition: width .25s, height .25s, border-color .25s;
+    }
+    body.hov #cur      { width:18px; height:18px; }
+    body.hov #cur-ring { width:54px; height:54px; border-color:rgba(46,196,198,.7); }
+
+    /* ── NAV ────────────────────────────────── */
+    nav {
+      position:fixed; top:0; left:0; right:0; z-index:200;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:18px 48px;
+      background: rgba(10,10,10,.75);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(46,196,198,.07);
+    }
+    .nav-logo {
+      font-size:19px; font-weight:800; letter-spacing:-.5px;
+      background: linear-gradient(130deg,#2EC4C6 0%,#fff 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      background-clip:text; cursor:none;
+    }
+    .nav-links { display:flex; gap:32px; list-style:none; }
+    .nav-links a {
+      color:var(--muted); text-decoration:none;
+      font-size:14px; font-weight:500; cursor:none;
+      transition:color .2s;
+    }
+    .nav-links a:hover { color:var(--fg); }
+    .nav-btn {
+      background:var(--accent); color:#000;
+      padding:9px 20px; border-radius:9px;
+      font-size:13px; font-weight:700;
+      text-decoration:none; cursor:none;
+      transition:transform .2s, box-shadow .2s;
+    }
+    .nav-btn:hover { transform:translateY(-1px); box-shadow:0 8px 28px rgba(46,196,198,.35); }
+
+    /* ── GROUP HERO ─────────────────────────── */
+    .group-hero {
+      position:relative; min-height:70vh;
+      display:flex; align-items:flex-end;
+      overflow:hidden;
+      padding-top:80px;
+    }
+
+    /* animated abstract background — replaces real photo */
+    .group-hero-bg {
+      position:absolute; inset:0;
+      background: radial-gradient(ellipse 80% 60% at 70% 40%,
+        rgba(168,85,247,.22) 0%,
+        rgba(46,196,198,.08) 50%,
+        transparent 75%);
+      overflow:hidden;
+    }
+    .group-hero-bg canvas {
+      position:absolute; inset:0; width:100%; height:100%;
+    }
+    .hero-fade {
+      position:absolute; bottom:0; left:0; right:0; height:55%;
+      background: linear-gradient(to bottom, transparent, var(--bg));
+      pointer-events:none;
+    }
+
+    .group-hero-content {
+      position:relative; z-index:2;
+      padding:64px 72px;
+      max-width:760px;
+    }
+
+    .breadcrumb {
+      display:inline-flex; align-items:center; gap:8px;
+      color:var(--muted); font-size:13px;
+      margin-bottom:28px; cursor:none;
+      text-decoration:none;
+      transition:color .2s;
+    }
+    .breadcrumb:hover { color:var(--fg); }
+    .breadcrumb svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2; }
+
+    .group-badge {
+      display:inline-flex; align-items:center; gap:8px;
+      background:rgba(168,85,247,.12);
+      border:1px solid rgba(168,85,247,.28);
+      border-radius:100px; padding:6px 14px;
+      font-size:12px; color:var(--group); font-weight:600;
+      margin-bottom:20px;
+    }
+
+    .group-title {
+      font-size: clamp(52px,7vw,88px);
+      font-weight:900; letter-spacing:-3px; line-height:1.0;
+      margin-bottom:20px;
+    }
+    .group-title .gt {
+      background: linear-gradient(130deg,#a855f7 0%,#e879f9 40%,#f9f7f4 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+    .group-subtitle {
+      font-size:clamp(16px,1.7vw,20px);
+      color:var(--muted); line-height:1.65; max-width:480px;
+      margin-bottom:40px;
+    }
+    .group-ctas {
+      display:flex; gap:14px; flex-wrap:wrap;
+    }
+    .btn-primary {
+      background:var(--group); color:#fff;
+      padding:14px 28px; border-radius:11px;
+      font-size:14px; font-weight:700;
+      text-decoration:none; cursor:none;
+      border:none; display:inline-flex; align-items:center; gap:8px;
+      transition:transform .2s, box-shadow .2s;
+    }
+    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 12px 32px rgba(168,85,247,.4); }
+    .btn-outline {
+      background:transparent; color:var(--fg);
+      padding:14px 28px; border-radius:11px;
+      font-size:14px; font-weight:600;
+      text-decoration:none; cursor:none;
+      border:1px solid var(--border); display:inline-flex; align-items:center; gap:8px;
+      transition:border-color .2s, color .2s;
+    }
+    .btn-outline:hover { border-color:rgba(255,255,255,.3); }
+    .btn-ical {
+      background:rgba(46,196,198,.1); color:var(--accent);
+      padding:14px 24px; border-radius:11px;
+      font-size:14px; font-weight:600;
+      text-decoration:none; cursor:none;
+      border:1px solid rgba(46,196,198,.2); display:inline-flex; align-items:center; gap:8px;
+      transition:background .2s, border-color .2s;
+    }
+    .btn-ical:hover { background:rgba(46,196,198,.18); border-color:rgba(46,196,198,.4); }
+
+    /* ── STATS BAND ─────────────────────────── */
+    .stats-band {
+      display:grid; grid-template-columns:repeat(3,1fr);
+      gap:1px; background:var(--border);
+      border-top:1px solid var(--border);
+      border-bottom:1px solid var(--border);
+    }
+    .stat-cell {
+      background:var(--bg); padding:36px 48px;
+      display:flex; flex-direction:column; gap:6px;
+    }
+    .stat-cell:nth-child(2) { border-left:1px solid var(--border); border-right:1px solid var(--border); }
+    .stat-num {
+      font-size:clamp(36px,4vw,52px);
+      font-weight:900; letter-spacing:-2px;
+      background: linear-gradient(130deg,#a855f7,#e879f9);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+    .stat-label { font-size:14px; color:var(--muted); font-weight:500; }
+
+    /* ── SECTION COMMONS ────────────────────── */
+    section { padding:80px 72px; max-width:1200px; margin:0 auto; }
+    .section-eyebrow {
+      font-size:11px; font-weight:700; letter-spacing:2px;
+      color:var(--accent); text-transform:uppercase;
+      margin-bottom:14px;
+    }
+    .section-title {
+      font-size:clamp(28px,3.5vw,44px);
+      font-weight:800; letter-spacing:-1.5px; line-height:1.1;
+      margin-bottom:40px;
+    }
+
+    /* ── TRAINING SCHEDULE ──────────────────── */
+    .schedule-grid {
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+      gap:16px;
+    }
+    .schedule-card {
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:24px;
+      position:relative; overflow:hidden;
+      transition:border-color .25s, transform .25s;
+    }
+    .schedule-card:hover {
+      border-color:rgba(168,85,247,.35);
+      transform:translateY(-3px);
+    }
+    .schedule-card::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:2px;
+      background:linear-gradient(90deg,#a855f7,#e879f9);
+      opacity:0; transition:opacity .25s;
+    }
+    .schedule-card:hover::before { opacity:1; }
+    .schedule-day {
+      font-size:12px; font-weight:700; letter-spacing:1.5px;
+      text-transform:uppercase; color:var(--group);
+      margin-bottom:10px;
+    }
+    .schedule-time {
+      font-size:26px; font-weight:800; letter-spacing:-1px;
+      margin-bottom:6px;
+    }
+    .schedule-meta { font-size:13px; color:var(--muted); line-height:1.6; }
+    .schedule-level {
+      display:inline-flex; align-items:center;
+      background:rgba(168,85,247,.1);
+      border:1px solid rgba(168,85,247,.2);
+      border-radius:100px; padding:3px 10px;
+      font-size:11px; font-weight:600; color:var(--group);
+      margin-top:14px;
+    }
+
+    /* ── MAP SECTION ────────────────────────── */
+    .map-wrap {
+      display:grid; grid-template-columns:1fr 360px;
+      gap:24px; align-items:start;
+    }
+    .map-container {
+      border-radius:20px; overflow:hidden;
+      border:1px solid var(--border);
+      height:420px; position:relative;
+      background:#111;
+    }
+    /* Fake OSM-style map */
+    .map-bg {
+      position:absolute; inset:0;
+      background:
+        /* street grid */
+        repeating-linear-gradient(0deg,   transparent,transparent 39px,rgba(255,255,255,.04) 40px),
+        repeating-linear-gradient(90deg,  transparent,transparent 39px,rgba(255,255,255,.04) 40px),
+        /* parks / blocks */
+        radial-gradient(ellipse 30% 20% at 20% 60%, rgba(46,196,198,.06) 0%, transparent 60%),
+        radial-gradient(ellipse 25% 30% at 75% 30%, rgba(46,196,198,.04) 0%, transparent 60%),
+        #0e1117;
+    }
+    .map-road-h {
+      position:absolute; left:0; right:0;
+      background:rgba(255,255,255,.07); height:10px;
+    }
+    .map-road-v {
+      position:absolute; top:0; bottom:0;
+      background:rgba(255,255,255,.07); width:10px;
+    }
+    .map-road-main-h {
+      position:absolute; left:0; right:0;
+      background:rgba(255,255,255,.12); height:16px;
+    }
+    .map-road-main-v {
+      position:absolute; top:0; bottom:0;
+      background:rgba(255,255,255,.12); width:16px;
+    }
+    .map-pin {
+      position:absolute; top:50%; left:50%;
+      transform:translate(-50%,-100%);
+      display:flex; flex-direction:column; align-items:center;
+    }
+    .map-pin-icon {
+      width:40px; height:40px; border-radius:50% 50% 50% 0;
+      transform:rotate(-45deg);
+      background:var(--accent);
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:0 4px 16px rgba(46,196,198,.5);
+    }
+    .map-pin-icon::after {
+      content:''; display:block; width:14px; height:14px;
+      border-radius:50%; background:#0A0A0A;
+    }
+    .map-pin-shadow {
+      width:16px; height:6px; border-radius:50%;
+      background:rgba(0,0,0,.4);
+      margin-top:2px;
+    }
+    .map-label {
+      position:absolute; top:16px; left:16px;
+      background:rgba(10,10,10,.85);
+      backdrop-filter:blur(8px);
+      border:1px solid var(--border);
+      border-radius:10px; padding:8px 12px;
+      font-size:12px; color:var(--muted);
+    }
+    .map-label strong { display:block; color:var(--fg); font-size:13px; }
+    .map-leaflet-credit {
+      position:absolute; bottom:8px; right:8px;
+      font-size:10px; color:rgba(255,255,255,.2);
+    }
+    .map-controls {
+      position:absolute; bottom:16px; left:16px;
+      display:flex; flex-direction:column; gap:4px;
+    }
+    .map-ctrl {
+      width:30px; height:30px;
+      background:rgba(17,17,17,.9);
+      border:1px solid var(--border);
+      border-radius:6px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:18px; color:var(--fg); cursor:none;
+      font-weight:300;
+    }
+
+    .map-info {
+      display:flex; flex-direction:column; gap:16px;
+    }
+    .map-info-card {
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:16px; padding:24px;
+    }
+    .map-info-card h3 { font-size:16px; font-weight:700; margin-bottom:16px; }
+    .info-row {
+      display:flex; gap:12px; align-items:flex-start;
+      padding:10px 0;
+      border-bottom:1px solid var(--border);
+    }
+    .info-row:last-child { border-bottom:none; padding-bottom:0; }
+    .info-icon {
+      width:32px; height:32px; border-radius:8px;
+      background:rgba(46,196,198,.1);
+      display:flex; align-items:center; justify-content:center;
+      flex-shrink:0;
+    }
+    .info-icon svg { width:16px; height:16px; stroke:var(--accent); fill:none; stroke-width:2; }
+    .info-text { font-size:13px; color:var(--muted); line-height:1.6; }
+    .info-text strong { display:block; color:var(--fg); font-size:14px; margin-bottom:2px; }
+    .btn-maps {
+      display:flex; align-items:center; justify-content:center; gap:8px;
+      background:rgba(255,255,255,.05);
+      border:1px solid var(--border);
+      border-radius:10px; padding:12px;
+      font-size:13px; font-weight:600; color:var(--fg);
+      text-decoration:none; cursor:none;
+      transition:border-color .2s, background .2s;
+    }
+    .btn-maps:hover { background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.2); }
+    .btn-maps svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2; }
+
+    /* ── BOOKING FORM ───────────────────────── */
+    .booking-section {
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:24px;
+      padding:60px 64px;
+      position:relative; overflow:hidden;
+    }
+    .booking-section::before {
+      content:''; position:absolute;
+      top:-120px; right:-80px;
+      width:400px; height:400px;
+      border-radius:50%;
+      background:radial-gradient(circle, rgba(168,85,247,.12) 0%, transparent 70%);
+      pointer-events:none;
+    }
+    .booking-grid {
+      display:grid; grid-template-columns:1fr 1fr;
+      gap:64px; align-items:start;
+    }
+    .booking-intro h2 { font-size:clamp(28px,3vw,40px); font-weight:800; letter-spacing:-1.5px; margin-bottom:16px; line-height:1.1; }
+    .booking-intro p { font-size:15px; color:var(--muted); line-height:1.7; margin-bottom:28px; }
+    .booking-perks { display:flex; flex-direction:column; gap:12px; }
+    .perk-row {
+      display:flex; align-items:center; gap:12px;
+      font-size:14px; color:var(--muted);
+    }
+    .perk-check {
+      width:22px; height:22px; border-radius:50%;
+      background:rgba(46,196,198,.12);
+      border:1px solid rgba(46,196,198,.25);
+      display:flex; align-items:center; justify-content:center;
+      flex-shrink:0;
+    }
+    .perk-check svg { width:12px; height:12px; stroke:var(--accent); fill:none; stroke-width:3; }
+
+    .booking-form { display:flex; flex-direction:column; gap:16px; }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .field { display:flex; flex-direction:column; gap:6px; }
+    .field label {
+      font-size:12px; font-weight:600; letter-spacing:.5px;
+      text-transform:uppercase; color:var(--muted);
+    }
+    .field input, .field select, .field textarea {
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:13px 16px;
+      font-size:14px; color:var(--fg);
+      font-family:inherit;
+      outline:none; cursor:none;
+      transition:border-color .2s, background .2s;
+    }
+    .field input::placeholder,
+    .field textarea::placeholder { color:rgba(136,136,136,.5); }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color:rgba(168,85,247,.5);
+      background:rgba(168,85,247,.05);
+    }
+    .field select option { background:#111; }
+    .field textarea { height:100px; resize:none; }
+    .consent-row {
+      display:flex; align-items:flex-start; gap:10px;
+      font-size:13px; color:var(--muted); line-height:1.5;
+    }
+    .consent-row input[type=checkbox] {
+      width:17px; height:17px; flex-shrink:0;
+      margin-top:2px; accent-color:var(--group);
+      cursor:none;
+    }
+    .btn-submit {
+      background:linear-gradient(135deg,#a855f7,#e879f9);
+      color:#fff; border:none;
+      padding:16px 32px; border-radius:12px;
+      font-size:15px; font-weight:700;
+      cursor:none; width:100%;
+      transition:transform .2s, box-shadow .2s, opacity .2s;
+      position:relative; overflow:hidden;
+    }
+    .btn-submit:hover { transform:translateY(-2px); box-shadow:0 16px 40px rgba(168,85,247,.45); }
+    .btn-submit::after {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(135deg,rgba(255,255,255,.1),transparent);
+      pointer-events:none;
+    }
+    .form-note { font-size:11px; color:rgba(136,136,136,.6); text-align:center; line-height:1.6; }
+
+    /* ── GALLERY STRIP ──────────────────────── */
+    .gallery-strip-outer {
+      overflow:hidden; padding:80px 0;
+      position:relative;
+    }
+    .gallery-strip-outer::before {
+      content:''; position:absolute; top:0; bottom:0; left:0; width:120px;
+      background:linear-gradient(to right, var(--bg), transparent);
+      z-index:2; pointer-events:none;
+    }
+    .gallery-strip-outer::after {
+      content:''; position:absolute; top:0; bottom:0; right:0; width:120px;
+      background:linear-gradient(to left, var(--bg), transparent);
+      z-index:2; pointer-events:none;
+    }
+    .gallery-strip-header {
+      padding:0 72px 40px;
+      display:flex; align-items:flex-end; justify-content:space-between;
+    }
+    .gallery-strip-header .left p { color:var(--muted); font-size:14px; margin-top:8px; }
+    .btn-gallery {
+      background:transparent; color:var(--fg);
+      padding:10px 20px; border-radius:9px;
+      font-size:13px; font-weight:600;
+      text-decoration:none; cursor:none;
+      border:1px solid var(--border);
+      display:inline-flex; align-items:center; gap:6px;
+      transition:border-color .2s;
+      white-space:nowrap;
+    }
+    .btn-gallery:hover { border-color:rgba(255,255,255,.3); }
+    .gallery-track {
+      display:flex; gap:16px;
+      padding:0 72px;
+      overflow-x:auto;
+      scrollbar-width:none;
+      scroll-snap-type:x mandatory;
+    }
+    .gallery-track::-webkit-scrollbar { display:none; }
+    .gallery-thumb {
+      flex:0 0 280px; height:360px;
+      border-radius:16px; overflow:hidden;
+      position:relative; cursor:none;
+      scroll-snap-align:start;
+    }
+    /* Placeholder image squares using CSS gradients */
+    .gallery-thumb:nth-child(1) .gimg { background:linear-gradient(145deg,#1a0929,#3b0f5c,#a855f7); }
+    .gallery-thumb:nth-child(2) .gimg { background:linear-gradient(145deg,#0f1a29,#0f3b4a,#2EC4C6); }
+    .gallery-thumb:nth-child(3) .gimg { background:linear-gradient(145deg,#1a1029,#3b1f5c,#e879f9); }
+    .gallery-thumb:nth-child(4) .gimg { background:linear-gradient(145deg,#0a1a14,#0f3b2a,#2EC4C6); }
+    .gallery-thumb:nth-child(5) .gimg { background:linear-gradient(145deg,#1a0a15,#3b0f25,#a855f7); }
+    .gimg {
+      position:absolute; inset:0;
+      transition:transform .5s cubic-bezier(.25,1,.5,1);
+    }
+    .gallery-thumb:hover .gimg { transform:scale(1.06); }
+    .gimg-overlay {
+      position:absolute; inset:0;
+      background:linear-gradient(to top,rgba(0,0,0,.5),transparent);
+    }
+    /* decorative silhouette shapes */
+    .gimg::before {
+      content:''; position:absolute;
+      bottom:0; left:50%; transform:translateX(-50%);
+      width:80px; height:140px;
+      background:rgba(0,0,0,.25);
+      clip-path:polygon(35% 0%,65% 0%,80% 40%,95% 100%,5% 100%,20% 40%);
+    }
+    .gallery-thumb:hover .gimg-overlay { opacity:.8; }
+
+    /* ── UPCOMING EVENTS ────────────────────── */
+    .events-list { display:flex; flex-direction:column; gap:12px; }
+    .event-row {
+      display:flex; align-items:center; gap:24px;
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:14px; padding:20px 24px;
+      transition:border-color .2s, transform .2s;
+      cursor:none; text-decoration:none;
+    }
+    .event-row:hover {
+      border-color:rgba(168,85,247,.3);
+      transform:translateX(4px);
+    }
+    .event-date-box {
+      flex-shrink:0; width:52px; height:52px;
+      border-radius:10px;
+      background:rgba(168,85,247,.12);
+      border:1px solid rgba(168,85,247,.2);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+    }
+    .event-date-box .day { font-size:20px; font-weight:800; color:var(--group); line-height:1; }
+    .event-date-box .mon { font-size:10px; font-weight:700; color:var(--muted); letter-spacing:.5px; text-transform:uppercase; }
+    .event-info { flex:1; }
+    .event-title { font-size:15px; font-weight:600; color:var(--fg); margin-bottom:4px; }
+    .event-meta { font-size:13px; color:var(--muted); }
+    .event-arrow { color:var(--muted); transition:color .2s, transform .2s; }
+    .event-row:hover .event-arrow { color:var(--fg); transform:translateX(3px); }
+    .event-arrow svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; }
+
+    /* ── SCROLL REVEAL ──────────────────────── */
+    .reveal {
+      opacity:0; transform:translateY(28px);
+      transition:opacity .65s cubic-bezier(.25,1,.5,1), transform .65s cubic-bezier(.25,1,.5,1);
+    }
+    .reveal.vis { opacity:1; transform:none; }
+
+    /* ── DIVIDER ────────────────────────────── */
+    .divider { height:1px; background:var(--border); margin:0 72px; }
+
+    /* ── FOOTER MINI ────────────────────────── */
+    .footer-cta {
+      text-align:center; padding:80px 72px;
+      max-width:700px; margin:0 auto;
+    }
+    .footer-cta h2 {
+      font-size:clamp(30px,4vw,48px); font-weight:900;
+      letter-spacing:-1.5px; margin-bottom:16px; line-height:1.1;
+    }
+    .footer-cta p { color:var(--muted); font-size:16px; margin-bottom:36px; line-height:1.6; }
+    .footer-cta-btns { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+
+    /* ── SCROLLBAR ──────────────────────────── */
+    ::-webkit-scrollbar { width:6px; }
+    ::-webkit-scrollbar-track { background:var(--bg); }
+    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+  </style>
+</head>
+<body>
+  <!-- Custom Cursor -->
+  <div id="cur"></div>
+  <div id="cur-ring"></div>
+
+  <!-- Nav -->
+  <nav>
+    <a class="nav-logo" href="#">DanceMotion</a>
+    <ul class="nav-links">
+      <li><a href="#">Gruppen</a></li>
+      <li><a href="#">Termine</a></li>
+      <li><a href="#">Galerie</a></li>
+      <li><a href="#">Team</a></li>
+      <li><a href="#">News</a></li>
+    </ul>
+    <a href="#buchung" class="nav-btn mag">Probestunde</a>
+  </nav>
+
+  <!-- Group Hero -->
+  <section class="group-hero" style="padding:0; max-width:none;">
+    <div class="group-hero-bg">
+      <canvas id="hero-c"></canvas>
+      <div class="hero-fade"></div>
+    </div>
+    <div class="group-hero-content">
+      <a href="/gruppen" class="breadcrumb">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Alle Gruppen
+      </a>
+      <div class="group-badge">
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--group);display:inline-block;animation:blink 2s ease-in-out infinite"></span>
+        Jugendliche &amp; Erwachsene
+      </div>
+      <h1 class="group-title">
+        <span class="gt">Emotion</span>
+      </h1>
+      <p class="group-subtitle">
+        Ausdrucksstarker Tanz für Jugendliche und Erwachsene. Hier zählt nicht Perfektion —
+        sondern das, was du in die Bewegung legst.
+      </p>
+      <div class="group-ctas">
+        <a href="#buchung" class="btn-primary mag">
+          <svg style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+          Probestunde buchen
+        </a>
+        <a href="#training" class="btn-outline mag">Trainingszeiten</a>
+        <a href="/api/ical/emotion.ics" class="btn-ical mag">
+          <svg style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          iCal abonnieren
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Band -->
+  <div class="stats-band reveal">
+    <div class="stat-cell">
+      <span class="stat-num" data-target="24">0</span>
+      <span class="stat-label">Aktive Mitglieder</span>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-num" data-target="8">0</span>
+      <span class="stat-label">Jahre aktiv</span>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-num" data-target="3">0</span>
+      <span class="stat-label">Trainingseinheiten / Woche</span>
+    </div>
+  </div>
+
+  <!-- Training Schedule -->
+  <section id="training">
+    <p class="section-eyebrow reveal">Trainingszeiten</p>
+    <h2 class="section-title reveal">Wann wir <span style="background:linear-gradient(130deg,#a855f7,#e879f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">tanzen</span></h2>
+    <div class="schedule-grid">
+      <div class="schedule-card reveal">
+        <div class="schedule-day">Dienstag</div>
+        <div class="schedule-time">18:30 – 20:00</div>
+        <div class="schedule-meta">Turnhalle am Marktplatz<br>Eschweiler, Innenstadt</div>
+        <span class="schedule-level">Anfänger &amp; Fortgeschrittene</span>
+      </div>
+      <div class="schedule-card reveal" style="transition-delay:.1s">
+        <div class="schedule-day">Donnerstag</div>
+        <div class="schedule-time">19:00 – 20:30</div>
+        <div class="schedule-meta">Turnhalle am Marktplatz<br>Eschweiler, Innenstadt</div>
+        <span class="schedule-level">Fortgeschrittene</span>
+      </div>
+      <div class="schedule-card reveal" style="transition-delay:.2s">
+        <div class="schedule-day">Samstag</div>
+        <div class="schedule-time">10:00 – 12:00</div>
+        <div class="schedule-meta">Tanzzentrum Nord<br>Eschweiler-Dürwiß</div>
+        <span class="schedule-level">Showprogramm &amp; Choreografie</span>
+      </div>
+    </div>
+
+    <!-- iCal Export Strip -->
+    <div style="margin-top:28px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;" class="reveal" style="transition-delay:.3s">
+      <a href="/api/ical/emotion.ics" class="btn-ical mag">
+        <svg style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        In Kalender exportieren (.ics)
+      </a>
+      <a href="https://calendar.google.com/calendar/r?cid=webcal%3A%2F%2Fdancemotion.org%2Fapi%2Fical%2Femotion.ics" class="btn-outline mag" style="padding:12px 20px;font-size:13px;">
+        <svg style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 6v6l4 2"/></svg>
+        In Google Kalender hinzufügen
+      </a>
+      <span style="font-size:12px;color:var(--muted)">Trainingszeiten immer aktuell in deiner Kalender-App</span>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Map Section -->
+  <section>
+    <p class="section-eyebrow reveal">Trainingsort</p>
+    <h2 class="section-title reveal">Wir trainieren <span style="background:linear-gradient(130deg,#2EC4C6,#7ef4f5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">hier</span></h2>
+    <div class="map-wrap reveal">
+      <div class="map-container">
+        <div class="map-bg">
+          <!-- Roads horizontal -->
+          <div class="map-road-main-h" style="top:45%"></div>
+          <div class="map-road-h" style="top:25%"></div>
+          <div class="map-road-h" style="top:65%"></div>
+          <div class="map-road-h" style="top:82%"></div>
+          <div class="map-road-h" style="top:15%"></div>
+          <!-- Roads vertical -->
+          <div class="map-road-main-v" style="left:38%"></div>
+          <div class="map-road-v" style="left:20%"></div>
+          <div class="map-road-v" style="left:60%"></div>
+          <div class="map-road-v" style="left:78%"></div>
+        </div>
+        <!-- Pin -->
+        <div class="map-pin">
+          <div class="map-pin-icon"></div>
+          <div class="map-pin-shadow"></div>
+        </div>
+        <!-- Label -->
+        <div class="map-label">
+          <strong>Turnhalle am Marktplatz</strong>
+          Marktplatz 14, 52249 Eschweiler
+        </div>
+        <!-- Controls -->
+        <div class="map-controls">
+          <div class="map-ctrl">+</div>
+          <div class="map-ctrl">−</div>
+        </div>
+        <div class="map-leaflet-credit">© OpenStreetMap contributors</div>
+      </div>
+
+      <div class="map-info">
+        <div class="map-info-card">
+          <h3>So erreichst du uns</h3>
+          <div class="info-row">
+            <div class="info-icon">
+              <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div class="info-text">
+              <strong>Adresse</strong>
+              Marktplatz 14<br>52249 Eschweiler
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="info-text">
+              <strong>Öffnungszeiten Halle</strong>
+              Di 17:00–22:00 · Do 17:00–22:00<br>Sa 08:00–14:00
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon">
+              <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            </div>
+            <div class="info-text">
+              <strong>ÖPNV</strong>
+              Bus 3 / 11 → Marktplatz (2 Min.)
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-icon">
+              <svg viewBox="0 0 24 24"><path d="M3 3h18v4H3zM3 10h18v4H3zM3 17h18v4H3z"/></svg>
+            </div>
+            <div class="info-text">
+              <strong>Parken</strong>
+              Parkhaus Stadtmitte (50m), kostenlos ab 18 Uhr
+            </div>
+          </div>
+        </div>
+        <a href="#" class="btn-maps mag">
+          <svg viewBox="0 0 24 24"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+          Route in OpenStreetMap planen
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Booking Form -->
+  <section id="buchung" style="max-width:none;padding:80px 72px;">
+    <div class="booking-section reveal">
+      <div class="booking-grid">
+        <div class="booking-intro">
+          <p class="section-eyebrow" style="margin-bottom:14px">Probestunde</p>
+          <h2>Komm einfach<br><span style="background:linear-gradient(130deg,#a855f7,#e879f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">vorbei</span></h2>
+          <p style="margin-top:16px;">
+            Keine Vorkenntnisse nötig. Schreib uns wann du möchtest —
+            wir melden uns innerhalb von 24 Stunden und reservieren deinen Platz.
+          </p>
+          <div class="booking-perks">
+            <div class="perk-row">
+              <div class="perk-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+              Erste Probestunde kostenlos &amp; unverbindlich
+            </div>
+            <div class="perk-row">
+              <div class="perk-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+              Bequeme Kleidung reicht — keine spezielle Ausrüstung
+            </div>
+            <div class="perk-row">
+              <div class="perk-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+              Bestätigung per E-Mail innerhalb weniger Stunden
+            </div>
+            <div class="perk-row">
+              <div class="perk-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+              Kein Abo — du entscheidest danach
+            </div>
+          </div>
+        </div>
+
+        <form class="booking-form" onsubmit="handleBooking(event)">
+          <div class="form-row">
+            <div class="field">
+              <label>Vorname *</label>
+              <input type="text" placeholder="Maria" required />
+            </div>
+            <div class="field">
+              <label>Nachname *</label>
+              <input type="text" placeholder="Müller" required />
+            </div>
+          </div>
+          <div class="field">
+            <label>E-Mail-Adresse *</label>
+            <input type="email" placeholder="maria@beispiel.de" required />
+          </div>
+          <div class="field">
+            <label>Telefon (optional)</label>
+            <input type="tel" placeholder="+49 172 1234567" />
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label>Wunschtermin</label>
+              <input type="date" />
+            </div>
+            <div class="field">
+              <label>Erfahrung</label>
+              <select>
+                <option value="">Bitte wählen</option>
+                <option>Keine Vorkenntnisse</option>
+                <option>Schon mal getanzt</option>
+                <option>Erfahren</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label>Nachricht (optional)</label>
+            <textarea placeholder="Gibt es etwas das wir wissen sollten? Fragen?"></textarea>
+          </div>
+          <div class="consent-row">
+            <input type="checkbox" id="consent" required />
+            <label for="consent" style="cursor:none;">
+              Ich bin einverstanden, dass DanceMotion meine Daten zur Bearbeitung dieser Anfrage nutzt.
+              Die Daten werden nach 90 Tagen automatisch gelöscht. (<a href="/datenschutz" style="color:var(--accent);">Datenschutzerklärung</a>)
+            </label>
+          </div>
+          <button type="submit" class="btn-submit mag" id="submit-btn">
+            Probestunde anfragen →
+          </button>
+          <p class="form-note">Deine Daten sind DSGVO-konform gespeichert &amp; werden nicht weitergegeben.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery Strip -->
+  <div class="gallery-strip-outer">
+    <div class="gallery-strip-header">
+      <div class="left">
+        <p class="section-eyebrow" style="margin-bottom:8px">Einblicke</p>
+        <h2 class="section-title" style="margin-bottom:0;font-size:clamp(24px,3vw,38px)">Emotion in <span style="background:linear-gradient(130deg,#a855f7,#e879f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Bildern</span></h2>
+        <p>Auftritte, Training, gemeinsame Momente</p>
+      </div>
+      <a href="/galerie?gruppe=emotion" class="btn-gallery mag">
+        Alle Fotos
+        <svg style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+    <div class="gallery-track" id="gallery">
+      <div class="gallery-thumb">
+        <div class="gimg"><div class="gimg-overlay"></div></div>
+      </div>
+      <div class="gallery-thumb">
+        <div class="gimg"><div class="gimg-overlay"></div></div>
+      </div>
+      <div class="gallery-thumb">
+        <div class="gimg"><div class="gimg-overlay"></div></div>
+      </div>
+      <div class="gallery-thumb">
+        <div class="gimg"><div class="gimg-overlay"></div></div>
+      </div>
+      <div class="gallery-thumb">
+        <div class="gimg"><div class="gimg-overlay"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Upcoming Events -->
+  <section>
+    <p class="section-eyebrow reveal">Kommende Auftritte</p>
+    <h2 class="section-title reveal">Emotion im <span style="background:linear-gradient(130deg,#2EC4C6,#7ef4f5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Kalender</span></h2>
+    <div class="events-list reveal">
+      <a href="/termine/sommerfest-2026" class="event-row">
+        <div class="event-date-box"><span class="day">21</span><span class="mon">Jun</span></div>
+        <div class="event-info">
+          <div class="event-title">Sommerfest Eschweiler 2026</div>
+          <div class="event-meta">19:00 Uhr · Stadtpark · Showauftritt</div>
+        </div>
+        <div class="event-arrow"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+      </a>
+      <a href="/termine/tanzgala-2026" class="event-row">
+        <div class="event-date-box"><span class="day">12</span><span class="mon">Jul</span></div>
+        <div class="event-info">
+          <div class="event-title">DanceMotion Tanzgala 2026</div>
+          <div class="event-meta">18:00 Uhr · Kulturbahnhof · Jahresshow</div>
+        </div>
+        <div class="event-arrow"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+      </a>
+      <a href="/termine/herbstfest-2026" class="event-row">
+        <div class="event-date-box"><span class="day">04</span><span class="mon">Okt</span></div>
+        <div class="event-info">
+          <div class="event-title">Herbstfest der Vereine</div>
+          <div class="event-meta">15:00 Uhr · Rathaus-Vorplatz · Kurzprogramm</div>
+        </div>
+        <div class="event-arrow"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+      </a>
+    </div>
+    <div style="margin-top:24px;" class="reveal">
+      <a href="/termine?gruppe=emotion" class="btn-outline mag" style="display:inline-flex;gap:8px;align-items:center;">
+        Alle Termine der Emotion-Gruppe
+        <svg style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer CTA -->
+  <div class="divider"></div>
+  <div class="footer-cta reveal">
+    <h2>Noch <span style="background:linear-gradient(130deg,#a855f7,#e879f9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Fragen?</span></h2>
+    <p>Wir sind für euch da. Schreibt uns, kommt vorbei oder bucht einfach eure Probestunde — wir freuen uns auf euch.</p>
+    <div class="footer-cta-btns">
+      <a href="#buchung" class="btn-primary mag">Jetzt Probestunde buchen</a>
+      <a href="mailto:info@dancemotion.org" class="btn-outline mag">info@dancemotion.org</a>
+    </div>
+  </div>
+
+  <script>
+    /* ── CURSOR ─────────────────────────────── */
+    const cur = document.getElementById('cur');
+    const ring = document.getElementById('cur-ring');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+    (function tick() {
+      rx += (mx - rx) * 0.12;
+      ry += (my - ry) * 0.12;
+      cur.style.left  = mx + 'px'; cur.style.top  = my + 'px';
+      ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+      requestAnimationFrame(tick);
+    })();
+    document.querySelectorAll('a,button,.mag,.map-ctrl,.gallery-thumb').forEach(el => {
+      el.addEventListener('mouseenter', () => document.body.classList.add('hov'));
+      el.addEventListener('mouseleave', () => document.body.classList.remove('hov'));
+    });
+
+    /* ── HERO CANVAS: Particle Dance ─────────── */
+    const hc = document.getElementById('hero-c');
+    const ctx = hc.getContext('2d');
+    function resize() { hc.width = hc.offsetWidth; hc.height = hc.offsetHeight; }
+    resize();
+    window.addEventListener('resize', resize);
+
+    const P = Array.from({length:60}, () => ({
+      x: Math.random(), y: Math.random(),
+      vx:(Math.random()-.5)*.0008, vy:(Math.random()-.5)*.0008,
+      r: Math.random()*1.8+.4,
+      o: Math.random()*.5+.1,
+      hue: Math.random() < .4 ? 170 : 285
+    }));
+    let hmx=.5, hmy=.5;
+    document.addEventListener('mousemove',e=>{
+      hmx=e.clientX/window.innerWidth; hmy=e.clientY/window.innerHeight;
+    });
+    function drawHero() {
+      ctx.clearRect(0,0,hc.width,hc.height);
+      P.forEach(p => {
+        p.x += p.vx + (hmx-.5)*.00015;
+        p.y += p.vy + (hmy-.5)*.00015;
+        if(p.x<0)p.x=1; if(p.x>1)p.x=0;
+        if(p.y<0)p.y=1; if(p.y>1)p.y=0;
+        ctx.beginPath();
+        ctx.arc(p.x*hc.width, p.y*hc.height, p.r, 0, Math.PI*2);
+        ctx.fillStyle = p.hue===170
+          ? `rgba(46,196,198,${p.o})`
+          : `rgba(168,85,247,${p.o})`;
+        ctx.fill();
+      });
+      // Draw connecting lines
+      for(let i=0;i<P.length;i++) {
+        for(let j=i+1;j<P.length;j++) {
+          const dx=(P[i].x-P[j].x)*hc.width;
+          const dy=(P[i].y-P[j].y)*hc.height;
+          const d=Math.sqrt(dx*dx+dy*dy);
+          if(d<120) {
+            ctx.beginPath();
+            ctx.moveTo(P[i].x*hc.width, P[i].y*hc.height);
+            ctx.lineTo(P[j].x*hc.width, P[j].y*hc.height);
+            const frac = (P[i].hue===285||P[j].hue===285) ? 'rgba(168,85,247,' : 'rgba(46,196,198,';
+            ctx.strokeStyle = frac + (1-d/120)*.12 + ')';
+            ctx.lineWidth=.8;
+            ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(drawHero);
+    }
+    drawHero();
+
+    /* ── COUNTUP ────────────────────────────── */
+    const counters = document.querySelectorAll('[data-target]');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if(!e.isIntersecting) return;
+        const el = e.target;
+        const target = +el.dataset.target;
+        let start = 0;
+        const dur = 1400;
+        const t0 = performance.now();
+        function step(now) {
+          const p = Math.min((now-t0)/dur,1);
+          const ease = 1 - Math.pow(1-p, 3);
+          el.textContent = Math.round(ease*target);
+          if(p<1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+        obs.unobserve(el);
+      });
+    }, {threshold:.4});
+    counters.forEach(c => obs.observe(c));
+
+    /* ── SCROLL REVEAL ──────────────────────── */
+    const revealObs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if(e.isIntersecting) { e.target.classList.add('vis'); revealObs.unobserve(e.target); }
+      });
+    }, {threshold:.1, rootMargin:'0px 0px -60px 0px'});
+    document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+    /* ── MAGNETIC BUTTONS ───────────────────── */
+    document.querySelectorAll('.mag').forEach(btn => {
+      let frame;
+      btn.addEventListener('mousemove', e => {
+        cancelAnimationFrame(frame);
+        const r = btn.getBoundingClientRect();
+        const dx = (e.clientX - r.left - r.width/2) * .35;
+        const dy = (e.clientY - r.top  - r.height/2) * .35;
+        btn.style.transform = `translate(${dx}px,${dy}px)`;
+      });
+      btn.addEventListener('mouseleave', () => {
+        cancelAnimationFrame(frame);
+        let ox=0,oy=0;
+        const cur = btn.style.transform.match(/-?[\d.]+/g);
+        if(cur){ox=parseFloat(cur[0]);oy=parseFloat(cur[1]);}
+        const t0=performance.now();
+        function spring(now){
+          const p=Math.min((now-t0)/280,1);
+          const e=1-Math.pow(1-p,3);
+          btn.style.transform=`translate(${ox*(1-e)}px,${oy*(1-e)}px)`;
+          if(p<1)frame=requestAnimationFrame(spring);
+        }
+        frame=requestAnimationFrame(spring);
+      });
+    });
+
+    /* ── GALLERY DRAG ───────────────────────── */
+    const track = document.getElementById('gallery');
+    let isDown=false, startX, scrollL;
+    track.addEventListener('mousedown', e=>{isDown=true;startX=e.pageX-track.offsetLeft;scrollL=track.scrollLeft;track.style.cursor='grabbing';});
+    window.addEventListener('mouseup', ()=>{isDown=false;track.style.cursor='';});
+    track.addEventListener('mousemove', e=>{
+      if(!isDown) return;
+      e.preventDefault();
+      const x=e.pageX-track.offsetLeft;
+      track.scrollLeft=scrollL-(x-startX);
+    });
+
+    /* ── FORM SUBMIT (demo) ─────────────────── */
+    function handleBooking(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      btn.textContent = '✓ Anfrage gesendet!';
+      btn.style.background = 'linear-gradient(135deg,#2EC4C6,#7ef4f5)';
+      btn.style.color = '#000';
+      btn.disabled = true;
+    }
+
+    /* ── SMOOTH GALLERY AUTO-SCROLL HINT ────── */
+    // Subtle initial scroll-hint after page load
+    setTimeout(() => {
+      track.scrollTo({left:60,behavior:'smooth'});
+      setTimeout(()=>track.scrollTo({left:0,behavior:'smooth'}),800);
+    }, 2200);
+  </script>
+</body>
+</html>
