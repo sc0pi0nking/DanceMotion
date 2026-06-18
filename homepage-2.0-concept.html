@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DanceMotion 2.0 — Konzept</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet" />
+  <style>
+    /* ── RESET ─────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:     #0A0A0A;
+      --fg:     #F9F7F4;
+      --muted:  #888;
+      --panel:  #111;
+      --border: #1e1e1e;
+      --accent: #2EC4C6;
+      --radius: 20px;
+    }
+
+    html { scroll-behavior: smooth; overflow-x: hidden; }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Inter', system-ui, sans-serif;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* ── GRAIN OVERLAY ─────────────────────── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.045;
+      pointer-events: none;
+      z-index: 9000;
+    }
+
+    /* ── CURSOR ────────────────────────────── */
+    #cur {
+      width: 10px; height: 10px;
+      background: var(--accent);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: width .15s, height .15s, background .15s;
+    }
+    #cur-ring {
+      width: 38px; height: 38px;
+      border: 1.5px solid rgba(46,196,198,.45);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      transition: width .25s, height .25s, border-color .25s;
+    }
+    body.hov #cur       { width: 18px; height: 18px; }
+    body.hov #cur-ring  { width: 54px; height: 54px; border-color: rgba(46,196,198,.7); }
+
+    /* ── NAV ───────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 48px;
+      background: rgba(10,10,10,.75);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(46,196,198,.07);
+    }
+    .nav-logo {
+      font-size: 19px; font-weight: 800; letter-spacing: -.5px;
+      background: linear-gradient(130deg, #2EC4C6 0%, #fff 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500;
+      cursor: none; transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--fg); }
+    .nav-btn {
+      background: var(--accent); color: #000;
+      padding: 9px 20px; border-radius: 9px;
+      font-size: 13px; font-weight: 700;
+      text-decoration: none; cursor: none;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .nav-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(46,196,198,.35); }
+
+    /* ── ALERT BANNER ──────────────────────── */
+    .alert-bar {
+      position: relative; z-index: 150;
+      margin-top: 65px;
+      background: rgba(46,196,198,.08);
+      border-bottom: 1px solid rgba(46,196,198,.18);
+      padding: 11px 20px;
+      text-align: center;
+      font-size: 13px;
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+    }
+    .alert-pill {
+      background: var(--accent); color: #000;
+      font-size: 10px; font-weight: 800; letter-spacing: .5px;
+      padding: 2px 9px; border-radius: 100px;
+    }
+    .alert-bar a { color: var(--accent); text-decoration: none; font-weight: 600; cursor: none; }
+
+    /* ── HERO ──────────────────────────────── */
+    #hero {
+      position: relative; min-height: 100vh;
+      display: flex; align-items: center; overflow: hidden;
+    }
+    #c {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+    }
+    .hero-inner {
+      position: relative; z-index: 2;
+      padding: 0 64px; max-width: 860px;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(46,196,198,.1);
+      border: 1px solid rgba(46,196,198,.22);
+      border-radius: 100px; padding: 6px 14px;
+      font-size: 12px; color: var(--accent); font-weight: 600;
+      margin-bottom: 32px;
+      opacity: 0; animation: fu .6s ease .2s forwards;
+    }
+    .badge-dot {
+      width: 6px; height: 6px; background: var(--accent); border-radius: 50%;
+      animation: blink 2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    h1.hero-h {
+      font-size: clamp(52px, 8.5vw, 104px);
+      font-weight: 900; letter-spacing: -3px; line-height: 1.0;
+      margin-bottom: 26px;
+    }
+    .hero-h .row { display: block; overflow: hidden; }
+    .hero-h .row span {
+      display: block;
+      opacity: 0; transform: translateY(105%);
+      animation: su .75s cubic-bezier(.16,1,.3,1) forwards;
+    }
+    .hero-h .row:nth-child(1) span { animation-delay: .3s; }
+    .hero-h .row:nth-child(2) span { animation-delay: .45s; }
+    .hero-h .row:nth-child(3) span { animation-delay: .6s; }
+    .gt {
+      background: linear-gradient(130deg, #2EC4C6 0%, #7ef4f5 50%, rgba(249,247,244,.65) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    @keyframes su { to { opacity:1; transform:translateY(0); } }
+    @keyframes fu { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+
+    .hero-p {
+      font-size: clamp(16px,1.8vw,20px); color: var(--muted); line-height: 1.65;
+      max-width: 500px; margin-bottom: 44px;
+      opacity: 0; animation: fu .6s ease .85s forwards;
+    }
+    .hero-ctas {
+      display: flex; gap: 14px; flex-wrap: wrap;
+      opacity: 0; animation: fu .6s ease 1.05s forwards;
+    }
+    .btn-p {
+      background: var(--accent); color: #000;
+      padding: 14px 28px; border-radius: 11px;
+      font-size: 15px; font-weight: 700; text-decoration: none; cursor: none;
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: transform .25s, box-shadow .25s;
+      position: relative; overflow: hidden;
+    }
+    .btn-p::after {
+      content:''; position:absolute; inset:0;
+      background: linear-gradient(135deg, rgba(255,255,255,.18), transparent);
+      opacity:0; transition: opacity .2s;
+    }
+    .btn-p:hover::after { opacity:1; }
+    .btn-p:hover { transform:translateY(-2px); box-shadow:0 14px 36px rgba(46,196,198,.42); }
+    .btn-g {
+      background: rgba(46,196,198,.08);
+      border: 1px solid rgba(46,196,198,.22);
+      color: var(--fg); padding: 14px 28px; border-radius: 11px;
+      font-size: 15px; font-weight: 600; text-decoration: none; cursor: none;
+      transition: all .2s;
+    }
+    .btn-g:hover { background: rgba(46,196,198,.14); border-color: rgba(46,196,198,.4); transform:translateY(-1px); }
+
+    .scroll-hint {
+      position: absolute; bottom: 36px; left: 64px;
+      display: flex; align-items: center; gap: 14px;
+      opacity: 0; animation: fu .6s ease 1.4s forwards;
+    }
+    .scroll-hint span { font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--muted); }
+    .scroll-line {
+      width: 48px; height: 1px;
+      background: linear-gradient(to right, var(--accent), transparent);
+      animation: sla 1.8s ease-in-out infinite;
+    }
+    @keyframes sla { 0%,100%{transform:scaleX(.3);transform-origin:left} 50%{transform:scaleX(1);transform-origin:left} }
+
+    /* ── SECTIONS ──────────────────────────── */
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 96px 48px; }
+
+    .s-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 14px;
+      opacity: 0; transform: translateY(16px);
+      transition: opacity .55s ease, transform .55s ease;
+    }
+    .s-title {
+      font-size: clamp(30px, 4.5vw, 54px);
+      font-weight: 850; letter-spacing: -1.5px; line-height: 1.1;
+      margin-bottom: 16px;
+      opacity: 0; transform: translateY(18px);
+      transition: opacity .55s .1s ease, transform .55s .1s ease;
+    }
+    .s-sub {
+      font-size: 17px; color: var(--muted); line-height: 1.6;
+      max-width: 500px; margin-bottom: 52px;
+      opacity: 0; transform: translateY(18px);
+      transition: opacity .55s .2s ease, transform .55s .2s ease;
+    }
+    .vis { opacity: 1 !important; transform: none !important; }
+
+    /* ── BENTO GRID ────────────────────────── */
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-template-rows: auto auto;
+      gap: 14px;
+    }
+
+    .bc {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px;
+      position: relative; overflow: hidden;
+      cursor: none;
+      opacity: 0; transform: translateY(28px);
+      transition: opacity .55s ease, transform .55s ease, border-color .3s, box-shadow .3s;
+    }
+    .bc:nth-child(2) { transition-delay: .1s; }
+    .bc:nth-child(3) { transition-delay: .18s; }
+    .bc.vis { opacity:1; transform:none; }
+
+    .bc::before {
+      content:''; position:absolute; inset:0; pointer-events:none;
+      background: radial-gradient(circle at var(--mx,50%) var(--my,50%), rgba(46,196,198,.07), transparent 58%);
+      opacity: 0; transition: opacity .35s;
+    }
+    .bc:hover::before { opacity:1; }
+    .bc:hover {
+      border-color: rgba(46,196,198,.28);
+      box-shadow: 0 20px 56px rgba(46,196,198,.07);
+    }
+
+    .bc:nth-child(1) { grid-column: span 7; }
+    .bc:nth-child(2) { grid-column: span 5; }
+    .bc:nth-child(3) {
+      grid-column: span 12;
+      display: grid; grid-template-columns: 1fr 1.1fr; gap: 36px; align-items: center;
+    }
+
+    .g-pill {
+      display: inline-block;
+      background: rgba(46,196,198,.1); border: 1px solid rgba(46,196,198,.22);
+      color: var(--accent); font-size: 10px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      padding: 4px 11px; border-radius: 100px; margin-bottom: 18px;
+    }
+    .g-icon { font-size: 44px; margin-bottom: 16px; display: block; }
+    .g-name { font-size: 28px; font-weight: 800; letter-spacing: -.5px; margin-bottom: 12px; }
+    .bc:nth-child(1) .g-name { font-size: 34px; }
+    .bc:nth-child(3) .g-name { font-size: 30px; }
+    .g-desc { color: var(--muted); font-size: 15px; line-height: 1.65; margin-bottom: 26px; }
+    .g-meta { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:22px; }
+    .g-meta span { font-size:13px; color:var(--muted); }
+    .g-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--accent); font-size: 14px; font-weight: 600;
+      text-decoration: none; cursor: none;
+      transition: gap .2s;
+    }
+    .g-link:hover { gap: 10px; }
+
+    .g-visual {
+      background: linear-gradient(135deg, rgba(46,196,198,.13), rgba(46,196,198,.04));
+      border: 1px solid rgba(46,196,198,.12);
+      border-radius: 14px;
+      aspect-ratio: 4/3;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 72px;
+      position: relative; overflow: hidden;
+    }
+    .g-visual::after {
+      content:'';
+      position: absolute; inset:0;
+      background: linear-gradient(135deg, rgba(46,196,198,.08) 0%, transparent 60%);
+    }
+
+    /* ── STATS ─────────────────────────────── */
+    .stats-band {
+      background: linear-gradient(135deg, rgba(46,196,198,.07), rgba(46,196,198,.02));
+      border-top: 1px solid rgba(46,196,198,.1);
+      border-bottom: 1px solid rgba(46,196,198,.1);
+      padding: 64px 48px;
+    }
+    .stats-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 32px;
+    }
+    .stat {
+      text-align: center;
+      opacity: 0; transform: translateY(18px);
+      transition: opacity .55s ease, transform .55s ease;
+    }
+    .stat:nth-child(2) { transition-delay:.1s; }
+    .stat:nth-child(3) { transition-delay:.2s; }
+    .stat.vis { opacity:1; transform:none; }
+    .stat-n {
+      font-size: clamp(52px,7vw,88px);
+      font-weight: 900; letter-spacing: -2px; line-height: 1;
+      background: linear-gradient(130deg, #2EC4C6, rgba(249,247,244,.9));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-l { font-size: 15px; color: var(--muted); margin-top: 8px; font-weight: 500; }
+
+    /* ── TIMELINE ──────────────────────────── */
+    .tl { position: relative; padding-left: 28px; }
+    .tl::before {
+      content:''; position:absolute; left:0; top:6px; bottom:6px; width:1px;
+      background: linear-gradient(to bottom, var(--accent), rgba(46,196,198,.06));
+    }
+    .tl-item {
+      position: relative; padding: 0 0 36px 24px;
+      opacity: 0; transform: translateX(-18px);
+      transition: opacity .5s ease, transform .5s ease;
+    }
+    .tl-item:nth-child(2) { transition-delay:.1s; }
+    .tl-item:nth-child(3) { transition-delay:.2s; }
+    .tl-item.vis { opacity:1; transform:none; }
+    .tl-item::before {
+      content:''; position:absolute; left:-4.5px; top:7px;
+      width:10px; height:10px; background:var(--accent); border-radius:50%;
+      box-shadow: 0 0 14px rgba(46,196,198,.55);
+    }
+    .tl-date {
+      font-size: 11px; font-weight: 700; letter-spacing:1.5px;
+      text-transform: uppercase; color: var(--accent); margin-bottom:6px;
+    }
+    .tl-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .tl-meta { display:flex; gap:14px; flex-wrap:wrap; align-items:center; }
+    .tl-meta span { font-size:13px; color:var(--muted); }
+    .tl-tag {
+      background: rgba(46,196,198,.09); border:1px solid rgba(46,196,198,.18);
+      color: var(--accent); font-size:11px; font-weight:600;
+      padding:3px 10px; border-radius:100px;
+    }
+
+    /* ── CTA CARD ──────────────────────────── */
+    .cta-card {
+      max-width: 1200px; margin: 0 auto 80px;
+      padding: 0 48px;
+    }
+    .cta-inner {
+      background: linear-gradient(135deg, rgba(46,196,198,.11), rgba(46,196,198,.04));
+      border: 1px solid rgba(46,196,198,.2);
+      border-radius: 28px; padding: 72px 56px;
+      text-align: center; position: relative; overflow: hidden;
+      opacity: 0; transform: translateY(22px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+    .cta-inner.vis { opacity:1; transform:none; }
+    .cta-inner::before {
+      content:''; position:absolute; inset:0; pointer-events:none;
+      background: radial-gradient(ellipse at 50% 50%, rgba(46,196,198,.07), transparent 65%);
+    }
+    .cta-inner h2 {
+      font-size: clamp(26px,3.5vw,44px);
+      font-weight: 850; letter-spacing:-1px; margin-bottom:16px;
+      position:relative;
+    }
+    .cta-inner p {
+      color:var(--muted); font-size:17px; line-height:1.6;
+      max-width:440px; margin:0 auto 36px; position:relative;
+    }
+    .cta-btns { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; position:relative; }
+
+    /* animated border btn */
+    @property --ba { syntax:'<angle>'; initial-value:0deg; inherits:false; }
+    @keyframes bspin { to { --ba: 360deg; } }
+    .btn-glow {
+      background: var(--accent); color: #000;
+      padding: 14px 28px; border-radius: 11px;
+      font-size: 15px; font-weight: 700;
+      text-decoration: none; cursor: none;
+      display: inline-flex; align-items: center; gap: 8px;
+      transition: transform .25s, box-shadow .25s;
+    }
+    .btn-glow:hover { transform:translateY(-2px); box-shadow:0 16px 44px rgba(46,196,198,.48); }
+
+    /* ── FOOTER ────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 44px 48px;
+      display: flex; justify-content: space-between; align-items: center;
+      max-width: 1200px; margin: 0 auto;
+    }
+    .f-logo {
+      font-size: 17px; font-weight: 800;
+      background: linear-gradient(130deg, #2EC4C6, rgba(249,247,244,.6));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .f-links { display:flex; gap:22px; list-style:none; }
+    .f-links a { color:var(--muted); text-decoration:none; font-size:13px; cursor:none; transition:color .2s; }
+    .f-links a:hover { color:var(--fg); }
+    .f-copy { font-size:13px; color:var(--muted); }
+
+    /* ── CONCEPT BADGE ─────────────────────── */
+    .concept-badge {
+      position: fixed; bottom: 22px; right: 22px; z-index: 9997;
+      background: rgba(18,18,18,.85);
+      border: 1px solid rgba(46,196,198,.3);
+      backdrop-filter: blur(12px);
+      color: var(--accent); font-size: 10px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      padding: 8px 14px; border-radius: 100px;
+    }
+
+    /* ── MOBILE ────────────────────────────── */
+    @media (max-width: 768px) {
+      nav { padding: 16px 24px; }
+      .nav-links { display:none; }
+      .hero-inner { padding: 0 24px; }
+      .wrap { padding: 64px 24px; }
+      .bento { grid-template-columns: 1fr; }
+      .bc:nth-child(1),.bc:nth-child(2),.bc:nth-child(3) { grid-column: span 1; }
+      .bc:nth-child(3) { grid-template-columns: 1fr; }
+      .stats-inner { grid-template-columns: 1fr; gap: 28px; }
+      footer { flex-direction:column; gap:20px; text-align:center; padding:36px 24px; }
+      .cta-card { padding: 0 20px; }
+      .cta-inner { padding: 48px 28px; }
+      .scroll-hint { left: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div id="cur"></div>
+<div id="cur-ring"></div>
+
+<!-- Concept label -->
+<div class="concept-badge">2.0 Konzept</div>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-logo">DanceMotion</div>
+  <ul class="nav-links">
+    <li><a href="#groups">Gruppen</a></li>
+    <li><a href="#events">Termine</a></li>
+    <li><a href="#">Galerie</a></li>
+    <li><a href="#">Team</a></li>
+  </ul>
+  <a href="#cta" class="nav-btn">Probestunde</a>
+</nav>
+
+<!-- Alert -->
+<div class="alert-bar">
+  <span class="alert-pill">NEU</span>
+  🎭 Sommer-Showcase 2025 — Tickets jetzt verfügbar!
+  <a href="#">Jetzt sichern →</a>
+</div>
+
+<!-- Hero -->
+<section id="hero">
+  <canvas id="c"></canvas>
+  <div class="hero-inner">
+    <div class="hero-badge">
+      <div class="badge-dot"></div>
+      Seit 2015 in Eschweiler
+    </div>
+    <h1 class="hero-h">
+      <div class="row"><span>Wir <span class="gt">bewegen</span></span></div>
+      <div class="row"><span>Menschen.</span></div>
+    </h1>
+    <p class="hero-p">
+      Drei Tanzgruppen, ein Ziel: Freude, Gemeinschaft und Leidenschaft.
+      Entdecke deinen Rhythmus bei DanceMotion Eschweiler.
+    </p>
+    <div class="hero-ctas">
+      <a href="#groups" class="btn-p">Gruppen entdecken <span>↓</span></a>
+      <a href="#cta" class="btn-g">Probestunde buchen</a>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- Groups -->
+<div class="wrap" id="groups">
+  <div class="s-label">Unsere Gruppen</div>
+  <h2 class="s-title">Für jeden den <span class="gt">richtigen Rhythmus</span></h2>
+  <p class="s-sub">Von den Kleinsten bis zu den Profis — bei DanceMotion findet jeder seine Gruppe und seine Bühne.</p>
+
+  <div class="bento">
+    <!-- Little Joys — groß links -->
+    <div class="bc">
+      <div class="g-pill">3–6 Jahre</div>
+      <span class="g-icon">🌟</span>
+      <div class="g-name">Little Joys</div>
+      <p class="g-desc">Tanzender Einstieg für die Allerjüngsten. Koordination, Rhythmusgefühl und vor allem jede Menge Spaß — liebevoll begleitet von unseren erfahrenen Trainerinnen.</p>
+      <div class="g-meta">
+        <span>📍 Sportzentrum Eschweiler</span>
+        <span>🕓 Mi. 16:00–17:00</span>
+      </div>
+      <a href="#" class="g-link">Mehr erfahren <span>→</span></a>
+    </div>
+
+    <!-- Smileys — kompakt rechts -->
+    <div class="bc">
+      <div class="g-pill">7–12 Jahre</div>
+      <span class="g-icon">😊</span>
+      <div class="g-name">Smileys</div>
+      <p class="g-desc">Auftritt, Kreativität, Teamgeist. Die Smileys bringen die Bühnen der Region zum Leuchten — und wachsen jedes Jahr über sich hinaus.</p>
+      <div class="g-meta">
+        <span>📍 Tanzstudio</span>
+        <span>🕓 Di. 16:30–17:30</span>
+      </div>
+      <a href="#" class="g-link">Mehr erfahren <span>→</span></a>
+    </div>
+
+    <!-- Emotion — breite volle Reihe -->
+    <div class="bc">
+      <div>
+        <div class="g-pill">Ab 13 Jahren</div>
+        <span class="g-icon">💫</span>
+        <div class="g-name">Emotion</div>
+        <p class="g-desc">Contemporary, Modern Jazz und Showtanz auf höchstem Level. Für alle, die Tanz nicht als Hobby, sondern als Leidenschaft leben — mit zwei Trainings pro Woche und regelmäßigen Auftritten.</p>
+        <div class="g-meta">
+          <span>📍 Sportzentrum</span>
+          <span>🕓 Mo. 19:00 & Mi. 18:00</span>
+        </div>
+        <a href="#" class="g-link">Mehr erfahren <span>→</span></a>
+      </div>
+      <div class="g-visual">💃</div>
+    </div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-band">
+  <div class="stats-inner">
+    <div class="stat">
+      <div class="stat-n" data-to="500">0</div>
+      <div class="stat-l">Auftritte seit Gründung</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n" data-to="3">0</div>
+      <div class="stat-l">Aktive Tanzgruppen</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n" data-to="10">0</div>
+      <div class="stat-l">Jahre DanceMotion</div>
+    </div>
+  </div>
+</div>
+
+<!-- Events -->
+<div class="wrap" id="events">
+  <div class="s-label">Kalender</div>
+  <h2 class="s-title">Nächste <span class="gt">Termine</span></h2>
+  <p class="s-sub">Alle Auftritte, Workshops und Trainings auf einen Blick — immer aktuell aus der Datenbank.</p>
+
+  <div class="tl">
+    <div class="tl-item">
+      <div class="tl-date">Sa, 28. Juni 2025</div>
+      <div class="tl-title">Sommerfest Eschweiler — Stadtbühne</div>
+      <div class="tl-meta">
+        <span>📍 Stadtpark Eschweiler</span>
+        <span>⏰ 15:00 Uhr</span>
+        <span class="tl-tag">Auftritt</span>
+        <span class="tl-tag">Little Joys · Smileys</span>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-date">Sa, 12. Juli 2025</div>
+      <div class="tl-title">Sommer-Showcase 2025</div>
+      <div class="tl-meta">
+        <span>📍 Kulturzentrum Aachen</span>
+        <span>⏰ 18:00 Uhr</span>
+        <span class="tl-tag">Auftritt</span>
+        <span class="tl-tag">Alle Gruppen</span>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-date">So, 27. Juli 2025</div>
+      <div class="tl-title">Workshop: Contemporary Dance</div>
+      <div class="tl-meta">
+        <span>📍 Tanzstudio Eschweiler</span>
+        <span>⏰ 10:00–14:00 Uhr</span>
+        <span class="tl-tag">Workshop</span>
+        <span class="tl-tag">Emotion</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:36px;">
+    <a href="#" class="btn-g">Alle Termine ansehen →</a>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-card" id="cta">
+  <div class="cta-inner">
+    <div class="s-label" style="justify-content:center;display:flex;margin-bottom:14px;">Mitmachen</div>
+    <h2>Bereit, deinen Rhythmus<br/>zu <span class="gt">entdecken?</span></h2>
+    <p>Komm einfach zur kostenlosen Probestunde — unverbindlich, herzlich willkommen, mit Garantie auf gute Laune.</p>
+    <div class="cta-btns">
+      <a href="#" class="btn-glow">Probestunde buchen ✦</a>
+      <a href="#" class="btn-g">Kontakt aufnehmen</a>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  <div class="f-logo">DanceMotion</div>
+  <ul class="f-links">
+    <li><a href="#">Impressum</a></li>
+    <li><a href="#">Datenschutz</a></li>
+    <li><a href="#">Kontakt</a></li>
+    <li><a href="#">Instagram</a></li>
+  </ul>
+  <div class="f-copy">© 2025 DanceMotion Eschweiler e.V.</div>
+</footer>
+
+<script>
+// ── CURSOR ──────────────────────────────────────
+const cur = document.getElementById('cur')
+const ring = document.getElementById('cur-ring')
+let rx = 0, ry = 0, cx = 0, cy = 0
+
+document.addEventListener('mousemove', e => {
+  cx = e.clientX; cy = e.clientY
+  cur.style.left = cx + 'px'
+  cur.style.top  = cy + 'px'
+})
+
+;(function raf() {
+  rx += (cx - rx) * 0.1
+  ry += (cy - ry) * 0.1
+  ring.style.left = rx + 'px'
+  ring.style.top  = ry + 'px'
+  requestAnimationFrame(raf)
+})()
+
+document.querySelectorAll('a, button').forEach(el => {
+  el.addEventListener('mouseenter', () => document.body.classList.add('hov'))
+  el.addEventListener('mouseleave', () => document.body.classList.remove('hov'))
+})
+
+// ── HERO CANVAS ─────────────────────────────────
+const canvas = document.getElementById('c')
+const ctx    = canvas.getContext('2d')
+let W, H, mouse = { x: 0, y: 0 }, t = 0
+
+function resize() {
+  W = canvas.width  = canvas.offsetWidth
+  H = canvas.height = canvas.offsetHeight
+}
+resize()
+window.addEventListener('resize', resize)
+document.getElementById('hero').addEventListener('mousemove', e => {
+  const r = canvas.getBoundingClientRect()
+  mouse.x = e.clientX - r.left
+  mouse.y = e.clientY - r.top
+})
+
+// Particles
+const pts = Array.from({ length: 65 }, () => ({
+  x:  Math.random() * 1400,
+  y:  Math.random() * 900,
+  vx: (Math.random() - .5) * .28,
+  vy: (Math.random() - .5) * .28,
+  r:  Math.random() * 1.8 + .4,
+  a:  Math.random() * .5 + .08,
+}))
+
+function drawTorus(cx, cy, rx, ry, n, off) {
+  for (let i = 0; i < n; i++) {
+    const ang = (i / n) * Math.PI * 2 + off
+    const x   = cx + Math.cos(ang) * rx
+    const y   = cy + Math.sin(ang) * ry
+    const sz  = 1.8 + Math.sin(ang * 2 + off) * 1.2
+    const a   = .12 + Math.abs(Math.sin(ang + off)) * .14
+    ctx.beginPath()
+    ctx.arc(x, y, Math.max(.3, sz), 0, Math.PI * 2)
+    ctx.fillStyle = `rgba(46,196,198,${a})`
+    ctx.fill()
+  }
+}
+
+function frame() {
+  t += .004
+  ctx.clearRect(0, 0, W, H)
+
+  // Background radial glow
+  const g = ctx.createRadialGradient(W * .72, H * .4, 0, W * .72, H * .4, H * .75)
+  g.addColorStop(0, 'rgba(46,196,198,.05)')
+  g.addColorStop(1, 'transparent')
+  ctx.fillStyle = g
+  ctx.fillRect(0, 0, W, H)
+
+  // 3D Torus — mouse parallax
+  const tx = W * .76 + (mouse.x - W * .76) * .025
+  const ty = H * .46 + (mouse.y - H * .46) * .025
+  drawTorus(tx, ty, 145, 52, 90,  t)
+  drawTorus(tx, ty, 118, 42, 65, -t * 1.4)
+  drawTorus(tx, ty, 168, 62, 48,  t * .65 + 1.2)
+
+  // Soft glow at torus center
+  const tg = ctx.createRadialGradient(tx, ty, 0, tx, ty, 110)
+  tg.addColorStop(0, 'rgba(46,196,198,.09)')
+  tg.addColorStop(1, 'transparent')
+  ctx.fillStyle = tg
+  ctx.beginPath()
+  ctx.ellipse(tx, ty, 110, 60, 0, 0, Math.PI * 2)
+  ctx.fill()
+
+  // Connections
+  for (let i = 0; i < pts.length; i++) {
+    for (let j = i + 1; j < pts.length; j++) {
+      const dx = pts[i].x - pts[j].x
+      const dy = pts[i].y - pts[j].y
+      const d  = Math.sqrt(dx * dx + dy * dy)
+      if (d < 95) {
+        ctx.beginPath()
+        ctx.moveTo(pts[i].x, pts[i].y)
+        ctx.lineTo(pts[j].x, pts[j].y)
+        ctx.strokeStyle = `rgba(46,196,198,${.04 * (1 - d / 95)})`
+        ctx.lineWidth = .5
+        ctx.stroke()
+      }
+    }
+  }
+
+  // Particles
+  pts.forEach(p => {
+    const dx = mouse.x - p.x
+    const dy = mouse.y - p.y
+    const d  = Math.sqrt(dx * dx + dy * dy)
+    if (d < 130) { p.vx -= dx * .00007; p.vy -= dy * .00007 }
+    p.vx *= .992; p.vy *= .992
+    p.x += p.vx;  p.y += p.vy
+    if (p.x < 0) p.x = W; if (p.x > W) p.x = 0
+    if (p.y < 0) p.y = H; if (p.y > H) p.y = 0
+    ctx.beginPath()
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
+    ctx.fillStyle = `rgba(46,196,198,${p.a})`
+    ctx.fill()
+  })
+
+  requestAnimationFrame(frame)
+}
+frame()
+
+// ── BENTO CARD RADIAL GLOW ───────────────────────
+document.querySelectorAll('.bc').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect()
+    card.style.setProperty('--mx', ((e.clientX - r.left) / r.width  * 100) + '%')
+    card.style.setProperty('--my', ((e.clientY - r.top)  / r.height * 100) + '%')
+  })
+})
+
+// ── MAGNETIC BUTTONS ─────────────────────────────
+document.querySelectorAll('.btn-p,.btn-g,.btn-glow,.nav-btn').forEach(btn => {
+  btn.addEventListener('mousemove', e => {
+    const r = btn.getBoundingClientRect()
+    const x = (e.clientX - r.left - r.width  / 2) * .22
+    const y = (e.clientY - r.top  - r.height / 2) * .22
+    btn.style.transform = `translate(${x}px,${y}px)`
+  })
+  btn.addEventListener('mouseleave', () => {
+    btn.style.transition = 'transform .45s cubic-bezier(.34,1.56,.64,1)'
+    btn.style.transform  = ''
+    setTimeout(() => btn.style.transition = '', 450)
+  })
+})
+
+// ── SCROLL ANIMATIONS ────────────────────────────
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis') })
+}, { threshold: 0.14 })
+
+document.querySelectorAll(
+  '.s-label,.s-title,.s-sub,.bc,.stat,.tl-item,.cta-inner'
+).forEach(el => io.observe(el))
+
+// ── COUNTUP ──────────────────────────────────────
+const cio = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return
+    const el  = entry.target
+    const to  = parseInt(el.dataset.to)
+    const dur = 1600
+    const t0  = performance.now()
+    const suffix = to >= 100 ? '+' : ''
+    ;(function tick(now) {
+      const p = Math.min((now - t0) / dur, 1)
+      const e = 1 - Math.pow(1 - p, 3)
+      el.textContent = Math.floor(e * to) + suffix
+      if (p < 1) requestAnimationFrame(tick)
+      else el.textContent = to + suffix
+    })(t0)
+    cio.unobserve(el)
+  })
+}, { threshold: .5 })
+
+document.querySelectorAll('[data-to]').forEach(el => cio.observe(el))
+
+// ── SMOOTH SCROLL ────────────────────────────────
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'))
+    if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }) }
+  })
+})
+</script>
+</body>
+</html>
