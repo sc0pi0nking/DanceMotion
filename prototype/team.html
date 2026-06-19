@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team — DanceMotion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .team-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px; margin-top:48px; }
+    .team-card {
+      background:var(--panel); border:1px solid var(--border); border-radius:20px; overflow:hidden;
+      transition:border-color .25s, transform .25s; cursor:none;
+    }
+    .team-card:hover { border-color:rgba(46,196,198,.3); transform:translateY(-4px); }
+    .team-avatar {
+      height:220px; position:relative; overflow:hidden;
+    }
+    .team-avatar .av {
+      position:absolute; inset:0;
+      transition:transform .5s cubic-bezier(.25,1,.5,1);
+    }
+    .team-card:hover .av { transform:scale(1.06); }
+    .av-1 { background:linear-gradient(160deg,#0f1a29,#1a3b5c,#2EC4C6); }
+    .av-2 { background:linear-gradient(160deg,#100829,#250f5c,#a855f7); }
+    .av-3 { background:linear-gradient(160deg,#0f1a08,#1a3b0f,#22c55e); }
+    .av-4 { background:linear-gradient(160deg,#1a1208,#3b290f,#f59e0b); }
+    .av-5 { background:linear-gradient(160deg,#1a0814,#3b0f28,#e879f9); }
+    .av-6 { background:linear-gradient(160deg,#081a1a,#0f3b3b,#67e8f9); }
+    /* Person silhouette */
+    .av::before {
+      content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+      width:90px; height:180px;
+      background:rgba(0,0,0,.25);
+      clip-path:polygon(35% 0%,65% 0%,72% 25%,80% 100%,20% 100%,28% 25%);
+    }
+    .av::after {
+      content:''; position:absolute; bottom:138px; left:50%; transform:translateX(-50%);
+      width:44px; height:44px; border-radius:50%; background:rgba(0,0,0,.25);
+    }
+    .team-body { padding:24px; }
+    .team-name  { font-size:18px; font-weight:800; letter-spacing:-.5px; margin-bottom:4px; }
+    .team-role  { font-size:13px; color:var(--accent); font-weight:600; margin-bottom:12px; }
+    .team-desc  { font-size:13px; color:var(--muted); line-height:1.6; margin-bottom:16px; }
+    .team-tags  { display:flex; gap:6px; flex-wrap:wrap; }
+    .team-tag   { background:rgba(255,255,255,.05); border:1px solid var(--border); border-radius:100px; padding:3px 10px; font-size:11px; color:var(--muted); }
+
+    .vorstand-section { margin-top:72px; }
+    .vorstand-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; margin-top:32px; }
+    .vorstand-card {
+      background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:20px;
+      display:flex; align-items:center; gap:14px;
+    }
+    .v-avatar { width:48px; height:48px; border-radius:50%; flex-shrink:0; }
+    .v-av-1 { background:linear-gradient(135deg,#2EC4C6,#0f3b3b); }
+    .v-av-2 { background:linear-gradient(135deg,#a855f7,#250f5c); }
+    .v-av-3 { background:linear-gradient(135deg,#f59e0b,#3b290f); }
+    .v-av-4 { background:linear-gradient(135deg,#22c55e,#0f3b1f); }
+    .v-name { font-size:14px; font-weight:700; margin-bottom:2px; }
+    .v-pos  { font-size:12px; color:var(--muted); }
+  </style>
+</head>
+<body>
+  <div id="cur"></div><div id="cur-ring"></div>
+  <nav>
+    <a class="nav-logo" href="index.html">DanceMotion</a>
+    <ul class="nav-links">
+      <li><a href="gruppen.html">Gruppen</a></li>
+      <li><a href="termine.html">Termine</a></li>
+      <li><a href="galerie.html">Galerie</a></li>
+      <li><a href="team.html" class="active">Team</a></li>
+      <li><a href="news.html">News</a></li>
+    </ul>
+    <a href="gruppen.html" class="nav-btn mag">Probestunde</a>
+  </nav>
+
+  <div class="page-hero">
+    <p class="eyebrow reveal">Das Team</p>
+    <h1 class="reveal">Menschen hinter der <span class="gt">Bewegung</span></h1>
+    <p class="reveal">Unsere Trainerinnen und Trainer bringen nicht nur Technik mit — sondern echte Leidenschaft für Tanz und die Menschen, die tanzen wollen.</p>
+  </div>
+
+  <div class="section">
+    <p class="section-eyebrow reveal">Trainer &amp; Trainerinnen</p>
+    <h2 class="section-title reveal">Unser <span class="gt">Trainer-Team</span></h2>
+    <div class="team-grid">
+      <div class="team-card reveal">
+        <div class="team-avatar"><div class="av av-1"></div></div>
+        <div class="team-body">
+          <div class="team-name">Sarah Müller</div>
+          <div class="team-role">Cheftrainerin · Emotion</div>
+          <div class="team-desc">Staatl. geprüfte Trainerin mit 12 Jahren Bühnenerfahrung. Spezialist für Contemporary und Modern Jazz.</div>
+          <div class="team-tags"><span class="team-tag">Contemporary</span><span class="team-tag">Jazz</span><span class="team-tag">Showdance</span></div>
+        </div>
+      </div>
+      <div class="team-card reveal" style="transition-delay:.1s">
+        <div class="team-avatar"><div class="av av-2"></div></div>
+        <div class="team-body">
+          <div class="team-name">Lena Weber</div>
+          <div class="team-role">Trainerin · Emotion &amp; Smileys</div>
+          <div class="team-desc">Ausgebildete Tanzpädagogin. Bringt 8 Jahre Unterrichtserfahrung und eine Herzlichkeit die ansteckt.</div>
+          <div class="team-tags"><span class="team-tag">HipHop</span><span class="team-tag">Street</span><span class="team-tag">Kids</span></div>
+        </div>
+      </div>
+      <div class="team-card reveal" style="transition-delay:.2s">
+        <div class="team-avatar"><div class="av av-3"></div></div>
+        <div class="team-body">
+          <div class="team-name">Julia Schmitt</div>
+          <div class="team-role">Trainerin · Smileys</div>
+          <div class="team-desc">Ehemalige Wettkampftänzerin, jetzt Trainerin mit einem besonderen Talent für Choreografie.</div>
+          <div class="team-tags"><span class="team-tag">Choreografie</span><span class="team-tag">Wettkampf</span><span class="team-tag">Fitness</span></div>
+        </div>
+      </div>
+      <div class="team-card reveal" style="transition-delay:.05s">
+        <div class="team-avatar"><div class="av av-4"></div></div>
+        <div class="team-body">
+          <div class="team-name">Mia Fischer</div>
+          <div class="team-role">Trainerin · Little Joys</div>
+          <div class="team-desc">Spezialistin für frühkindliche Tanzerziehung. Macht Tanzen zum Abenteuer für die Kleinsten.</div>
+          <div class="team-tags"><span class="team-tag">Kinderturnen</span><span class="team-tag">Rhythmik</span><span class="team-tag">Spiel</span></div>
+        </div>
+      </div>
+      <div class="team-card reveal" style="transition-delay:.15s">
+        <div class="team-avatar"><div class="av av-5"></div></div>
+        <div class="team-body">
+          <div class="team-name">Anna Becker</div>
+          <div class="team-role">Co-Trainerin · Little Joys</div>
+          <div class="team-desc">Studentin der Sportwissenschaften mit Schwerpunkt Bewegungspädagogik. Unterstützt Mia seit 2024.</div>
+          <div class="team-tags"><span class="team-tag">Sportwiss.</span><span class="team-tag">Kids</span><span class="team-tag">Ballett</span></div>
+        </div>
+      </div>
+      <div class="team-card reveal" style="transition-delay:.25s">
+        <div class="team-avatar"><div class="av av-6"></div></div>
+        <div class="team-body">
+          <div class="team-name">Thomas Kraft</div>
+          <div class="team-role">Trainer · Emotion (Breakdance)</div>
+          <div class="team-desc">B-Boy mit 15 Jahren Street-Dance-Erfahrung. Bringt Power, Kreativität und urbane Kultur ins Training.</div>
+          <div class="team-tags"><span class="team-tag">Breakdance</span><span class="team-tag">B-Boy</span><span class="team-tag">Urban</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vorstand -->
+    <div class="vorstand-section reveal">
+      <p class="section-eyebrow">Vereinsführung</p>
+      <h2 class="section-title" style="margin-bottom:0">Vorstand</h2>
+      <div class="vorstand-grid" style="margin-top:24px;">
+        <div class="vorstand-card"><div class="v-avatar v-av-1"></div><div><div class="v-name">Klaus Meyer</div><div class="v-pos">1. Vorsitzender</div></div></div>
+        <div class="vorstand-card"><div class="v-avatar v-av-2"></div><div><div class="v-name">Sandra Hoffmann</div><div class="v-pos">2. Vorsitzende</div></div></div>
+        <div class="vorstand-card"><div class="v-avatar v-av-3"></div><div><div class="v-name">Marcus Klein</div><div class="v-pos">Kassenwart</div></div></div>
+        <div class="vorstand-card"><div class="v-avatar v-av-4"></div><div><div class="v-name">Petra Braun</div><div class="v-pos">Schriftführerin</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin:0 72px;" class="reveal">
+    <div style="background:var(--panel);border:1px solid rgba(46,196,198,.15);border-radius:20px;padding:48px;text-align:center;">
+      <p class="section-eyebrow" style="margin-bottom:12px">Mitmachen</p>
+      <h2 style="font-size:clamp(24px,3vw,36px);font-weight:800;letter-spacing:-1.5px;margin-bottom:12px;">Du möchtest Trainer werden?</h2>
+      <p style="color:var(--muted);font-size:15px;max-width:480px;margin:0 auto 28px;line-height:1.7;">Wir suchen immer engagierte Menschen die unsere Gruppen unterstützen möchten. Meld dich einfach!</p>
+      <a href="mailto:info@dancemotion.org" class="btn-primary mag">info@dancemotion.org</a>
+    </div>
+  </div>
+
+  <footer style="margin-top:80px;">
+    <div class="footer-logo">DanceMotion</div>
+    <ul class="footer-links">
+      <li><a href="index.html">Home</a></li><li><a href="gruppen.html">Gruppen</a></li>
+      <li><a href="termine.html">Termine</a></li><li><a href="#">Datenschutz</a></li><li><a href="#">Impressum</a></li>
+    </ul>
+    <span class="footer-copy">© 2026 DanceMotion Eschweiler e.V.</span>
+  </footer>
+  <script src="_shared.js"></script>
+</body>
+</html>
