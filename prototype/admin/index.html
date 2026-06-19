@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard — DanceMotion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../_shared.css" />
+  <style>
+    body { cursor: default; }
+    #cur, #cur-ring { display:none; }
+
+    .admin-layout { display:grid; grid-template-columns:240px 1fr; min-height:100vh; }
+
+    /* ── SIDEBAR ──────────────── */
+    .sidebar {
+      background:#0d0d0d; border-right:1px solid var(--border);
+      display:flex; flex-direction:column; padding:0;
+      position:sticky; top:0; height:100vh; overflow-y:auto;
+    }
+    .sb-header { padding:20px 20px 16px; border-bottom:1px solid var(--border); }
+    .sb-logo { font-size:16px; font-weight:800; background:linear-gradient(130deg,#2EC4C6,#fff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .sb-subtitle { font-size:11px; color:var(--muted); margin-top:2px; }
+
+    .sb-section { padding:16px 12px 6px; font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:rgba(136,136,136,.5); }
+    .sb-link {
+      display:flex; align-items:center; gap:10px;
+      padding:9px 12px; border-radius:9px; margin:1px 4px;
+      font-size:13px; color:var(--muted); text-decoration:none; cursor:pointer;
+      transition:background .15s, color .15s;
+    }
+    .sb-link:hover { background:rgba(255,255,255,.05); color:var(--fg); }
+    .sb-link.active { background:rgba(46,196,198,.1); color:var(--accent); }
+    .sb-link svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:1.8; flex-shrink:0; }
+    .sb-badge { margin-left:auto; background:var(--accent); color:#000; border-radius:100px; padding:1px 7px; font-size:10px; font-weight:800; }
+    .sb-badge-red { background:#ef4444; color:#fff; }
+    .sb-footer { margin-top:auto; padding:16px; border-top:1px solid var(--border); }
+    .sb-user { display:flex; align-items:center; gap:10px; }
+    .sb-avatar { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#2EC4C6,#0f3b3b); flex-shrink:0; }
+    .sb-user-name { font-size:13px; font-weight:600; }
+    .sb-user-role { font-size:11px; color:var(--muted); }
+    .sb-logout { margin-left:auto; color:var(--muted); cursor:pointer; font-size:12px; text-decoration:none; transition:color .2s; }
+    .sb-logout:hover { color:#ef4444; }
+
+    /* ── MAIN ─────────────────── */
+    .main { background:var(--bg); overflow-y:auto; }
+    .main-header { padding:28px 40px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+    .main-header h1 { font-size:22px; font-weight:800; letter-spacing:-.5px; }
+    .main-header-right { display:flex; align-items:center; gap:12px; }
+    .header-btn { background:var(--panel); border:1px solid var(--border); border-radius:9px; padding:8px 14px; font-size:13px; color:var(--fg); cursor:pointer; transition:border-color .2s; font-family:inherit; }
+    .header-btn:hover { border-color:rgba(255,255,255,.2); }
+    .header-btn-primary { background:var(--accent); color:#000; border-color:var(--accent); font-weight:700; }
+    .header-btn-primary:hover { box-shadow:0 4px 16px rgba(46,196,198,.35); }
+
+    .main-body { padding:32px 40px; }
+
+    /* ── STAT CARDS ──────────── */
+    .stat-cards { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px; }
+    .stat-card { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:20px; }
+    .sc-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+    .sc-icon { width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; }
+    .sc-icon svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:1.8; }
+    .sc-icon-teal   { background:rgba(46,196,198,.1); color:var(--accent); }
+    .sc-icon-purple { background:rgba(168,85,247,.1); color:#a855f7; }
+    .sc-icon-green  { background:rgba(34,197,94,.1); color:#22c55e; }
+    .sc-icon-amber  { background:rgba(245,158,11,.1); color:#f59e0b; }
+    .sc-delta { font-size:11px; font-weight:700; padding:2px 8px; border-radius:100px; }
+    .sc-delta-up   { background:rgba(34,197,94,.1); color:#22c55e; }
+    .sc-delta-down { background:rgba(239,68,68,.1); color:#f87171; }
+    .sc-value { font-size:30px; font-weight:900; letter-spacing:-1.5px; margin-bottom:4px; }
+    .sc-label { font-size:12px; color:var(--muted); }
+
+    /* ── TABLES ──────────────── */
+    .table-card { background:var(--panel); border:1px solid var(--border); border-radius:16px; overflow:hidden; margin-bottom:24px; }
+    .table-header { display:flex; align-items:center; justify-content:space-between; padding:18px 22px; border-bottom:1px solid var(--border); }
+    .table-header h2 { font-size:15px; font-weight:700; }
+    .table-header a  { font-size:12px; color:var(--accent); text-decoration:none; cursor:pointer; }
+    table { width:100%; border-collapse:collapse; }
+    th { font-size:11px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:var(--muted); padding:11px 22px; text-align:left; background:rgba(255,255,255,.02); border-bottom:1px solid var(--border); }
+    td { font-size:13px; padding:13px 22px; border-bottom:1px solid rgba(30,30,30,.5); color:var(--fg); }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:rgba(255,255,255,.015); }
+    .status { display:inline-flex; align-items:center; gap:5px; border-radius:100px; padding:3px 10px; font-size:11px; font-weight:700; }
+    .status-new      { background:rgba(46,196,198,.1); color:var(--accent); }
+    .status-confirm  { background:rgba(34,197,94,.1);  color:#22c55e; }
+    .status-pending  { background:rgba(245,158,11,.1); color:#f59e0b; }
+    .status-rejected { background:rgba(239,68,68,.1);  color:#f87171; }
+    .status-dot      { width:5px; height:5px; border-radius:50%; background:currentColor; }
+    .action-btn { background:transparent; border:1px solid var(--border); border-radius:7px; padding:4px 10px; font-size:11px; color:var(--muted); cursor:pointer; transition:all .15s; font-family:inherit; }
+    .action-btn:hover { border-color:var(--accent); color:var(--accent); }
+
+    /* ── GRID 2-COL ──────────── */
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+
+    /* ── RECENT ACTIVITY ──────── */
+    .activity-list { }
+    .act-item { display:flex; align-items:flex-start; gap:12px; padding:14px 22px; border-bottom:1px solid rgba(30,30,30,.5); }
+    .act-item:last-child { border-bottom:none; }
+    .act-dot { width:8px; height:8px; border-radius:50%; margin-top:5px; flex-shrink:0; }
+    .act-text { font-size:13px; line-height:1.5; }
+    .act-text strong { color:var(--fg); }
+    .act-time { font-size:11px; color:var(--muted); margin-top:2px; }
+
+    /* ── QUICK ACTIONS ─────────── */
+    .quick-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:16px; }
+    .qa-btn { display:flex; align-items:center; gap:10px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; padding:12px 14px; font-size:13px; color:var(--fg); cursor:pointer; transition:border-color .2s; font-family:inherit; text-decoration:none; }
+    .qa-btn:hover { border-color:rgba(46,196,198,.3); color:var(--accent); }
+    .qa-btn svg { width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.8; }
+
+    /* ── TOAST ─────────────────── */
+    .toast {
+      position:fixed; bottom:24px; right:24px; z-index:9999;
+      background:#111; border:1px solid rgba(34,197,94,.3); border-radius:12px;
+      padding:14px 18px; font-size:13px; color:var(--fg);
+      display:flex; align-items:center; gap:10px;
+      transform:translateY(80px); opacity:0; transition:all .35s cubic-bezier(.16,1,.3,1);
+      pointer-events:none;
+    }
+    .toast.show { transform:none; opacity:1; }
+    .toast-icon { width:22px; height:22px; border-radius:50%; background:rgba(34,197,94,.15); border:1px solid rgba(34,197,94,.3); display:flex; align-items:center; justify-content:center; font-size:11px; color:#22c55e; flex-shrink:0; }
+  </style>
+</head>
+<body>
+  <div id="cur"></div><div id="cur-ring"></div>
+
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sb-header">
+        <div class="sb-logo">DanceMotion</div>
+        <div class="sb-subtitle">Admin-Panel</div>
+      </div>
+
+      <div class="sb-section">Übersicht</div>
+      <a href="index.html" class="sb-link active">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </a>
+
+      <div class="sb-section">Veranstaltungen</div>
+      <a href="#" class="sb-link" onclick="showToast('Events')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Events
+      </a>
+      <a href="#" class="sb-link" onclick="showToast('Probestunden')">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Probestunden
+        <span class="sb-badge" style="background:#ef4444;color:#fff;">3</span>
+      </a>
+      <a href="#" class="sb-link" onclick="showToast('Auftrittsanfragen')">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Auftrittsanfragen
+        <span class="sb-badge">1</span>
+      </a>
+
+      <div class="sb-section">Inhalte</div>
+      <a href="#" class="sb-link" onclick="showToast('Gruppen')">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        Gruppen
+      </a>
+      <a href="#" class="sb-link" onclick="showToast('News')">
+        <svg viewBox="0 0 24 24"><path d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8a2 2 0 00-2 2v16a2 2 0 01-2 2zm0 0a2 2 0 01-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8z"/></svg>
+        News / Blog
+      </a>
+      <a href="#" class="sb-link" onclick="showToast('Galerie')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Galerie
+      </a>
+      <a href="#" class="sb-link" onclick="showToast('Team')">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Team
+      </a>
+      <a href="#" class="sb-link" onclick="showToast('Sponsoren')">
+        <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        Sponsoren
+      </a>
+      <a href="#" class="sb-link" onclick="showToast('FAQs')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        FAQs
+      </a>
+
+      <div class="sb-section">System</div>
+      <a href="#" class="sb-link" onclick="showToast('Analytics')">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Analytics
+      </a>
+      <a href="#" class="sb-link" onclick="showToast('Nutzer')">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Nutzer &amp; Rollen
+      </a>
+      <a href="#" class="sb-link" onclick="showToast('Einstellungen')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        Einstellungen
+      </a>
+      <a href="#" class="sb-link" onclick="showToast('Audit-Log')">
+        <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        Audit-Log
+      </a>
+
+      <div class="sb-footer">
+        <div class="sb-user">
+          <div class="sb-avatar"></div>
+          <div><div class="sb-user-name">Sarah Müller</div><div class="sb-user-role">Super Admin</div></div>
+          <a href="login.html" class="sb-logout" title="Abmelden">
+            <svg style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+      <div class="main-header">
+        <div>
+          <h1>Dashboard</h1>
+          <p style="font-size:13px;color:var(--muted);margin-top:2px;">Guten Morgen, Sarah 👋</p>
+        </div>
+        <div class="main-header-right">
+          <a href="../index.html" target="_blank" class="header-btn">
+            Website ansehen ↗
+          </a>
+          <button class="header-btn header-btn-primary" onclick="showToast('Event')">+ Neues Event</button>
+        </div>
+      </div>
+
+      <div class="main-body">
+        <!-- Stat Cards -->
+        <div class="stat-cards">
+          <div class="stat-card">
+            <div class="sc-top">
+              <div class="sc-icon sc-icon-teal"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+              <span class="sc-delta sc-delta-up">+2 diese Woche</span>
+            </div>
+            <div class="sc-value" data-target="5">0</div>
+            <div class="sc-label">Kommende Events</div>
+          </div>
+          <div class="stat-card">
+            <div class="sc-top">
+              <div class="sc-icon sc-icon-purple"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+              <span class="sc-delta sc-delta-up">+3 neu</span>
+            </div>
+            <div class="sc-value" style="color:#a855f7" data-target="3">0</div>
+            <div class="sc-label">Offene Probestunden</div>
+          </div>
+          <div class="stat-card">
+            <div class="sc-top">
+              <div class="sc-icon sc-icon-green"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
+              <span class="sc-delta sc-delta-up">+1 diesen Monat</span>
+            </div>
+            <div class="sc-value" style="color:#22c55e" data-target="68">0</div>
+            <div class="sc-label">Aktive Mitglieder</div>
+          </div>
+          <div class="stat-card">
+            <div class="sc-top">
+              <div class="sc-icon sc-icon-amber"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+              <span class="sc-delta sc-delta-up">+12 diesen Monat</span>
+            </div>
+            <div class="sc-value" style="color:#f59e0b" data-target="247">0</div>
+            <div class="sc-label">Galeriefotos</div>
+          </div>
+        </div>
+
+        <!-- Two columns -->
+        <div class="two-col">
+          <!-- Probestunden Table -->
+          <div class="table-card">
+            <div class="table-header">
+              <h2>Neue Probestunden</h2>
+              <a href="#" onclick="showToast('Probestunden')">Alle ansehen →</a>
+            </div>
+            <table>
+              <thead><tr><th>Name</th><th>Gruppe</th><th>Datum</th><th>Status</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><strong>Maria K.</strong><div style="font-size:11px;color:var(--muted)">maria@gmx.de</div></td>
+                  <td><span style="color:#a855f7;font-size:12px;font-weight:600;">Emotion</span></td>
+                  <td style="color:var(--muted)">24.06.2026</td>
+                  <td><span class="status status-new"><span class="status-dot"></span>Neu</span></td>
+                  <td><button class="action-btn" onclick="showToast('Bestätigt')">Bestätigen</button></td>
+                </tr>
+                <tr>
+                  <td><strong>Leon B.</strong><div style="font-size:11px;color:var(--muted)">l.bauer@web.de</div></td>
+                  <td><span style="color:#a855f7;font-size:12px;font-weight:600;">Emotion</span></td>
+                  <td style="color:var(--muted)">26.06.2026</td>
+                  <td><span class="status status-new"><span class="status-dot"></span>Neu</span></td>
+                  <td><button class="action-btn" onclick="showToast('Bestätigt')">Bestätigen</button></td>
+                </tr>
+                <tr>
+                  <td><strong>Lena S. (Kind)</strong><div style="font-size:11px;color:var(--muted)">eltern@web.de</div></td>
+                  <td><span style="color:#f59e0b;font-size:12px;font-weight:600;">Little Joys</span></td>
+                  <td style="color:var(--muted)">02.07.2026</td>
+                  <td><span class="status status-pending"><span class="status-dot"></span>Ausstehend</span></td>
+                  <td><button class="action-btn" onclick="showToast('Bestätigt')">Bestätigen</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Quick Actions + Activity -->
+          <div style="display:flex;flex-direction:column;gap:24px;">
+            <div class="table-card">
+              <div class="table-header"><h2>Schnellaktionen</h2></div>
+              <div class="quick-actions">
+                <a href="#" class="qa-btn" onclick="showToast('Event erstellt')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Neues Event</a>
+                <a href="#" class="qa-btn" onclick="showToast('News erstellt')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>News schreiben</a>
+                <a href="#" class="qa-btn" onclick="showToast('Fotos hochladen')"><svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>Fotos hochladen</a>
+                <a href="#" class="qa-btn" onclick="showToast('Alert erstellt')"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>Alert setzen</a>
+                <a href="../index.html" target="_blank" class="qa-btn"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Website öffnen</a>
+                <a href="login.html" class="qa-btn"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Abmelden</a>
+              </div>
+            </div>
+
+            <div class="table-card">
+              <div class="table-header"><h2>Letzte Aktivitäten</h2></div>
+              <div class="activity-list">
+                <div class="act-item"><div class="act-dot" style="background:#22c55e"></div><div><div class="act-text"><strong>Probestunde bestätigt</strong> — Maria K. für Emotion</div><div class="act-time">Vor 12 Minuten · Sarah M.</div></div></div>
+                <div class="act-item"><div class="act-dot" style="background:var(--accent)"></div><div><div class="act-text"><strong>Event erstellt:</strong> Tanzgala 2026</div><div class="act-time">Gestern · Klaus M.</div></div></div>
+                <div class="act-item"><div class="act-dot" style="background:#f59e0b"></div><div><div class="act-text"><strong>12 Fotos hochgeladen</strong> in Galerie</div><div class="act-time">Vor 2 Tagen · Sarah M.</div></div></div>
+                <div class="act-item"><div class="act-dot" style="background:#a855f7"></div><div><div class="act-text"><strong>News veröffentlicht:</strong> "Neue Choreografie…"</div><div class="act-time">Vor 3 Tagen · Lena W.</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Events Table -->
+        <div class="table-card">
+          <div class="table-header">
+            <h2>Kommende Events</h2>
+            <a href="#" onclick="showToast('Events')">Alle ansehen →</a>
+          </div>
+          <table>
+            <thead><tr><th>Datum</th><th>Titel</th><th>Ort</th><th>Gruppen</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              <tr>
+                <td style="color:var(--accent);font-weight:700;">21. Jun</td>
+                <td><strong>Sommerfest Eschweiler 2026</strong></td>
+                <td style="color:var(--muted)">Stadtpark</td>
+                <td><span style="font-size:11px;">Alle</span></td>
+                <td><span class="status status-confirm"><span class="status-dot"></span>Bestätigt</span></td>
+                <td><button class="action-btn" onclick="showToast('Event bearbeiten')">Bearbeiten</button></td>
+              </tr>
+              <tr>
+                <td style="color:var(--accent);font-weight:700;">12. Jul</td>
+                <td><strong>DanceMotion Tanzgala 2026</strong></td>
+                <td style="color:var(--muted)">Kulturbahnhof</td>
+                <td><span style="font-size:11px;">Alle</span></td>
+                <td><span class="status status-confirm"><span class="status-dot"></span>Bestätigt</span></td>
+                <td><button class="action-btn" onclick="showToast('Event bearbeiten')">Bearbeiten</button></td>
+              </tr>
+              <tr>
+                <td style="color:var(--muted);font-weight:700;">04. Okt</td>
+                <td><strong>Herbstfest der Vereine</strong></td>
+                <td style="color:var(--muted)">Rathaus-Vorplatz</td>
+                <td><span style="font-size:11px;">Alle</span></td>
+                <td><span class="status status-pending"><span class="status-dot"></span>Ausstehend</span></td>
+                <td><button class="action-btn" onclick="showToast('Event bearbeiten')">Bearbeiten</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <div class="toast-icon">✓</div>
+    <span id="toast-msg">Gespeichert</span>
+  </div>
+
+  <script>
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      document.getElementById('toast-msg').textContent = msg + ' — Seite in Prototyp nicht verfügbar';
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+  </script>
+  <script src="../_shared.js"></script>
+</body>
+</html>

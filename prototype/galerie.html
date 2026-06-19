@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Galerie — DanceMotion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    .filter-bar { display:flex; gap:8px; margin:32px 72px 40px; flex-wrap:wrap; align-items:center; }
+    .filter-bar span { font-size:13px; color:var(--muted); margin-right:8px; }
+
+    .gallery-grid {
+      padding:0 72px 80px;
+      columns:3; column-gap:16px;
+    }
+    .photo-item {
+      break-inside:avoid; margin-bottom:16px;
+      border-radius:14px; overflow:hidden; cursor:none;
+      position:relative; display:block;
+    }
+    .photo-item .ph {
+      display:block; width:100%; border-radius:14px;
+      transition:transform .5s cubic-bezier(.25,1,.5,1);
+    }
+    .photo-item:hover .ph { transform:scale(1.04); }
+    .photo-item .ph-overlay {
+      position:absolute; inset:0; border-radius:14px;
+      background:linear-gradient(to top, rgba(0,0,0,.6) 0%, transparent 50%);
+      opacity:0; transition:opacity .3s;
+      display:flex; align-items:flex-end; padding:16px;
+    }
+    .photo-item:hover .ph-overlay { opacity:1; }
+    .ph-caption { font-size:13px; font-weight:600; color:#fff; }
+    .ph-group   { font-size:11px; color:rgba(255,255,255,.6); margin-top:2px; }
+
+    /* ── gradient placeholders ──── */
+    .ph { border-radius:14px; }
+    .ph-1  { height:280px; background:linear-gradient(145deg,#1a0929,#3b0f5c,#a855f7); }
+    .ph-2  { height:360px; background:linear-gradient(145deg,#0f1a08,#1a3b0f,#22c55e); }
+    .ph-3  { height:220px; background:linear-gradient(145deg,#1a1208,#3b290f,#f59e0b); }
+    .ph-4  { height:300px; background:linear-gradient(145deg,#081a1a,#0f3b3b,#2EC4C6); }
+    .ph-5  { height:240px; background:linear-gradient(145deg,#1a0a15,#3b0f25,#e879f9); }
+    .ph-6  { height:320px; background:linear-gradient(145deg,#0f1408,#1e3b0f,#86efac); }
+    .ph-7  { height:260px; background:linear-gradient(145deg,#1a1008,#3b250f,#fde68a); }
+    .ph-8  { height:380px; background:linear-gradient(145deg,#100829,#250f5c,#a855f7); }
+    .ph-9  { height:220px; background:linear-gradient(145deg,#081a0f,#0f3b1f,#4ade80); }
+    .ph-10 { height:300px; background:linear-gradient(145deg,#0a1a1a,#0f3b3b,#67e8f9); }
+    .ph-11 { height:260px; background:linear-gradient(145deg,#1a0814,#3b0f28,#f0abfc); }
+    .ph-12 { height:340px; background:linear-gradient(145deg,#0f1a08,#1a3b0f,#bbf7d0); }
+
+    /* simulated silhouettes */
+    .ph::before {
+      content:''; display:block; width:60px; height:110px;
+      position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+      background:rgba(0,0,0,.2);
+      clip-path:polygon(35% 0%,65% 0%,80% 40%,95% 100%,5% 100%,20% 40%);
+    }
+
+    /* ── LIGHTBOX ─────────────────────── */
+    #lightbox {
+      position:fixed; inset:0; background:rgba(0,0,0,.92); z-index:8000;
+      display:flex; align-items:center; justify-content:center;
+      opacity:0; pointer-events:none; transition:opacity .3s; cursor:none;
+    }
+    #lightbox.open { opacity:1; pointer-events:all; }
+    #lb-img { border-radius:16px; max-width:80vw; max-height:80vh; display:block; }
+    #lb-close {
+      position:absolute; top:24px; right:32px;
+      background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.15);
+      border-radius:50%; width:44px; height:44px;
+      display:flex; align-items:center; justify-content:center;
+      cursor:none; color:var(--fg); font-size:20px; transition:background .2s;
+    }
+    #lb-close:hover { background:rgba(255,255,255,.2); }
+    #lb-caption { position:absolute; bottom:40px; left:50%; transform:translateX(-50%); text-align:center; }
+    #lb-caption p { font-size:15px; font-weight:600; }
+    #lb-caption span { font-size:13px; color:var(--muted); }
+    #lb-nav { position:absolute; top:50%; width:100%; display:flex; justify-content:space-between; padding:0 24px; transform:translateY(-50%); pointer-events:none; }
+    .lb-arr {
+      background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.15);
+      border-radius:50%; width:48px; height:48px;
+      display:flex; align-items:center; justify-content:center;
+      cursor:none; pointer-events:all; transition:background .2s;
+    }
+    .lb-arr:hover { background:rgba(255,255,255,.2); }
+    .lb-arr svg { width:20px; height:20px; stroke:var(--fg); fill:none; stroke-width:2; }
+  </style>
+</head>
+<body>
+  <div id="cur"></div><div id="cur-ring"></div>
+  <nav>
+    <a class="nav-logo" href="index.html">DanceMotion</a>
+    <ul class="nav-links">
+      <li><a href="gruppen.html">Gruppen</a></li>
+      <li><a href="termine.html">Termine</a></li>
+      <li><a href="galerie.html" class="active">Galerie</a></li>
+      <li><a href="team.html">Team</a></li>
+      <li><a href="news.html">News</a></li>
+    </ul>
+    <a href="gruppen.html" class="nav-btn mag">Probestunde</a>
+  </nav>
+
+  <div class="page-hero">
+    <p class="eyebrow reveal">Galerie</p>
+    <h1 class="reveal">Einblicke in <span class="gt">unser Leben</span></h1>
+    <p class="reveal">Auftritte, Training, Gala-Abende und gemeinsame Momente — festgehalten für immer.</p>
+  </div>
+
+  <div class="filter-bar reveal">
+    <span>Filter:</span>
+    <button class="tab active" onclick="filterGallery('all',this)">Alle</button>
+    <button class="tab tab-lj" onclick="filterGallery('lj',this)">Little Joys</button>
+    <button class="tab tab-sm" onclick="filterGallery('sm',this)">Smileys</button>
+    <button class="tab tab-em" onclick="filterGallery('em',this)">Emotion</button>
+    <button class="tab" onclick="filterGallery('gala',this)">Gala 2025</button>
+  </div>
+
+  <div class="gallery-grid" id="grid">
+    <div class="photo-item reveal" data-group="em" data-title="Gala 2025 — Emotion" onclick="openLb(this)">
+      <div class="ph ph-1" style="position:relative"></div>
+      <div class="ph-overlay"><div><div class="ph-caption">Gala 2025 — Emotion</div><div class="ph-group">Emotion · Juli 2025</div></div></div>
+    </div>
+    <div class="photo-item reveal" data-group="sm" data-title="Smileys beim Herbstfest" onclick="openLb(this)" style="transition-delay:.05s">
+      <div class="ph ph-2" style="position:relative"></div>
+      <div class="ph-overlay"><div><div class="ph-caption">Smileys beim Herbstfest</div><div class="ph-group">Smileys · Oktober 2025</div></div></div>
+    </div>
+    <div class="photo-item reveal" data-group="lj" data-title="Little Joys — erste Bühne" onclick="openLb(this)" style="transition-delay:.1s">
+      <div class="ph ph-3" style="position:relative"></div>
+      <div class="ph-overlay"><div><div class="ph-caption">Little Joys — erste Bühne</div><div class="ph-group">Little Joys · Juni 2025</div></div></div>
+    </div>
+    <div class="photo-item reveal" data-group="gala" data-title="Gala 2025 — Finale" onclick="openLb(this)" style="transition-delay:.05s">
+      <div class="ph ph-4" style="position:relative"></div>
+      <div class="ph-overlay"><div><div class="ph-caption">Gala 2025 — Finale</div><div class="ph-group">Alle Gruppen · Juli 2025</div></div></div>
+    </div>
+    <div class="photo-item reveal" data-group="em" data-title="Training Donnerstag" onclick="openLb(this)" style="transition-delay:.1s">
+      <div class="ph ph-5" style="position:relative"></div>
+      <div class="ph-overlay"><div><div class="ph-caption">Training Donnerstag</div><div class="ph-group">Emotion · April 2026</div></div></div>
+    </div>
+    <div class="photo-item reveal" data-group="sm" data-title="Sommerfest 2025" onclick="openLb(this)" style="transition-delay:.15s">
+      <div class="ph ph-6" style="position:relative"></div>
+      <div class="ph-overlay"><div><div class="ph-caption">Sommerfest 2025</div><div class="ph-group">Smileys · Juni 2025</div></div></div>
+    </div>
+    <div class="photo-item reveal" data-group="lj" data-title="Probenalltag" onclick="openLb(this)">
+      <div class="ph ph-7" style="position:relative"></div>
+      <div class="ph-overlay"><div><div class="ph-caption">Probenalltag</div><div class="ph-group">Little Joys · März 2026</div></div></div>
+    </div>
+    <div class="photo-item reveal" data-group="gala" data-title="Gala 2025 — Emotion Solo" onclick="openLb(this)" style="transition-delay:.05s">
+      <div class="ph ph-8" style="position:relative"></div>
+      <div class="ph-overlay"><div><div class="ph-caption">Gala 2025 — Emotion Solo</div><div class="ph-group">Emotion · Juli 2025</div></div></div>
+    </div>
+    <div class="photo-item reveal" data-group="sm" data-title="Weihnachtsfeier" onclick="openLb(this)" style="transition-delay:.1s">
+      <div class="ph ph-9" style="position:relative"></div>
+      <div class="ph-overlay"><div><div class="ph-caption">Weihnachtsfeier</div><div class="ph-group">Smileys · Dezember 2025</div></div></div>
+    </div>
+    <div class="photo-item reveal" data-group="all" data-title="Vereinstreffen 2025" onclick="openLb(this)" style="transition-delay:.05s">
+      <div class="ph ph-10" style="position:relative"></div>
+      <div class="ph-overlay"><div><div class="ph-caption">Vereinstreffen 2025</div><div class="ph-group">Alle · November 2025</div></div></div>
+    </div>
+    <div class="photo-item reveal" data-group="em" data-title="Auftritt Stadtfest" onclick="openLb(this)" style="transition-delay:.1s">
+      <div class="ph ph-11" style="position:relative"></div>
+      <div class="ph-overlay"><div><div class="ph-caption">Auftritt Stadtfest</div><div class="ph-group">Emotion · August 2025</div></div></div>
+    </div>
+    <div class="photo-item reveal" data-group="lj" data-title="Elternvorführung" onclick="openLb(this)" style="transition-delay:.15s">
+      <div class="ph ph-12" style="position:relative"></div>
+      <div class="ph-overlay"><div><div class="ph-caption">Elternvorführung</div><div class="ph-group">Little Joys · Mai 2026</div></div></div>
+    </div>
+  </div>
+
+  <!-- Lightbox -->
+  <div id="lightbox" onclick="closeLb()">
+    <div id="lb-nav">
+      <div class="lb-arr" onclick="event.stopPropagation();prevLb()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
+      <div class="lb-arr" onclick="event.stopPropagation();nextLb()"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </div>
+    <div id="lb-img" style="width:400px;height:300px;border-radius:16px;"></div>
+    <div id="lb-close" onclick="closeLb()">✕</div>
+    <div id="lb-caption"><p id="lb-title"></p><span id="lb-sub"></span></div>
+  </div>
+
+  <footer>
+    <div class="footer-logo">DanceMotion</div>
+    <ul class="footer-links">
+      <li><a href="index.html">Home</a></li><li><a href="gruppen.html">Gruppen</a></li>
+      <li><a href="termine.html">Termine</a></li><li><a href="#">Datenschutz</a></li><li><a href="#">Impressum</a></li>
+    </ul>
+    <span class="footer-copy">© 2026 DanceMotion Eschweiler e.V.</span>
+  </footer>
+
+  <script>
+    const tab = document.querySelector('.tab');
+    function filterGallery(group, btn) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.photo-item').forEach(item => {
+        const g = item.dataset.group;
+        item.style.display = (group === 'all' || g === group || g === 'all') ? '' : 'none';
+      });
+    }
+
+    let currentIdx = 0;
+    const items = () => [...document.querySelectorAll('.photo-item:not([style*="none"])')];
+    function openLb(el) {
+      const all = items();
+      currentIdx = all.indexOf(el);
+      showLb(el);
+    }
+    function showLb(el) {
+      const ph = el.querySelector('.ph');
+      const lb = document.getElementById('lightbox');
+      const img = document.getElementById('lb-img');
+      img.style.cssText = ph.style.cssText + '; width:500px; height:380px; border-radius:16px; ' + getComputedStyle(ph).background.replace('background:','');
+      img.style.background = getComputedStyle(ph).backgroundImage;
+      img.style.backgroundSize = 'cover';
+      document.getElementById('lb-title').textContent = el.dataset.title;
+      document.getElementById('lb-sub').textContent = el.querySelector('.ph-group').textContent;
+      lb.classList.add('open');
+    }
+    function closeLb() { document.getElementById('lightbox').classList.remove('open'); }
+    function prevLb() { const all=items(); currentIdx=(currentIdx-1+all.length)%all.length; showLb(all[currentIdx]); }
+    function nextLb() { const all=items(); currentIdx=(currentIdx+1)%all.length; showLb(all[currentIdx]); }
+    document.addEventListener('keydown', e => {
+      if(e.key==='Escape') closeLb();
+      if(e.key==='ArrowLeft') prevLb();
+      if(e.key==='ArrowRight') nextLb();
+    });
+  </script>
+  <script src="_shared.js"></script>
+</body>
+</html>

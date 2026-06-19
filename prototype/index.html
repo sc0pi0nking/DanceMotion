@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DanceMotion — Wir tanzen. Eschweiler.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="_shared.css" />
+  <style>
+    /* ── HERO ──────────────────────────────── */
+    #hero { position:relative; min-height:100vh; display:flex; align-items:center; overflow:hidden; }
+    #c    { position:absolute; inset:0; width:100%; height:100%; }
+    .hero-inner { position:relative; z-index:2; padding:0 72px; max-width:900px; }
+    .hero-badge {
+      display:inline-flex; align-items:center; gap:8px;
+      background:rgba(46,196,198,.1); border:1px solid rgba(46,196,198,.22);
+      border-radius:100px; padding:6px 14px; font-size:12px; color:var(--accent); font-weight:600;
+      margin-bottom:32px; opacity:0; animation:fu .6s ease .2s forwards;
+    }
+    h1.hero-h { font-size:clamp(52px,8.5vw,108px); font-weight:900; letter-spacing:-4px; line-height:1.0; margin-bottom:26px; }
+    .hero-h .row { display:block; overflow:hidden; }
+    .hero-h .row span { display:block; opacity:0; transform:translateY(105%); animation:su .75s cubic-bezier(.16,1,.3,1) forwards; }
+    .hero-h .row:nth-child(1) span { animation-delay:.3s; }
+    .hero-h .row:nth-child(2) span { animation-delay:.45s; }
+    .hero-h .row:nth-child(3) span { animation-delay:.6s; }
+    .hero-p { font-size:clamp(16px,1.8vw,20px); color:var(--muted); line-height:1.65; max-width:500px; margin-bottom:44px; opacity:0; animation:fu .6s ease .85s forwards; }
+    .hero-ctas { display:flex; gap:14px; flex-wrap:wrap; opacity:0; animation:fu .6s ease 1.05s forwards; }
+
+    /* ── BENTO GRID ────────────────────────── */
+    .bento { display:grid; grid-template-columns:repeat(12,1fr); gap:16px; padding:80px 72px; }
+    .bento-card {
+      background:var(--panel); border:1px solid var(--border); border-radius:20px;
+      padding:32px; position:relative; overflow:hidden;
+      transition:border-color .3s, transform .3s;
+      text-decoration:none; color:var(--fg); display:block; cursor:none;
+    }
+    .bento-card:hover { transform:translateY(-4px); }
+    .bento-card::after {
+      content:''; position:absolute; inset:0;
+      background:radial-gradient(circle 200px at var(--mx,50%) var(--my,50%), rgba(46,196,198,.07), transparent);
+      opacity:0; transition:opacity .4s;
+    }
+    .bento-card:hover::after { opacity:1; }
+    .bc1 { grid-column:span 7; min-height:320px; }
+    .bc2 { grid-column:span 5; min-height:320px; }
+    .bc3 { grid-column:span 5; min-height:280px; }
+    .bc4 { grid-column:span 7; min-height:280px; }
+    .bento-card h2 { font-size:clamp(24px,2.5vw,34px); font-weight:800; letter-spacing:-1px; margin-bottom:12px; }
+    .bento-card p  { font-size:14px; color:var(--muted); line-height:1.7; max-width:340px; }
+    .bento-top-badge {
+      display:inline-flex; align-items:center; gap:6px;
+      border-radius:100px; padding:4px 12px;
+      font-size:11px; font-weight:700;
+      margin-bottom:16px;
+    }
+    .bento-arrow {
+      position:absolute; bottom:24px; right:24px;
+      width:36px; height:36px; border-radius:50%;
+      background:rgba(255,255,255,.06); border:1px solid var(--border);
+      display:flex; align-items:center; justify-content:center;
+      transition:background .2s, border-color .2s;
+    }
+    .bento-card:hover .bento-arrow { background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.2); }
+    .bento-arrow svg { width:16px; height:16px; stroke:var(--fg); fill:none; stroke-width:2; }
+    .bento-visual {
+      position:absolute; bottom:-20px; right:-20px;
+      width:180px; height:180px; border-radius:50%;
+      opacity:.12; filter:blur(0px);
+    }
+
+    /* group colors */
+    .bc-lj { --group:#f59e0b; }
+    .bc-sm { --group:#22c55e; }
+    .bc-em { --group:#a855f7; }
+    .bc-lj:hover { border-color:rgba(245,158,11,.35); }
+    .bc-sm:hover { border-color:rgba(34,197,94,.35); }
+    .bc-em:hover { border-color:rgba(168,85,247,.35); }
+    .bc-lj .bento-top-badge { background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.2); color:#f59e0b; }
+    .bc-sm .bento-top-badge { background:rgba(34,197,94,.1); border:1px solid rgba(34,197,94,.2); color:#22c55e; }
+    .bc-em .bento-top-badge { background:rgba(168,85,247,.1); border:1px solid rgba(168,85,247,.2); color:#a855f7; }
+    .bc-lj .bento-visual { background:radial-gradient(circle,#f59e0b,transparent); }
+    .bc-sm .bento-visual { background:radial-gradient(circle,#22c55e,transparent); }
+    .bc-em .bento-visual { background:radial-gradient(circle,#a855f7,transparent); }
+
+    /* ── STATS BAND ────────────────────────── */
+    .stats-band { display:grid; grid-template-columns:repeat(4,1fr); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+    .stat-cell { padding:36px 48px; display:flex; flex-direction:column; gap:6px; border-right:1px solid var(--border); }
+    .stat-cell:last-child { border-right:none; }
+    .stat-num { font-size:clamp(36px,4vw,52px); font-weight:900; letter-spacing:-2px; }
+    .stat-num.teal { background:linear-gradient(130deg,#2EC4C6,#7ef4f5); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .stat-label { font-size:14px; color:var(--muted); font-weight:500; }
+
+    /* ── EVENTS PREVIEW ────────────────────── */
+    .events-preview { padding:80px 72px; }
+    .events-preview-header { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:40px; }
+    .event-row {
+      display:flex; align-items:center; gap:24px;
+      background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:20px 24px;
+      transition:border-color .2s, transform .2s; cursor:none; text-decoration:none; color:var(--fg);
+      margin-bottom:12px;
+    }
+    .event-row:hover { border-color:rgba(46,196,198,.3); transform:translateX(4px); }
+    .event-date-box {
+      flex-shrink:0; width:52px; height:52px; border-radius:10px;
+      background:rgba(46,196,198,.1); border:1px solid rgba(46,196,198,.18);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+    }
+    .event-date-box .day { font-size:20px; font-weight:800; color:var(--accent); line-height:1; }
+    .event-date-box .mon { font-size:10px; font-weight:700; color:var(--muted); letter-spacing:.5px; text-transform:uppercase; }
+    .event-title { font-size:15px; font-weight:600; margin-bottom:4px; }
+    .event-meta  { font-size:13px; color:var(--muted); }
+    .event-arrow { margin-left:auto; color:var(--muted); transition:color .2s, transform .2s; }
+    .event-row:hover .event-arrow { color:var(--fg); transform:translateX(3px); }
+    .event-arrow svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; }
+
+    /* ── CTA SECTION ───────────────────────── */
+    .cta-section {
+      margin:0 72px 80px; border-radius:24px; padding:72px;
+      background:var(--panel); border:1px solid var(--border); position:relative; overflow:hidden;
+      text-align:center;
+    }
+    .cta-section::before {
+      content:''; position:absolute; top:-100px; left:50%; transform:translateX(-50%);
+      width:600px; height:300px; border-radius:50%;
+      background:radial-gradient(ellipse,rgba(46,196,198,.1) 0%,transparent 70%);
+    }
+    .cta-section h2 { font-size:clamp(32px,4vw,52px); font-weight:900; letter-spacing:-2px; margin-bottom:16px; line-height:1.1; position:relative; }
+    .cta-section p  { color:var(--muted); font-size:16px; margin-bottom:36px; line-height:1.6; position:relative; }
+    .cta-btns       { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; position:relative; }
+  </style>
+</head>
+<body>
+  <div id="cur"></div><div id="cur-ring"></div>
+
+  <nav>
+    <a class="nav-logo" href="index.html">DanceMotion</a>
+    <ul class="nav-links">
+      <li><a href="gruppen.html">Gruppen</a></li>
+      <li><a href="termine.html">Termine</a></li>
+      <li><a href="galerie.html">Galerie</a></li>
+      <li><a href="team.html">Team</a></li>
+      <li><a href="news.html">News</a></li>
+      <li><a href="admin/login.html" class="nav-admin-link">
+        <svg style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        Admin
+      </a></li>
+    </ul>
+    <a href="gruppen.html" class="nav-btn mag">Probestunde</a>
+  </nav>
+
+  <!-- Alert -->
+  <div class="alert-bar">
+    <div class="alert-dot"></div>
+    <span class="alert-pill">NEU</span>
+    Tanzgala 2026 — Jetzt Tickets sichern!
+    <a href="termine.html">Mehr erfahren →</a>
+  </div>
+
+  <!-- Hero -->
+  <section id="hero">
+    <canvas id="c"></canvas>
+    <div class="hero-inner">
+      <div class="hero-badge"><div class="alert-dot"></div>Seit 2018 in Eschweiler</div>
+      <h1 class="hero-h">
+        <span class="row"><span>Wir sind</span></span>
+        <span class="row"><span class="gt">DanceMotion.</span></span>
+        <span class="row"><span>Wir tanzen.</span></span>
+      </h1>
+      <p class="hero-p">Drei Gruppen, ein Herzschlag. Für Kinder, Jugendliche und Erwachsene die Tanz als mehr als nur Bewegung verstehen.</p>
+      <div class="hero-ctas">
+        <a href="gruppen.html" class="btn-primary mag">Gruppe finden</a>
+        <a href="termine.html" class="btn-outline mag">Nächste Auftritte</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <div class="stats-band reveal">
+    <div class="stat-cell"><span class="stat-num teal" data-target="68">0</span><span class="stat-label">Aktive Mitglieder</span></div>
+    <div class="stat-cell"><span class="stat-num teal" data-target="3">0</span><span class="stat-label">Tanzgruppen</span></div>
+    <div class="stat-cell"><span class="stat-num teal" data-target="8">0</span><span class="stat-label">Jahre Erfahrung</span></div>
+    <div class="stat-cell"><span class="stat-num teal" data-target="24" data-suffix="">0</span><span class="stat-label">Auftritte pro Jahr</span></div>
+  </div>
+
+  <!-- Bento Grid -->
+  <div class="bento">
+    <a href="gruppen/little-joys.html" class="bento-card bc1 bc-lj reveal mag">
+      <div class="bento-top-badge"><span style="width:6px;height:6px;border-radius:50%;background:#f59e0b;display:inline-block;"></span>4 – 8 Jahre</div>
+      <h2>Little Joys</h2>
+      <p>Tanzen für die Kleinsten — spielerisch und mit viel Freude. Hier beginnt die Leidenschaft.</p>
+      <div class="bento-arrow"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+      <div class="bento-visual" style="background:radial-gradient(circle,#f59e0b,transparent)"></div>
+    </a>
+    <a href="gruppen/smileys.html" class="bento-card bc2 bc-sm reveal mag" style="transition-delay:.1s">
+      <div class="bento-top-badge"><span style="width:6px;height:6px;border-radius:50%;background:#22c55e;display:inline-block;"></span>8 – 14 Jahre</div>
+      <h2>Smileys</h2>
+      <p>Fröhliche Gruppe für Kinder mit Bewegung, Musik und ersten Choreografien.</p>
+      <div class="bento-arrow"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+      <div class="bento-visual" style="background:radial-gradient(circle,#22c55e,transparent)"></div>
+    </a>
+    <a href="gruppen/emotion.html" class="bento-card bc3 bc-em reveal mag" style="transition-delay:.2s">
+      <div class="bento-top-badge"><span style="width:6px;height:6px;border-radius:50%;background:#a855f7;display:inline-block;"></span>14+ Jahre</div>
+      <h2>Emotion</h2>
+      <p>Ausdrucksstarker Tanz für Jugendliche und Erwachsene.</p>
+      <div class="bento-arrow"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+      <div class="bento-visual" style="background:radial-gradient(circle,#a855f7,transparent)"></div>
+    </a>
+    <a href="gruppen.html" class="bento-card bc4 reveal mag" style="transition-delay:.3s; background:linear-gradient(135deg,rgba(46,196,198,.06),var(--panel)); border-color:rgba(46,196,198,.15);">
+      <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:16px;">Noch unsicher?</div>
+      <h2 style="font-size:clamp(22px,2.2vw,30px);">Wir helfen dir die richtige Gruppe zu finden</h2>
+      <p>Kein Vorwissen nötig. Einfach vorbeikommen — erste Probestunde immer kostenlos.</p>
+      <div style="margin-top:28px;display:flex;gap:12px;">
+        <span class="btn-primary btn-sm" style="pointer-events:none;">Gruppen entdecken →</span>
+      </div>
+      <div class="bento-arrow"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    </a>
+  </div>
+
+  <!-- Events Preview -->
+  <div class="events-preview">
+    <div class="events-preview-header reveal">
+      <div>
+        <p class="section-eyebrow">Kommende Termine</p>
+        <h2 class="section-title" style="margin-bottom:0">Was als nächstes <span class="gt">ansteht</span></h2>
+      </div>
+      <a href="termine.html" class="btn-outline btn-sm mag">Alle Termine →</a>
+    </div>
+    <a href="termine.html" class="event-row reveal">
+      <div class="event-date-box"><span class="day">21</span><span class="mon">Jun</span></div>
+      <div><div class="event-title">Sommerfest Eschweiler 2026</div><div class="event-meta">19:00 Uhr · Stadtpark · Alle Gruppen</div></div>
+      <div class="event-arrow"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    </a>
+    <a href="termine.html" class="event-row reveal" style="transition-delay:.1s">
+      <div class="event-date-box"><span class="day">12</span><span class="mon">Jul</span></div>
+      <div><div class="event-title">DanceMotion Tanzgala 2026</div><div class="event-meta">18:00 Uhr · Kulturbahnhof · Jahresshow</div></div>
+      <div class="event-arrow"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    </a>
+    <a href="termine.html" class="event-row reveal" style="transition-delay:.2s">
+      <div class="event-date-box"><span class="day">04</span><span class="mon">Okt</span></div>
+      <div><div class="event-title">Herbstfest der Vereine</div><div class="event-meta">15:00 Uhr · Rathaus-Vorplatz · Kurzprogramm</div></div>
+      <div class="event-arrow"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+    </a>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section reveal">
+    <h2>Bereit <span class="gt">mitzumachen?</span></h2>
+    <p>Die erste Probestunde ist kostenlos und unverbindlich. Komm einfach vorbei.</p>
+    <div class="cta-btns">
+      <a href="gruppen.html" class="btn-primary mag">Gruppe finden &amp; buchen</a>
+      <a href="team.html" class="btn-outline mag">Unser Team</a>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-logo">DanceMotion</div>
+    <ul class="footer-links">
+      <li><a href="gruppen.html">Gruppen</a></li>
+      <li><a href="termine.html">Termine</a></li>
+      <li><a href="galerie.html">Galerie</a></li>
+      <li><a href="team.html">Team</a></li>
+      <li><a href="news.html">News</a></li>
+      <li><a href="#">Datenschutz</a></li>
+      <li><a href="#">Impressum</a></li>
+    </ul>
+    <span class="footer-copy">© 2026 DanceMotion Eschweiler e.V.</span>
+  </footer>
+
+  <script>
+    // Hero Canvas — Torus rings
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+    function resize() { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; }
+    resize(); window.addEventListener('resize', resize);
+    let t = 0, hmx=.5, hmy=.5;
+    document.addEventListener('mousemove', e => { hmx=e.clientX/window.innerWidth; hmy=e.clientY/window.innerHeight; });
+    function draw() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      const cx = canvas.width*.65 + (hmx-.5)*30, cy = canvas.height*.5 + (hmy-.5)*20;
+      const rings = [
+        {R:160,r:44,color:'rgba(46,196,198,',speed:.008,tilt:.6},
+        {R:120,r:28,color:'rgba(46,196,198,',speed:-.012,tilt:.3},
+        {R:200,r:18,color:'rgba(46,196,198,',speed:.005,tilt:.9},
+      ];
+      rings.forEach(({R,r,color,speed,tilt}) => {
+        const ang = t * speed;
+        for(let i=0;i<120;i++) {
+          const u = (i/120)*Math.PI*2;
+          const x3 = (R+r*Math.cos(u))*Math.cos(ang) - (R+r*Math.cos(u))*Math.sin(ang)*0.1;
+          const y3 = (R+r*Math.cos(u))*Math.sin(ang)*tilt + r*Math.sin(u)*.8;
+          const depth = Math.sin(u+ang)*.5+.5;
+          ctx.beginPath();
+          ctx.arc(cx+x3, cy+y3, 1.2, 0, Math.PI*2);
+          ctx.fillStyle = color + (depth*.25) + ')';
+          ctx.fill();
+        }
+      });
+      t++;
+      requestAnimationFrame(draw);
+    }
+    draw();
+
+    // Bento card mouse tracking
+    document.querySelectorAll('.bento-card').forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', (e.clientX-r.left)+'px');
+        card.style.setProperty('--my', (e.clientY-r.top)+'px');
+      });
+    });
+  </script>
+  <script src="_shared.js"></script>
+</body>
+</html>

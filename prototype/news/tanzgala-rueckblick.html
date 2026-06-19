@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tanzgala 2025 — Rückblick — DanceMotion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../_shared.css" />
+  <style>
+    .article-hero { padding:120px 72px 56px; max-width:none; border-bottom:1px solid var(--border); }
+    .article-hero .eyebrow { font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--accent); margin-bottom:16px; }
+    .article-hero h1 { font-size:clamp(36px,6vw,68px); font-weight:900; letter-spacing:-2.5px; line-height:1.05; margin-bottom:20px; max-width:900px; }
+    .article-meta { display:flex; align-items:center; gap:20px; font-size:13px; color:var(--muted); }
+    .article-meta .avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#2EC4C6,#0f3b3b); }
+    .article-meta strong { color:var(--fg); }
+
+    .article-cover { height:480px; margin:0; position:relative; overflow:hidden; }
+    .cover-img { position:absolute; inset:0; background:linear-gradient(145deg,#0a1a1a,#0f3b3b,#2EC4C6); }
+
+    .article-body { max-width:720px; margin:0 auto; padding:64px 72px; }
+    .article-body p { font-size:17px; line-height:1.8; color:rgba(249,247,244,.8); margin-bottom:24px; }
+    .article-body h2 { font-size:28px; font-weight:800; letter-spacing:-1px; margin:40px 0 16px; line-height:1.2; }
+    .article-body blockquote { border-left:3px solid var(--accent); padding:16px 24px; margin:32px 0; background:rgba(46,196,198,.05); border-radius:0 12px 12px 0; font-style:italic; font-size:18px; line-height:1.7; color:var(--fg); }
+    .article-body img { width:100%; border-radius:16px; margin:24px 0; }
+
+    .photo-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin:32px 0; }
+    .photo-grid-item { border-radius:12px; overflow:hidden; height:180px; }
+    .pg-1 { background:linear-gradient(145deg,#100829,#250f5c,#a855f7); }
+    .pg-2 { background:linear-gradient(145deg,#0f1a08,#1a3b0f,#22c55e); }
+    .pg-3 { background:linear-gradient(145deg,#1a1208,#3b290f,#f59e0b); }
+
+    .article-tags { display:flex; gap:8px; flex-wrap:wrap; margin:40px 0 24px; }
+    .tag { background:rgba(255,255,255,.05); border:1px solid var(--border); border-radius:100px; padding:4px 12px; font-size:12px; color:var(--muted); }
+
+    .article-footer { border-top:1px solid var(--border); padding-top:40px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:20px; }
+    .author-card { display:flex; align-items:center; gap:14px; }
+    .author-avatar { width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg,#2EC4C6,#0f3b3b); }
+    .author-name { font-size:15px; font-weight:700; margin-bottom:2px; }
+    .author-bio  { font-size:13px; color:var(--muted); }
+
+    .related-posts { padding:64px 72px; border-top:1px solid var(--border); }
+    .related-grid  { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; margin-top:32px; }
+    .related-card  { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:20px; text-decoration:none; color:var(--fg); transition:border-color .2s,transform .2s; cursor:none; display:block; }
+    .related-card:hover { border-color:rgba(46,196,198,.3); transform:translateY(-3px); }
+    .related-cover { height:120px; border-radius:10px; margin-bottom:14px; overflow:hidden; }
+    .rc-1 { background:linear-gradient(145deg,#100829,#250f5c,#a855f7); }
+    .rc-2 { background:linear-gradient(145deg,#0f1a08,#1a3b0f,#22c55e); }
+    .rc-3 { background:linear-gradient(145deg,#1a1208,#3b290f,#f59e0b); }
+    .related-title { font-size:14px; font-weight:700; margin-bottom:6px; }
+    .related-meta  { font-size:12px; color:var(--muted); }
+  </style>
+</head>
+<body>
+  <div id="cur"></div><div id="cur-ring"></div>
+  <nav>
+    <a class="nav-logo" href="../index.html">DanceMotion</a>
+    <ul class="nav-links">
+      <li><a href="../gruppen.html">Gruppen</a></li>
+      <li><a href="../termine.html">Termine</a></li>
+      <li><a href="../galerie.html">Galerie</a></li>
+      <li><a href="../team.html">Team</a></li>
+      <li><a href="../news.html" class="active">News</a></li>
+    </ul>
+    <a href="../gruppen.html" class="nav-btn mag">Probestunde</a>
+  </nav>
+
+  <div class="article-hero">
+    <p class="eyebrow reveal"><a href="../news.html" style="color:var(--accent);text-decoration:none;cursor:none;">← News</a> · 15. Juli 2025</p>
+    <h1 class="reveal">Tanzgala 2025 — Ein Abend der unvergesslich bleibt</h1>
+    <div class="article-meta reveal">
+      <div class="avatar"></div>
+      <div><strong>Sarah Müller</strong> · Cheftrainerin &amp; Autorin</div>
+      <span>·</span>
+      <span>6 Minuten Lesezeit</span>
+    </div>
+  </div>
+
+  <div class="article-cover reveal">
+    <div class="cover-img"></div>
+  </div>
+
+  <div class="article-body">
+    <p class="reveal">Es war der 12. Juli 2025, ein warmer Sommerabend im Kulturbahnhof Eschweiler. Als der erste Vorhang fiel und das Licht erlosch, lag eine Stille im Raum — die Art von Stille, die man nur bekommt wenn 200 Menschen gleichzeitig den Atem anhalten.</p>
+
+    <p class="reveal">Dann: Musik. Dann: Bewegung. Dann: Jubel.</p>
+
+    <h2 class="reveal">14 Choreografien, drei Gruppen, ein Herzschlag</h2>
+
+    <p class="reveal">Die Tanzgala 2025 war mehr als ein Jahresabschluss. Sie war der Beweis, dass in jedem unserer Mitglieder — vom 5-jährigen Kind bis zur 45-jährigen Erwachsenen — etwas steckt, das die Bühne verdient. Alle drei Gruppen zeigten Programme, an denen sie monatelang gearbeitet hatten.</p>
+
+    <blockquote class="reveal">"Ich hatte Herzrasen bevor ich auf die Bühne kam. Aber als die Musik anfing, war alles weg. Nur noch Tanz." — Emma, 16, Emotion</blockquote>
+
+    <div class="photo-grid reveal">
+      <div class="photo-grid-item pg-1"></div>
+      <div class="photo-grid-item pg-2"></div>
+      <div class="photo-grid-item pg-3"></div>
+    </div>
+
+    <h2 class="reveal">Little Joys — Die Herzen im Sturm</h2>
+    <p class="reveal">Die Kleinsten eröffneten den Abend — und stahlen von Anfang an die Show. 18 Kinder zwischen 4 und 8 Jahren tanzten zu "Happy" von Pharrell Williams mit einer Energie und Freude, die selbst die stoischsten Zuschauer zum Lächeln brachten. Manche Eltern in der ersten Reihe hatten Tränen in den Augen, bevor die erste Strophe zu Ende war.</p>
+
+    <h2 class="reveal">Smileys — Synchron und strahlend</h2>
+    <p class="reveal">Was die Smileys in ihrem Programm zeigten, überraschte selbst uns Trainer. Drei Monate intensiver Probenarbeit hatten aus einer fröhlichen Gruppe tanzbegeisterter Kinder eine echte Showgruppe gemacht. Synchronität, Ausdrucksstärke, Bühnenpräsenz — alles da. Julia Schmitt, ihre Trainerin, musste nach dem Auftritt kurz aus dem Saal — um heimlich zu weinen, wie sie zugab.</p>
+
+    <h2 class="reveal">Emotion — Die Bühne gehört euch</h2>
+    <p class="reveal">Den Abschluss machten unsere Ältesten, und sie ließen den Abend mit einem Highlight enden das noch lange nachhallt. Zwei Soloeinlagen, ein Pas de Deux, drei Gruppenformationen — alles choreografiert von Sarah und Lena gemeinsam mit den Tänzerinnen selbst. Das ist das Schöne an Emotion: Die Choreografien entstehen im Dialog.</p>
+
+    <div class="article-tags reveal">
+      <span class="tag">Tanzgala 2025</span>
+      <span class="tag">Rückblick</span>
+      <span class="tag">Little Joys</span>
+      <span class="tag">Smileys</span>
+      <span class="tag">Emotion</span>
+      <span class="tag">Kulturbahnhof</span>
+    </div>
+
+    <div class="article-footer reveal">
+      <div class="author-card">
+        <div class="author-avatar"></div>
+        <div>
+          <div class="author-name">Sarah Müller</div>
+          <div class="author-bio">Cheftrainerin &amp; Mitgründerin · DanceMotion</div>
+        </div>
+      </div>
+      <a href="../news.html" class="btn-outline btn-sm mag">← Alle News</a>
+    </div>
+  </div>
+
+  <!-- Related Posts -->
+  <div class="related-posts">
+    <p class="section-eyebrow reveal">Weiterlesen</p>
+    <h2 class="section-title reveal">Mehr aus dem Vereinsleben</h2>
+    <div class="related-grid">
+      <a href="tanzgala-rueckblick.html" class="related-card reveal">
+        <div class="related-cover rc-1"></div>
+        <div class="related-title">Neue Choreografie: "Into the Deep"</div>
+        <div class="related-meta">3. Juni 2026 · Lena Weber</div>
+      </a>
+      <a href="tanzgala-rueckblick.html" class="related-card reveal" style="transition-delay:.1s">
+        <div class="related-cover rc-2"></div>
+        <div class="related-title">Smileys auf dem Stadtfest — Rückblick</div>
+        <div class="related-meta">18. Mai 2026 · Julia Schmitt</div>
+      </a>
+      <a href="tanzgala-rueckblick.html" class="related-card reveal" style="transition-delay:.2s">
+        <div class="related-cover rc-3"></div>
+        <div class="related-title">Little Joys — Elternvorführung ein voller Erfolg</div>
+        <div class="related-meta">2. April 2026 · Mia Fischer</div>
+      </a>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-logo">DanceMotion</div>
+    <ul class="footer-links">
+      <li><a href="../index.html">Home</a></li><li><a href="../gruppen.html">Gruppen</a></li>
+      <li><a href="../news.html">News</a></li><li><a href="#">Datenschutz</a></li><li><a href="#">Impressum</a></li>
+    </ul>
+    <span class="footer-copy">© 2026 DanceMotion Eschweiler e.V.</span>
+  </footer>
+  <script src="../_shared.js"></script>
+</body>
+</html>
