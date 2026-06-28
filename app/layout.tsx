@@ -8,6 +8,7 @@ import AnalyticsTracker from "./components/AnalyticsTracker";
 import CookieBanner from "./components/CookieBanner";
 import AlertsDisplay from "./components/AlertsDisplay";
 import PublicShell from "./components/PublicShell";
+import SearchModal from "./components/SearchModal";
 import { getOrganizationSchema, getLocalBusinessSchema } from "@/lib/structured-data";
 
 const geistSans = Geist({
@@ -105,6 +106,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* Global Parallax Background - fixed, behind everything */}
           <ParallaxBackground />
           <Header />
+          <SearchModal />
         </PublicShell>
         <main className="relative z-10 flex-grow">{children}</main>
         <PublicShell>

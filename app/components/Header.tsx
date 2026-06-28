@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import ThemeToggle from "./ThemeToggle";
-import { Settings, Menu, X } from "lucide-react";
+import { Settings, Menu, X, Search } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Header() {
@@ -141,6 +141,19 @@ export default function Header() {
 
             {/* Theme Toggle & Mobile Menu Button */}
             <div className="flex items-center gap-2">
+              {/* Suche öffnen (Cmd/Ctrl+K) */}
+              <button
+                onClick={() => window.dispatchEvent(new Event('dancemotion:open-search'))}
+                className="p-2 rounded-lg transition-colors"
+                style={{ backgroundColor: "transparent" }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(46,196,198,0.1)")}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                aria-label="Suche öffnen"
+                title="Suche (Strg/⌘ + K)"
+              >
+                <Search size={20} style={{ color: "var(--fg)" }} />
+              </button>
+
               <ThemeToggle />
               
               {/* Mobile Menu Button */}

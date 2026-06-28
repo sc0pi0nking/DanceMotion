@@ -4,6 +4,8 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Clock, MapPin, Calendar } from "lucide-react";
 import EditableContent from "@/app/components/EditableContent";
+import CalendarButtons from "@/app/components/CalendarButtons";
+import TrainingMapLoader from "@/app/components/TrainingMapLoader";
 import { ContentProvider } from "@/lib/content-context";
 import { fetchActiveGroups, fetchGroupBySlug } from "@/lib/groups-db";
 import { loadContentBatch } from "@/lib/content-loader";
@@ -165,6 +167,10 @@ export default async function GroupPage({
           style={{ color: "var(--muted)" }}
         />
 
+        <div className="mt-6 flex justify-center">
+          <CalendarButtons slug={slug} />
+        </div>
+
         <div className="mt-16 space-y-12">
           {/* Trainingszeiten Section - Admin-editierbar */}
           <section
@@ -209,6 +215,9 @@ export default async function GroupPage({
               </div>
             </div>
           </section>
+
+          {/* Trainingsort auf der Karte */}
+          <TrainingMapLoader label={defaults.training_location} />
 
           <section className="glass rounded-2xl p-8 md:p-12">
             <h2 className="text-2xl font-semibold mb-3" style={{ color: "var(--fg)" }}>

@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
-import { Calendar, FileText, BarChart3, Images, LogOut, Menu, X, FileDown, HelpCircle, Users, Book, Home, Share2, Repeat, Shield, Activity, LogIn, Settings, MessageSquare, AlertCircle, ImageIcon } from 'lucide-react'
+import { Toaster } from 'sonner'
+import { Calendar, FileText, BarChart3, Images, LogOut, Menu, X, FileDown, HelpCircle, Users, Book, Home, Share2, Repeat, Shield, Activity, LogIn, Settings, MessageSquare, AlertCircle, ImageIcon, Users2, Newspaper } from 'lucide-react'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -185,6 +186,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         { icon: FileDown, label: 'Dokumente', href: '/admin/documents', permission: 'documents' },
         { icon: HelpCircle, label: 'FAQs', href: '/admin/faqs', permission: 'faqs' },
         { icon: Users, label: 'Team', href: '/admin/team', permission: 'team' },
+        { icon: Users2, label: 'Gruppen', href: '/admin/groups', permission: 'content' },
+        { icon: Newspaper, label: 'News', href: '/admin/posts', permission: 'content' },
       ]
     },
     {
@@ -233,6 +236,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ backgroundColor: "var(--bg)", color: "var(--fg)" }}>
+      <Toaster position="top-right" richColors theme="dark" />
       {/* Session Timeout Warning */}
       {showTimeoutWarning && (
         <div className="fixed top-4 right-4 z-[100] bg-amber-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-4 animate-pulse">

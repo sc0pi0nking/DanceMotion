@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import HeroScene from "../components/HeroScene";
 import EventTimeline from "../components/EventTimeline";
+import CalendarButtons from "../components/CalendarButtons";
 import type { Event } from "../../lib/supabase";
 
 interface TermineContentProps {
@@ -37,6 +38,7 @@ export default function TermineContent({ upcoming, past }: TermineContentProps) 
           Schau dich um und sei dabei! Hier findest du alle kommenden Auftritte, 
           Workshops und Events der DanceMotion Community.
         </p>
+        <CalendarButtons slug="all" className="mt-6" />
       </section>
 
       {/* Upcoming events */}
