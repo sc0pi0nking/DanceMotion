@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Pencil, Save, X } from 'lucide-react'
+import { useContentContext } from '@/lib/content-context'
 
 interface EditableContentProps {
   contentKey: string
@@ -25,27 +26,46 @@ export default function EditableContent({
   editIconClassName,
 }: EditableContentProps) {
   const Wrapper = Component === 'span' ? 'span' : 'div'
+
+  // ContentProvider liefert (falls vorhanden) gebündelten Content + zentralen Admin-Status.
+  // Ohne Provider: Legacy-Fetch pro Instanz (Abwärtskompatibilität).
+  const ctx = useContentContext()
+  const hasProvider = ctx !== null
+  const adminFromCtx = ctx?.isAdmin ?? false
+  const providedValue = hasProvider ? ctx!.content[contentKey] ?? defaultValue : defaultValue
+
   const [isAdmin, setIsAdmin] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
-  const [content, setContent] = useState(defaultValue)
-  const [editValue, setEditValue] = useState(defaultValue)
+  const [content, setContent] = useState(providedValue)
+  const [editValue, setEditValue] = useState(providedValue)
   const [isSaving, setIsSaving] = useState(false)
 
-  // Check admin session
+  // Admin-Status: aus Provider (eine zentrale Prüfung) oder Legacy-Fetch je Instanz
   useEffect(() => {
-    async function checkAdmin() {
-      try {
-        const res = await fetch('/api/admin/auth/session')
-        setIsAdmin(res.ok)
-      } catch {
-        setIsAdmin(false)
-      }
+    if (hasProvider) {
+      setIsAdmin(adminFromCtx)
+      return
     }
-    checkAdmin()
-  }, [])
+    let active = true
+    fetch('/api/admin/auth/session')
+      .then((res) => {
+        if (active) setIsAdmin(res.ok)
+      })
+      .catch(() => {
+        if (active) setIsAdmin(false)
+      })
+    return () => {
+      active = false
+    }
+  }, [hasProvider, adminFromCtx])
 
-  // Load content from database
+  // Content: aus Provider (gebündelt, kein Fetch) oder Legacy-Fetch je Instanz
   useEffect(() => {
+    if (hasProvider) {
+      setContent(providedValue)
+      setEditValue(providedValue)
+      return
+    }
     async function loadContent() {
       try {
         const res = await fetch(`/api/content/${encodeURIComponent(contentKey)}`)
@@ -69,7 +89,7 @@ export default function EditableContent({
       }
     }
     loadContent()
-  }, [contentKey, defaultValue])
+  }, [contentKey, defaultValue, hasProvider, providedValue])
 
   const handleSave = async () => {
     setIsSaving(true)

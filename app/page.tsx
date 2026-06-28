@@ -1,51 +1,29 @@
-"use client";
-import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect, memo } from "react";
 import HeroScene from "./components/HeroScene";
 import EventTimeline from "./components/EventTimeline";
 import EditableContent from "./components/EditableContent";
-import { Button, LinkButton } from "./components/Button";
+import { LinkButton } from "./components/Button";
+import { ContentProvider } from "@/lib/content-context";
 import { tiles } from "../lib/site-data";
-import { fetchUpcomingEvents } from "../lib/events-db";
-import type { Event } from "../lib/supabase";
+import { getUpcomingEvents } from "../lib/events-cache";
+import { loadContentBatch } from "../lib/content-loader";
 import "./gradients.css";
 
-export default function Home() {
-  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
-  const [eventsLoading, setEventsLoading] = useState(true);
-  const [groupsBannerUrl, setGroupsBannerUrl] = useState('');
+const HOME_CONTENT_KEYS = [
+  "home.groups.badge_label",
+  "groups.banner_image_url",
+  ...tiles.map((tile) => `${tile.slug}.short_description`),
+];
 
-  useEffect(() => {
-    async function loadEvents() {
-      try {
-        const events = await fetchUpcomingEvents(4);
-        setUpcomingEvents(events);
-      } catch (error) {
-        console.error("Failed to load events:", error);
-        setUpcomingEvents([]);
-      } finally {
-        setEventsLoading(false);
-      }
-    }
-    loadEvents();
-
-    // Load groups banner image
-    async function loadGroupsBanner() {
-      try {
-        const res = await fetch('/api/content?keys=groups.banner_image_url');
-        if (!res.ok) return;
-        const data = await res.json();
-        const url = data?.data?.['groups.banner_image_url'];
-        if (typeof url === 'string' && url.trim().length > 0) {
-          setGroupsBannerUrl(url.trim());
-        }
-      } catch { /* silent fallback */ }
-    }
-    loadGroupsBanner();
-  }, []);
+export default async function Home() {
+  const [upcomingEvents, content] = await Promise.all([
+    getUpcomingEvents(4),
+    loadContentBatch(HOME_CONTENT_KEYS),
+  ]);
+  const groupsBannerUrl = (content["groups.banner_image_url"] || "").trim();
 
   return (
+    <ContentProvider initialContent={content}>
     <div className="min-h-screen">
       {/* Hero - Normal, scrollable */}
       <HeroScene />
@@ -207,5 +185,6 @@ export default function Home() {
 
       </div>
     </div>
+    </ContentProvider>
   );
 }

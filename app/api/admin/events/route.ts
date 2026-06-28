@@ -1,4 +1,5 @@
 import { supabaseServer } from '@/lib/supabase'
+import { revalidateTag } from 'next/cache'
 import type { Event } from '@/lib/supabase'
 import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
 
@@ -77,6 +78,7 @@ export async function POST(req: Request) {
     }
 
     console.log('Event created:', data[0]);
+    revalidateTag('events', 'max')
     return Response.json(data[0], { status: 201 })
   } catch (error: any) {
     console.error('POST /api/admin/events error:', error);

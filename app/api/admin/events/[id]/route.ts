@@ -1,4 +1,5 @@
 import { supabaseServer } from '@/lib/supabase'
+import { revalidateTag } from 'next/cache'
 import type { Event } from '@/lib/supabase'
 import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
 
@@ -61,6 +62,7 @@ export async function PUT(
 
     if (error) throw error
 
+    revalidateTag('events', 'max')
     return Response.json(data[0])
   } catch (error: any) {
     return Response.json(
@@ -89,6 +91,7 @@ export async function DELETE(
 
     if (error) throw error
 
+    revalidateTag('events', 'max')
     return Response.json({ success: true })
   } catch (error: any) {
     return Response.json(
