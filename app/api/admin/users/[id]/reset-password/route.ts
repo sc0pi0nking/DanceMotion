@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabase'
 import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
+import { validatePassword } from '@/lib/validators'
 import { logUserAction } from '@/lib/audit-logger'
 
 interface RouteParams {
@@ -19,8 +20,16 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     const body = await req.json()
     const { new_password } = body
 
-    if (!new_password || new_password.length < 6) {
-      return NextResponse.json({ error: 'Password must be at least 6 characters' }, { status: 400 })
+    if (!new_password || typeof new_password !== 'string') {
+      return NextResponse.json({ error: 'Password is required' }, { status: 400 })
+    }
+
+    const passwordValidation = validatePassword(new_password)
+    if (!passwordValidation.valid) {
+      return NextResponse.json(
+        { error: 'Password does not meet requirements', details: passwordValidation.errors },
+        { status: 400 }
+      )
     }
 
     // Update password in Supabase Auth

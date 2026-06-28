@@ -36,22 +36,15 @@ export function sanitizeInput(input: string, maxLength: number = 5000): string {
 }
 
 /**
- * Sanitize HTML - allow only safe tags
+ * Sanitize HTML - server-safe.
+ *
+ * The previous implementation used `document.createElement`, which crashes on
+ * the server (no DOM). This escapes all HTML special characters into entities
+ * so the value is rendered as inert plain text in both server and browser
+ * environments.
  */
 export function sanitizeHtml(html: string): string {
-  const allowedTags = ['p', 'br', 'strong', 'em', 'u', 'a', 'ul', 'ol', 'li'];
-  const temporaryDiv = document.createElement('div');
-  temporaryDiv.innerHTML = html;
-
-  // Remove disallowed tags
-  const allElements = temporaryDiv.querySelectorAll('*');
-  for (const element of allElements) {
-    if (!allowedTags.includes(element.tagName.toLowerCase())) {
-      element.remove();
-    }
-  }
-
-  return temporaryDiv.innerHTML;
+  return escapeHtml(html);
 }
 
 /**

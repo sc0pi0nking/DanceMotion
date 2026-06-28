@@ -1,9 +1,16 @@
 import { supabaseServer } from '@/lib/supabase'
 import { logLoginAction } from '@/lib/audit-logger'
+import { checkRateLimit, getClientIp } from '@/lib/rate-limiter'
 import { cookies } from 'next/headers'
 import type { NextRequest } from 'next/server'
 
 export async function POST(req: NextRequest) {
+  // Rate-Limit: max. 5 Login-Versuche pro IP in 15 Minuten -> 429 mit Retry-After
+  const rateLimited = checkRateLimit(req, `login:${getClientIp(req)}`, 5, 15 * 60 * 1000)
+  if (rateLimited) {
+    return rateLimited
+  }
+
   try {
     const { email, password } = await req.json()
 

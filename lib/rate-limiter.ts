@@ -96,11 +96,32 @@ export function checkRateLimit(
 }
 
 /**
- * Get client IP from request
+ * Get client IP from request.
+ *
+ * Security: the leftmost entry of X-Forwarded-For is client-supplied and can be
+ * spoofed. We therefore prefer Cloudflare's cf-connecting-ip (set by the edge,
+ * not spoofable when traffic passes through Cloudflare) and otherwise take the
+ * LAST entry of X-Forwarded-For, which is appended by the closest trusted proxy.
  */
 export function getClientIp(request: Request | NextRequest): string {
+  const cfIp = request.headers.get('cf-connecting-ip');
+  if (cfIp) return cfIp.trim();
+
   const forwarded = request.headers.get('x-forwarded-for');
-  return forwarded ? forwarded.split(',')[0].trim() : (request.headers.get('x-real-ip') || 'unknown');
+  if (forwarded) {
+    const parts = forwarded
+      .split(',')
+      .map((part) => part.trim())
+      .filter(Boolean);
+    if (parts.length > 0) {
+      return parts[parts.length - 1];
+    }
+  }
+
+  const realIp = request.headers.get('x-real-ip');
+  if (realIp) return realIp.trim();
+
+  return 'unknown';
 }
 
 export function resetRateLimitStore(): void {
