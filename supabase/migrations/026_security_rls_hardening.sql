@@ -349,33 +349,22 @@ WITH CHECK (true);
 -- SICHERHEITSLÜCKE #15: form_submissions (PII!)
 -- Problem: Jeder kann Submissions einfügen (ok), aber 
 -- 'authenticated' ist zu permissiv für SELECT
+-- HINWEIS: form_submissions wurde in 009_remove_form_submissions.sql
+-- entfernt. Daher wird dieser Abschnitt nur ausgeführt, wenn die
+-- Tabelle tatsächlich existiert (verhindert Abbruch der gesamten Migration).
 -- =====================================================
 
-DROP POLICY IF EXISTS "Submissions read by admin" ON form_submissions;
-DROP POLICY IF EXISTS "Submissions insert public" ON form_submissions;
-
--- Public: Nur INSERT
-CREATE POLICY "Public insert form submissions"
-ON form_submissions FOR INSERT
-TO anon, authenticated
-WITH CHECK (true);
-
--- Service role: Lesen für Admin
-CREATE POLICY "Service role - form_submissions select"
-ON form_submissions FOR SELECT
-TO service_role
-USING (true);
-
-CREATE POLICY "Service role - form_submissions update"
-ON form_submissions FOR UPDATE
-TO service_role
-USING (true)
-WITH CHECK (true);
-
-CREATE POLICY "Service role - form_submissions delete"
-ON form_submissions FOR DELETE
-TO service_role
-USING (true);
+DO $$
+BEGIN
+  IF to_regclass('public.form_submissions') IS NOT NULL THEN
+    EXECUTE 'DROP POLICY IF EXISTS "Submissions read by admin" ON form_submissions';
+    EXECUTE 'DROP POLICY IF EXISTS "Submissions insert public" ON form_submissions';
+    EXECUTE 'CREATE POLICY "Public insert form submissions" ON form_submissions FOR INSERT TO anon, authenticated WITH CHECK (true)';
+    EXECUTE 'CREATE POLICY "Service role - form_submissions select" ON form_submissions FOR SELECT TO service_role USING (true)';
+    EXECUTE 'CREATE POLICY "Service role - form_submissions update" ON form_submissions FOR UPDATE TO service_role USING (true) WITH CHECK (true)';
+    EXECUTE 'CREATE POLICY "Service role - form_submissions delete" ON form_submissions FOR DELETE TO service_role USING (true)';
+  END IF;
+END $$;
 
 
 -- =====================================================
