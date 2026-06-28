@@ -1,0 +1,48 @@
+# docker-compose.v2.yml — V2 Preview Deployment
+#
+# Läuft NUR im V2-Preview-Verzeichnis /opt/dancemotion/web-v2 (NICHT in der
+# Produktion /opt/dancemotion/web). Erreichbar unter dancemotion-v2.dancemotion.org
+# über den bestehenden Cloudflare Tunnel -> Traefik.
+#
+# VORAUSSETZUNGEN vor dem ersten Start:
+#   1. Eigene .env in /opt/dancemotion/web-v2 anlegen (Supabase-Keys etc.).
+#      WICHTIG: Idealerweise ein SEPARATES Supabase-Projekt, damit die Preview
+#      nicht in die Produktions-DB schreibt.
+#   2. Den nginx-v2-Prototyp-Router (gleicher Host + Router-Name `dm-v2`)
+#      vorher abschalten, sonst kollidiert Traefik-Routing.
+#
+# Start:
+#   cd /opt/dancemotion/web-v2
+#   docker compose -f docker-compose.v2.yml build
+#   docker compose -f docker-compose.v2.yml up -d
+
+services:
+  dancemotion-web-v2:
+    build:
+      context: .
+      dockerfile: dockerfile
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-https://dancemotion-v2.dancemotion.org}
+    container_name: dancemotion-web-v2
+    restart: unless-stopped
+    networks:
+      - traefik_proxy
+      - proxy
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dm-v2.rule=Host(`dancemotion-v2.dancemotion.org`)"
+      - "traefik.http.routers.dm-v2.entrypoints=web"
+      - "traefik.http.services.dm-v2.loadbalancer.server.port=3000"
+      - "traefik.docker.network=traefik_proxy"
+
+networks:
+  traefik_proxy:
+    external: true
+  proxy:
+    external: true
