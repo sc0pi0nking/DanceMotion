@@ -1,194 +1,154 @@
-import Image from "next/image";
+import Link from "next/link";
 import HeroScene from "./components/HeroScene";
-import EventTimeline from "./components/EventTimeline";
 import StatsBand from "./components/StatsBand";
-import EditableContent from "./components/EditableContent";
-import { LinkButton } from "./components/Button";
+import BentoGroups, { type BentoGroupItem } from "./components/BentoGroups";
 import { ContentProvider } from "@/lib/content-context";
-import { tiles } from "../lib/site-data";
+import { fetchActiveGroups } from "@/lib/groups-db";
+import { getGroupPresentation, FALLBACK_GROUPS } from "@/lib/group-presentation";
 import { getUpcomingEvents } from "../lib/events-cache";
 import { loadContentBatch } from "../lib/content-loader";
 import "./gradients.css";
+import "./home.css";
 
-const HOME_CONTENT_KEYS = [
-  "home.groups.badge_label",
-  "groups.banner_image_url",
-  ...tiles.map((tile) => `${tile.slug}.short_description`),
+const HOME_CONTENT_KEYS = ["hero.title", "hero.subtitle"];
+
+const MONTHS_DE = [
+  "Jan", "Feb", "Mär", "Apr", "Mai", "Jun",
+  "Jul", "Aug", "Sep", "Okt", "Nov", "Dez",
 ];
 
+function eventDateParts(dateStr: string): { day: string; mon: string } {
+  const d = new Date(dateStr + "T00:00:00");
+  if (Number.isNaN(d.getTime())) return { day: "–", mon: "" };
+  return {
+    day: String(d.getDate()).padStart(2, "0"),
+    mon: MONTHS_DE[d.getMonth()],
+  };
+}
+
 export default async function Home() {
-  const [upcomingEvents, content] = await Promise.all([
-    getUpcomingEvents(4),
+  const [dbGroups, upcomingEvents, content] = await Promise.all([
+    fetchActiveGroups(),
+    getUpcomingEvents(3),
     loadContentBatch(HOME_CONTENT_KEYS),
   ]);
-  const groupsBannerUrl = (content["groups.banner_image_url"] || "").trim();
+
+  const groups = dbGroups.length > 0 ? dbGroups : FALLBACK_GROUPS;
+
+  const bentoItems: BentoGroupItem[] = groups.map((group) => {
+    const presentation = getGroupPresentation(
+      group.slug,
+      (group as { color?: string }).color ?? null
+    );
+    return {
+      slug: group.slug,
+      name: group.name,
+      description: group.short_desc ?? "",
+      href: `/gruppen/${group.slug}`,
+      color: presentation.color,
+      age: presentation.age,
+      location: presentation.location,
+      schedule: presentation.schedule,
+    };
+  });
 
   return (
     <ContentProvider initialContent={content}>
-    <div className="min-h-screen">
-      {/* Hero - Normal, scrollable */}
-      <HeroScene />
+      <div className="min-h-screen">
+        {/* HERO — volle Viewport-Höhe, Torus + Gradient-Heading */}
+        <HeroScene />
 
-      {/* Content wrapper */}
-      <div className="relative w-full">
-        {/* Decorative gradient background under header */}
-        <div 
-          className="h-32 pointer-events-none relative z-10"
-          style={{ background: "var(--gradient-hero-fade)" }}
-        />
+        {/* STATS BAND — 4 Zellen mit Separator + CountUp */}
+        <StatsBand />
 
-      {/* Stats Band mit CountUp */}
-      <StatsBand />
-
-      {/* Groups Section - Alternating Layout */}
-      <section id="groups" className="mx-auto max-w-6xl px-6 py-20 sm:py-24 relative z-20">
-        <div className="mb-16">
-          <h2 className="text-4xl font-bold" style={{ color: "var(--fg)" }}>
-            Unsere Gruppen
+        {/* GRUPPEN — Bento Grid */}
+        <section id="groups" className="dm-wrap">
+          <p className="dm-eyebrow">Unsere Gruppen</p>
+          <h2 className="dm-title">
+            Für jeden den <span className="dm-gt">richtigen Rhythmus</span>
           </h2>
-          <p className="mt-3 text-lg" style={{ color: "var(--muted)" }}>
-            Verschiedene Stile, eine Community
+          <p className="dm-sub">
+            Von den Kleinsten bis zu den Profis — bei DanceMotion findet jeder
+            seine Gruppe und seine Bühne.
           </p>
-        </div>
 
-        {/* Configurable Groups Banner Image */}
-        {groupsBannerUrl && (
-          <div className="mb-16 w-full rounded-2xl overflow-hidden">
-            <img
-              src={groupsBannerUrl}
-              alt="Unsere Gruppen"
-              style={{
-                display: 'block',
-                width: '100%',
-                height: 'auto',
-                borderRadius: '1rem',
-              }}
-            />
-          </div>
-        )}
-        
-        {/* Alternating Groups - Text/Image Left-Right */}
-        <div className="space-y-24">
-          {tiles.map((tile, index) => (
-            <div
-              key={tile.slug}
-              className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center group"
-              style={{
-                direction: index % 2 === 1 ? "rtl" : "ltr",
-              }}
-            >
-              {/* Image/Visual Side */}
-              <div className="relative h-64 lg:h-80 rounded-2xl overflow-hidden transition-all duration-500 group-hover:shadow-2xl group">
-                <div
-                  className="absolute inset-0 rounded-2xl transition-all duration-500 group-hover:border-accent-bright backdrop-blur-sm"
-                  style={{
-                    background: "var(--gradient-card-light)",
-                    backdropFilter: "var(--backdrop-blur-medium)",
-                    border: "var(--border-accent)",
-                    boxShadow: "inset 0 1px 2px rgba(46,196,198,0.1)",
-                  }}
-                >
-                  <div className="absolute inset-0 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
-                    <div className="text-center">
-                      {tile.logo ? (
-                        <Image
-                          src={tile.logo}
-                          alt={tile.title}
-                          width={120}
-                          height={120}
-                          className="mx-auto opacity-70 group-hover:opacity-100 transition-opacity duration-500"
-                          loading="lazy"
-                          priority={false}
-                        />
-                      ) : (
-                        <div className="text-5xl font-bold opacity-20 group-hover:opacity-40 transition-opacity duration-500" style={{ color: "var(--accent)" }}>
-                          💃
-                        </div>
-                      )}
-                      <p className="mt-6 text-sm font-semibold" style={{ color: "var(--muted)" }}>
-                        {tile.title}
-                      </p>
-                    </div>
-                  </div>
-                  {/* Decorative circles - more prominent on hover */}
-                  <div
-                    className="absolute top-4 right-4 h-20 w-20 rounded-full opacity-15 group-hover:opacity-35 transition-opacity duration-500"
-                    style={{ background: "var(--gradient-radial-accent)" }}
-                  ></div>
-                  <div
-                    className="absolute bottom-4 left-4 h-28 w-28 rounded-full opacity-10 group-hover:opacity-25 transition-opacity duration-500"
-                    style={{ background: "var(--gradient-radial-accent)" }}
-                  ></div>
-                </div>
-              </div>
+          <BentoGroups items={bentoItems} />
+        </section>
 
-              {/* Text/Info Side */}
-              <div style={{ direction: "ltr" }} className="flex flex-col justify-center">
-                <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-full px-3 py-1" 
-                     style={{ backgroundColor: "var(--badge-bg-subtle)" }}>
-                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: "var(--accent-dot)" }}></span>
-                  <EditableContent
-                    contentKey="home.groups.badge_label"
-                    defaultValue="Tanzgruppe"
-                    as="span"
-                    className="text-xs font-semibold"
-                    style={{ color: "var(--accent)" }}
-                  />
-                </div>
-                
-                <h3 className="text-3xl font-bold leading-tight" style={{ color: "var(--fg)" }}>
-                  {tile.title}
-                </h3>
-                
-                <EditableContent
-                  contentKey={`${tile.slug}.short_description`}
-                  defaultValue={tile.shortDescription}
-                  className="mt-4 text-base leading-relaxed"
-                  style={{ color: "var(--muted)" }}
-                  multiline
-                />
-
-                <div className="mt-8 flex gap-3">
-                  <LinkButton
-                    href={`/gruppen/${tile.slug}`}
-                    variant="primary"
-                    size="md"
-                  >
-                    Mehr erfahren →
-                  </LinkButton>
-                </div>
-              </div>
+        {/* EVENTS PREVIEW */}
+        <section id="events" className="dm-wrap" style={{ paddingTop: 0 }}>
+          <div className="dm-events-head">
+            <div>
+              <p className="dm-eyebrow">Kommende Termine</p>
+              <h2 className="dm-title" style={{ marginBottom: 0 }}>
+                Was als Nächstes <span className="dm-gt">ansteht</span>
+              </h2>
             </div>
-          ))}
+            <Link href="/termine" className="dm-btn-ghost dm-btn-sm">
+              Alle Termine →
+            </Link>
+          </div>
+
+          {upcomingEvents.length === 0 ? (
+            <div className="dm-event-empty">
+              Aktuell sind keine Termine eingetragen — schau bald wieder vorbei.
+            </div>
+          ) : (
+            upcomingEvents.slice(0, 3).map((event) => {
+              const { day, mon } = eventDateParts(event.date);
+              const meta = [
+                event.time ? `${event.time} Uhr` : null,
+                event.location,
+                event.category,
+              ]
+                .filter(Boolean)
+                .join(" · ");
+              return (
+                <Link key={event.id} href="/termine" className="dm-event-row">
+                  <div className="dm-event-date">
+                    <span className="day">{day}</span>
+                    <span className="mon">{mon}</span>
+                  </div>
+                  <div className="dm-event-body">
+                    <div className="dm-event-title">{event.title}</div>
+                    <div className="dm-event-meta">{meta}</div>
+                  </div>
+                  <span className="dm-event-arrow">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                      <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                  </span>
+                </Link>
+              );
+            })
+          )}
+        </section>
+
+        {/* CTA */}
+        <div className="dm-cta" id="cta">
+          <div className="dm-cta-inner">
+            <p className="dm-eyebrow" style={{ marginBottom: 14 }}>
+              Mitmachen
+            </p>
+            <h2>
+              Bereit, deinen Rhythmus <span className="dm-gt">zu entdecken?</span>
+            </h2>
+            <p>
+              Komm einfach zur kostenlosen Probestunde — unverbindlich, herzlich
+              willkommen, mit Garantie auf gute Laune.
+            </p>
+            <div className="dm-cta-btns">
+              <Link href="/gruppen" className="dm-btn-primary">
+                Gruppe finden ✦
+              </Link>
+              <Link href="/formulare" className="dm-btn-ghost">
+                Kontakt aufnehmen
+              </Link>
+            </div>
+          </div>
         </div>
-      </section>
-
-      {/* Events Timeline Section - NEW */}
-      <section id="events" className="mx-auto max-w-6xl px-6 py-20 sm:py-24 relative z-20">
-        <div className="mb-16">
-          <h2 className="text-4xl font-bold" style={{ color: "var(--fg)" }}>
-            Nächste Auftritte & Events
-          </h2>
-          <p className="mt-3 text-lg" style={{ color: "var(--muted)" }}>
-            Was als Nächstes ansteht – komm vorbei und supporte uns.
-          </p>
-        </div>
-
-        <EventTimeline events={upcomingEvents} variant="compact" />
-
-        <div className="mt-12 text-center">
-          <LinkButton
-            href="/termine"
-            variant="primary"
-            size="lg"
-          >
-            Alle Termine ansehen →
-          </LinkButton>
-        </div>
-      </section>
-
       </div>
-    </div>
     </ContentProvider>
   );
 }

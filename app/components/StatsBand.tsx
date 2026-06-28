@@ -5,9 +5,10 @@ import CountUp from 'react-countup'
 import { useInView } from 'framer-motion'
 
 const STATS = [
-  { to: 500, label: 'Auftritte seit Gründung' },
-  { to: 3, label: 'Aktive Tanzgruppen' },
-  { to: 10, label: 'Jahre DanceMotion' },
+  { to: 68, label: 'Aktive Mitglieder' },
+  { to: 3, label: 'Tanzgruppen' },
+  { to: 8, label: 'Jahre Erfahrung' },
+  { to: 24, label: 'Auftritte pro Jahr' },
 ]
 
 export default function StatsBand() {
@@ -16,30 +17,15 @@ export default function StatsBand() {
   const inView = useInView(ref, { once: true, amount: 0.4 })
 
   return (
-    <section
-      ref={ref}
-      className="relative z-20 border-y"
-      style={{ borderColor: 'var(--border)', background: 'var(--panel)' }}
-    >
-      <div className="mx-auto max-w-5xl grid grid-cols-1 sm:grid-cols-3 gap-8 px-6 py-14 sm:py-16 text-center">
-        {STATS.map((stat) => (
-          <div key={stat.label}>
-            <div
-              className="text-5xl sm:text-6xl font-bold tabular-nums"
-              style={{ color: 'var(--accent)' }}
-            >
-              {inView ? (
-                <CountUp end={stat.to} duration={1.6} useEasing />
-              ) : (
-                0
-              )}
-            </div>
-            <div className="mt-3 text-sm font-medium" style={{ color: 'var(--muted)' }}>
-              {stat.label}
-            </div>
-          </div>
-        ))}
-      </div>
+    <section ref={ref} className="dm-stats">
+      {STATS.map((stat) => (
+        <div key={stat.label} className="dm-stat-cell">
+          <span className="dm-stat-num tabular-nums">
+            {inView ? <CountUp end={stat.to} duration={1.6} useEasing /> : 0}
+          </span>
+          <span className="dm-stat-label">{stat.label}</span>
+        </div>
+      ))}
     </section>
   )
 }

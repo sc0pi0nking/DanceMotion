@@ -4,6 +4,7 @@ import React, { useMemo, useEffect, useState, useCallback } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import EditableContent from "./EditableContent";
 
 // 3D-Torus (R3F) nur clientseitig laden
@@ -104,7 +105,7 @@ export default function HeroScene() {
       className="hero-scene relative w-full overflow-hidden"
       style={{
         height: heroBackgroundImage && imageLoaded ? `${containerHeight}px` : undefined,
-        minHeight: heroBackgroundImage && imageLoaded ? undefined : '600px',
+        minHeight: heroBackgroundImage && imageLoaded ? undefined : '100vh',
       }}
     >
       {/* Optional admin-managed hero background image */}
@@ -331,7 +332,7 @@ export default function HeroScene() {
 
       {/* Content overlay */}
       <motion.div
-        className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 py-16 sm:py-24 md:py-32 lg:py-40 flex flex-col justify-center h-full"
+        className="relative z-10 mx-auto w-full max-w-6xl px-6 sm:px-10 lg:px-16 flex flex-col justify-center h-full"
         initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: 0.2 }}
@@ -339,74 +340,78 @@ export default function HeroScene() {
       >
         <div className="max-w-3xl">
           <motion.div
-            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
+            className="dm-hero-badge"
+            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.6, delay: 0.2 }}
+          >
+            <span className="dm-badge-dot" />
+            Seit 2018 in Eschweiler
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: 0.3 }}
             style={{ willChange: "transform, opacity" }}
           >
+            <h1 className="dm-hero-h">
+              <span>Wir </span>
+              <span className="dm-gt">bewegen</span>
+              <br />
+              <span>Menschen.</span>
+            </h1>
+          </motion.div>
+
+          {/* Optional admin-editierbarer Titel (versteckt, hält den CMS-Key am Leben) */}
+          <span className="sr-only">
             <EditableContent
               contentKey="hero.title"
-              defaultValue="Bewegung ist Ausdruck"
-              className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight"
-              style={{ color: "var(--fg)" }}
-              as="h1"
+              defaultValue="Wir bewegen Menschen."
+              as="span"
             />
-          </motion.div>
+          </span>
+
           <motion.div
-            className="mt-6"
             initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: 0.4 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: 0.45 }}
             style={{ willChange: "transform, opacity" }}
           >
             <EditableContent
               contentKey="hero.subtitle"
-              defaultValue="DanceMotion ist eine offene Tanzgemeinschaft — voller Energie, Kreativität und Wärme. Wir laden dich ein, dich selbst auszudrücken und Teil unserer Bühne zu werden."
-              className="text-base sm:text-lg leading-relaxed"
-              style={{ color: "var(--muted)" }}
+              defaultValue="Drei Tanzgruppen, ein Ziel: Freude, Gemeinschaft und Leidenschaft. Entdecke deinen Rhythmus bei DanceMotion Eschweiler."
+              className="dm-hero-p"
               multiline
             />
           </motion.div>
+
           <motion.div
-            className="mt-8"
+            className="dm-hero-ctas"
             initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: 0.5 }}
+            transition={{ duration: prefersReducedMotion ? 0 : 0.8, delay: 0.6 }}
             style={{ willChange: "transform, opacity" }}
           >
-            <a
-              href="#groups"
-              className="inline-block rounded-full px-6 py-3 text-base font-semibold transition"
-              style={{
-                backgroundColor: "var(--accent)",
-                color: "var(--bg)",
-                boxShadow: "0 12px 36px rgba(46,196,198,0.16)",
-              }}
-            >
-              Unsere Gruppen entdecken
+            <a href="#groups" className="dm-btn-primary">
+              Gruppen entdecken <span aria-hidden="true">↓</span>
             </a>
+            <Link href="/termine" className="dm-btn-ghost">
+              Nächste Auftritte
+            </Link>
           </motion.div>
         </div>
       </motion.div>
 
-      {/* Subtle scroll indicator */}
+      {/* Scroll hint */}
       <motion.div
-        className="absolute bottom-8 left-1/2 translate-x-[-50%]"
-        animate={prefersReducedMotion ? {} : { y: [0, 8, 0] }}
-        transition={{ duration: 3, repeat: repeatCount, ease: "easeInOut" } as any}
-        style={{ willChange: "transform" }}
+        className="dm-scroll-hint absolute bottom-9 left-6 sm:left-10 lg:left-16 z-10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: prefersReducedMotion ? 0 : 0.6, delay: 1.2 }}
       >
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          style={{ color: "var(--accent)", opacity: 0.4 }}
-        >
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
+        <span>Scroll</span>
+        <div className="dm-scroll-line" />
       </motion.div>
     </section>
   );
