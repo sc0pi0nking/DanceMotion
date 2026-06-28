@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { Plus, Trash2, Edit2, ChevronDown, Calendar, X } from 'lucide-react'
 import type { Event } from '@/lib/supabase'
 import { AdminPageHeader, AdminCard, AdminLoadingState, AdminEmptyState, AdminModal, ModalCancelButton, ModalConfirmButton, AdminInput, AdminSelect, FormGroup } from '../components'
@@ -11,6 +12,7 @@ export default function AdminEventsPage() {
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('all')
+  const [listRef] = useAutoAnimate<HTMLDivElement>()
   const [formData, setFormData] = useState<Partial<Event>>({
     title: '',
     date: '',
@@ -282,7 +284,7 @@ export default function AdminEventsPage() {
           }}
         />
       ) : (
-        <div className="space-y-3">
+        <div ref={listRef} className="space-y-3">
           {filteredEvents.map((event) => (
             <EventCard
               key={event.id}

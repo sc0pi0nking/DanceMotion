@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { Plus, Edit2, Trash2, Save, X, Eye, EyeOff } from 'lucide-react';
 
 interface FAQ {
@@ -29,7 +30,7 @@ export default function FAQManager() {
   const [isCreating, setIsCreating] = useState(false);
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-
+  const [listRef] = useAutoAnimate<HTMLDivElement>();
   const [formData, setFormData] = useState({
     question: '',
     answer: '',
@@ -314,7 +315,7 @@ export default function FAQManager() {
       )}
 
       {/* FAQ List */}
-      <div className="space-y-3">
+      <div ref={listRef} className="space-y-3">
         {filteredFAQs.map((faq) => (
           <div
             key={faq.id}

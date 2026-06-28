@@ -2,6 +2,7 @@
 
 import { getAdminSession } from '@/lib/auth'
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { ChevronLeft, ChevronRight, Filter, X, Download, AlertCircle } from 'lucide-react'
 
 interface AuditLog {
@@ -78,7 +79,7 @@ export default function AuditPage() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
     } catch (err) {
-      alert('Export failed')
+      toast.error('Export fehlgeschlagen')
     } finally {
       setExporting(false)
     }

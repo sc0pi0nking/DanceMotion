@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import { Plus, Edit2, Trash2, User, Shield, Check, X, Eye, EyeOff, RefreshCw, Trash, Lock, UserCheck, Users } from 'lucide-react'
 import { AdminPageHeader, AdminCard, AdminLoadingState, AdminTable, AdminModal, ModalCancelButton, ModalConfirmButton, AdminInput, AdminSelect, FormGroup } from '../components'
 
@@ -105,7 +106,7 @@ export default function UsersPage() {
     setSaving(false)
     setSelectedUsers(new Set())
     setBulkAction(null)
-    alert(`${successCount} Benutzer wurden aktualisiert`)
+    toast.success(`${successCount} Benutzer wurden aktualisiert`)
     fetchData()
   }
 

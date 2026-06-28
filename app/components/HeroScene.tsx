@@ -3,7 +3,11 @@
 import React, { useMemo, useEffect, useState, useCallback } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import dynamic from "next/dynamic";
 import EditableContent from "./EditableContent";
+
+// 3D-Torus (R3F) nur clientseitig laden
+const HeroTorus = dynamic(() => import("./three/HeroTorus"), { ssr: false });
 
 // Generate floating particles (reduced count for performance)
 const generateParticles = (count: number) => {
@@ -314,6 +318,16 @@ export default function HeroScene() {
           ))}
         </svg>
       </motion.div>
+
+      {/* 3D-Torus (R3F) – rechte Hälfte, hinter dem Text, Desktop */}
+      {!prefersReducedMotion && (
+        <div
+          className="hidden md:block absolute top-0 right-0 h-full w-1/2 pointer-events-none z-[5]"
+          aria-hidden="true"
+        >
+          <HeroTorus />
+        </div>
+      )}
 
       {/* Content overlay */}
       <motion.div

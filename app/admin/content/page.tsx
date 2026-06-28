@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import { FileText, Plus, Save, X, Eye, Search, Tag, Trash2 } from 'lucide-react'
 import type { ContentItem } from '@/lib/supabase'
 import { AdminPageHeader, AdminCard, AdminLoadingState, AdminModal, ModalCancelButton, ModalConfirmButton, AdminInput, AdminTextarea, FormGroup } from '../components'
@@ -64,15 +65,19 @@ export default function AdminContentPage() {
       if (res.ok) {
         setEditingId(null)
         await loadContent()
+        toast.success('Inhalt gespeichert')
+      } else {
+        toast.error('Speichern fehlgeschlagen')
       }
     } catch (error) {
       console.error('Failed to save content:', error)
+      toast.error('Speichern fehlgeschlagen')
     }
   }
 
   async function handleCreate(): Promise<void> {
     if (!newItem.key || !newItem.section) {
-      alert('Bitte Key und Section ausfüllen')
+      toast.error('Bitte Key und Section ausfüllen')
       return
     }
 
@@ -92,13 +97,14 @@ export default function AdminContentPage() {
         setShowAddNew(false)
         setNewItem({ key: '', section: '', description: '', value: '' })
         await loadContent()
+        toast.success('Inhalt erstellt')
       } else {
         const error = await res.json()
-        alert(`Fehler: ${error.error || 'Unbekannter Fehler'}`)
+        toast.error(`Fehler: ${error.error || 'Unbekannter Fehler'}`)
       }
     } catch (error) {
       console.error('Failed to create content:', error)
-      alert('Fehler beim Erstellen')
+      toast.error('Fehler beim Erstellen')
     }
   }
 
@@ -112,9 +118,13 @@ export default function AdminContentPage() {
 
       if (res.ok) {
         await loadContent()
+        toast.success('Inhalt gelöscht')
+      } else {
+        toast.error('Löschen fehlgeschlagen')
       }
     } catch (error) {
       console.error('Failed to delete content:', error)
+      toast.error('Löschen fehlgeschlagen')
     }
   }
 

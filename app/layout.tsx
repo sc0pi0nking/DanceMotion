@@ -9,6 +9,8 @@ import CookieBanner from "./components/CookieBanner";
 import AlertsDisplay from "./components/AlertsDisplay";
 import PublicShell from "./components/PublicShell";
 import SearchModal from "./components/SearchModal";
+import SmoothScroll from "./components/SmoothScroll";
+import CustomCursor from "./components/cursor/CustomCursor";
 import { getOrganizationSchema, getLocalBusinessSchema } from "@/lib/structured-data";
 
 const geistSans = Geist({
@@ -97,6 +99,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
         {/* Analytics Tracking (DSGVO-konform) */}
         <AnalyticsTracker />
+        {/* Smooth Scroll (Lenis, nicht im Admin) */}
+        <SmoothScroll />
+        {/* Custom Cursor (nur Desktop) */}
+        <CustomCursor />
         {/* Cookie Banner */}
         <CookieBanner />
         {/* Public-only elements (hidden on /admin/*) */}

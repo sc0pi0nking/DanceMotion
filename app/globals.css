@@ -1076,7 +1076,7 @@ html[data-theme="dark"] .glass {
   }
 }
 
-/* Markdown-Rendering für News/Blog-Beiträge */
+/* Markdown-Rendering fï¿½r News/Blog-Beitrï¿½ge */
 .post-content {
   color: var(--fg);
   line-height: 1.75;
@@ -1121,3 +1121,74 @@ html[data-theme="dark"] .glass {
 .post-content pre code { background: transparent; padding: 0; }
 .post-content img { border-radius: 0.75rem; max-width: 100%; height: auto; }
 .post-content hr { border-color: var(--border); margin: 2rem 0; }
+
+/* ============================================================
+   Grain-Overlay (Film-Korn, ~4.5%) â€“ Ã¼ber Content, unter Modals
+   ============================================================ */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+}
+@media (prefers-reduced-motion: reduce) {
+  body::after { display: none; }
+}
+
+/* ============================================================
+   Custom Cursor (nur Desktop, aktiviert via JS-Klasse)
+   ============================================================ */
+body.dm-cursor-active { cursor: none; }
+body.dm-cursor-active a,
+body.dm-cursor-active button,
+body.dm-cursor-active input,
+body.dm-cursor-active select,
+body.dm-cursor-active textarea,
+body.dm-cursor-active [role="button"] { cursor: none; }
+
+#dm-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background: var(--accent, #2EC4C6);
+  z-index: 9999;
+  pointer-events: none;
+  will-change: transform;
+  transition: width 0.2s ease, height 0.2s ease, margin 0.2s ease;
+}
+#dm-cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 38px;
+  height: 38px;
+  margin: -19px 0 0 -19px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(46, 196, 198, 0.45);
+  z-index: 9998;
+  pointer-events: none;
+  will-change: transform;
+  transition: width 0.2s ease, height 0.2s ease, margin 0.2s ease, border-color 0.2s ease;
+}
+body.dm-hover #dm-cursor {
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+}
+body.dm-hover #dm-cursor-ring {
+  width: 54px;
+  height: 54px;
+  margin: -27px 0 0 -27px;
+  border-color: rgba(46, 196, 198, 0.7);
+}
+@media (pointer: coarse) {
+  #dm-cursor,
+  #dm-cursor-ring { display: none; }
+}

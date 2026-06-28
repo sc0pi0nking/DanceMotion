@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { Upload, Trash2, Image as ImageIcon, X, Plus, Pencil, Eye, EyeOff, Images } from 'lucide-react'
 import { useDropzone } from 'react-dropzone'
 import Image from 'next/image'
@@ -32,6 +33,7 @@ const categoryLabels: Record<string, string> = {
 export default function AdminGalleryManager() {
   const [galleries, setGalleries] = useState<GalleryItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [listRef] = useAutoAnimate<HTMLDivElement>()
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<number>(0)
   const [uploadStatus, setUploadStatus] = useState<string>('')
@@ -299,7 +301,7 @@ export default function AdminGalleryManager() {
       </div>
 
       {/* Gallery / Album List */}
-      <div className="space-y-4">
+      <div ref={listRef} className="space-y-4">
         {galleries.map((gallery) => (
           <div
             key={gallery.id}

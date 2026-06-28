@@ -1,6 +1,7 @@
 import Image from "next/image";
 import HeroScene from "./components/HeroScene";
 import EventTimeline from "./components/EventTimeline";
+import StatsBand from "./components/StatsBand";
 import EditableContent from "./components/EditableContent";
 import { LinkButton } from "./components/Button";
 import { ContentProvider } from "@/lib/content-context";
@@ -35,6 +36,9 @@ export default async function Home() {
           className="h-32 pointer-events-none relative z-10"
           style={{ background: "var(--gradient-hero-fade)" }}
         />
+
+      {/* Stats Band mit CountUp */}
+      <StatsBand />
 
       {/* Groups Section - Alternating Layout */}
       <section id="groups" className="mx-auto max-w-6xl px-6 py-20 sm:py-24 relative z-20">
