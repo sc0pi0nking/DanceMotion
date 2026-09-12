@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase';
+import { serverError } from '@/lib/api-error';
 
 // GET - Alle veröffentlichten FAQs abrufen (öffentlich)
 export async function GET() {
@@ -16,11 +17,7 @@ export async function GET() {
     if (error) throw error;
 
     return NextResponse.json(faqs || []);
-  } catch (error: any) {
-    console.error('Error fetching FAQs:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to fetch FAQs' },
-      { status: 500 }
-    );
+  } catch (error) {
+    return serverError('faqs.list', error);
   }
 }

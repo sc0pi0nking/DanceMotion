@@ -127,3 +127,77 @@ export function getClientIp(request: Request | NextRequest): string {
 export function resetRateLimitStore(): void {
   rateLimitStore.clear();
 }
+
+/**
+ * Distributed rate limiter backed by Upstash Redis.
+ *
+ * Uses an atomic INCR + EXPIRE sliding fixed-window counter that is shared
+ * across all instances. When Redis is not configured (or errors), it falls back
+ * to the process-local in-memory limiter so behaviour degrades gracefully.
+ *
+ * @param identifier - Unique key (e.g. `login:1.2.3.4`)
+ * @param limit - Maximum requests allowed within the window
+ * @param windowMs - Time window in milliseconds
+ */
+export async function rateLimitDistributed(
+  identifier: string,
+  limit: number = 10,
+  windowMs: number = 60000
+): Promise<{ success: boolean; remaining: number; reset: number }> {
+  const { getRedis } = await import('./redis');
+  const redis = getRedis();
+
+  if (!redis) {
+    return rateLimit(identifier, limit, windowMs);
+  }
+
+  const key = `rl:${identifier}`;
+  const windowSeconds = Math.ceil(windowMs / 1000);
+
+  try {
+    const count = await redis.incr(key);
+    if (count === 1) {
+      await redis.expire(key, windowSeconds);
+    }
+    const ttl = await redis.ttl(key);
+    const reset = Date.now() + (ttl > 0 ? ttl * 1000 : windowMs);
+
+    if (count > limit) {
+      return { success: false, remaining: 0, reset };
+    }
+    return { success: true, remaining: Math.max(0, limit - count), reset };
+  } catch {
+    // Redis unavailable -> fail open to the in-memory limiter
+    return rateLimit(identifier, limit, windowMs);
+  }
+}
+
+/**
+ * Async middleware variant of {@link checkRateLimit} using the distributed
+ * (Redis) limiter with in-memory fallback.
+ */
+export async function checkRateLimitDistributed(
+  identifier: string,
+  limit: number = 10,
+  windowMs: number = 60000
+): Promise<NextResponse | null> {
+  const result = await rateLimitDistributed(identifier, limit, windowMs);
+
+  if (!result.success) {
+    const retryAfter = Math.ceil((result.reset - Date.now()) / 1000);
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(retryAfter),
+          'X-RateLimit-Limit': String(limit),
+          'X-RateLimit-Remaining': String(result.remaining),
+          'X-RateLimit-Reset': String(Math.ceil(result.reset / 1000)),
+        },
+      }
+    );
+  }
+
+  return null;
+}

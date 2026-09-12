@@ -1,5 +1,6 @@
 import { supabaseServer } from '@/lib/supabase'
 import { getClientIp, rateLimit } from '@/lib/rate-limiter'
+import { serverError } from '@/lib/api-error'
 
 // POST - Create anonymous ticket
 export async function POST(req: Request) {
@@ -44,11 +45,7 @@ export async function POST(req: Request) {
     if (error) throw error
 
     return Response.json(data[0], { status: 201 })
-  } catch (error: any) {
-    console.error('POST /api/tickets error:', error)
-    return Response.json(
-      { error: error.message },
-      { status: 500 }
-    )
+  } catch (error) {
+    return serverError('tickets.create', error)
   }
 }

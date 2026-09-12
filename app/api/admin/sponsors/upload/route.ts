@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
+import { serverError } from '@/lib/api-error'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -46,8 +47,7 @@ export async function POST(req: Request) {
       })
 
     if (uploadError) {
-      console.error('Sponsor logo upload error:', uploadError)
-      return Response.json({ error: uploadError.message }, { status: 500 })
+      return serverError('sponsors.upload', uploadError)
     }
 
     const { data: { publicUrl } } = supabase.storage
@@ -55,9 +55,8 @@ export async function POST(req: Request) {
       .getPublicUrl(fileName)
 
     return Response.json({ url: publicUrl })
-  } catch (error: any) {
-    console.error('POST /api/admin/sponsors/upload error:', error)
-    return Response.json({ error: error.message }, { status: 500 })
+  } catch (error) {
+    return serverError('sponsors.upload', error)
   }
 }
 
@@ -82,8 +81,7 @@ export async function DELETE(req: Request) {
       .remove([fileName])
 
     return Response.json({ success: true })
-  } catch (error: any) {
-    console.error('DELETE /api/admin/sponsors/upload error:', error)
-    return Response.json({ error: error.message }, { status: 500 })
+  } catch (error) {
+    return serverError('sponsors.delete', error)
   }
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase';
+import { serverError } from '@/lib/api-error';
 
 // GET - Alle öffentlichen Dokumente abrufen (NUR aktive)
 // NOTE: Admin-Zugriff (inkl. inaktive) nur über /api/admin/documents
@@ -17,11 +18,7 @@ export async function GET() {
     if (error) throw error;
 
     return NextResponse.json(documents || []);
-  } catch (error: any) {
-    console.error('Error fetching documents:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to fetch documents' },
-      { status: 500 }
-    );
+  } catch (error) {
+    return serverError('documents.list', error);
   }
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase';
+import { serverError } from '@/lib/api-error';
 
 // GET - Alle veröffentlichten Team-Mitglieder (öffentlich)
 export async function GET() {
@@ -13,11 +14,7 @@ export async function GET() {
     if (error) throw error;
 
     return NextResponse.json(members || []);
-  } catch (error: any) {
-    console.error('Error fetching team members:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to fetch team members' },
-      { status: 500 }
-    );
+  } catch (error) {
+    return serverError('team.list', error);
   }
 }

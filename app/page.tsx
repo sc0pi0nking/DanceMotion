@@ -2,11 +2,13 @@ import Link from "next/link";
 import HeroScene from "./components/HeroScene";
 import StatsBand from "./components/StatsBand";
 import BentoGroups, { type BentoGroupItem } from "./components/BentoGroups";
+import GoogleReviews from "./components/GoogleReviews";
 import { ContentProvider } from "@/lib/content-context";
 import { fetchActiveGroups } from "@/lib/groups-db";
 import { getGroupPresentation, FALLBACK_GROUPS } from "@/lib/group-presentation";
 import { getUpcomingEvents } from "../lib/events-cache";
 import { loadContentBatch } from "../lib/content-loader";
+import { getGoogleReviews } from "@/lib/google-reviews";
 import "./gradients.css";
 import "./home.css";
 
@@ -27,10 +29,11 @@ function eventDateParts(dateStr: string): { day: string; mon: string } {
 }
 
 export default async function Home() {
-  const [dbGroups, upcomingEvents, content] = await Promise.all([
+  const [dbGroups, upcomingEvents, content, reviews] = await Promise.all([
     fetchActiveGroups(),
     getUpcomingEvents(3),
     loadContentBatch(HOME_CONTENT_KEYS),
+    getGoogleReviews(),
   ]);
 
   const groups = dbGroups.length > 0 ? dbGroups : FALLBACK_GROUPS;
@@ -124,6 +127,9 @@ export default async function Home() {
             })
           )}
         </section>
+
+        {/* GOOGLE REVIEWS — rendert nur, wenn konfiguriert + Rezensionen vorhanden */}
+        <GoogleReviews data={reviews} />
 
         {/* CTA */}
         <div className="dm-cta" id="cta">

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabase'
 import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
+import { serverError } from '@/lib/api-error'
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
@@ -52,8 +53,7 @@ export async function POST(request: NextRequest) {
       url: data.publicUrl,
       path: filePath,
     })
-  } catch (error: any) {
-    console.error('Groups banner upload error:', error)
-    return NextResponse.json({ error: error.message || 'Upload fehlgeschlagen' }, { status: 500 })
+  } catch (error) {
+    return serverError('groups-banner.upload', error)
   }
 }

@@ -17,18 +17,31 @@ const nextConfig: NextConfig = {
     formats: ["image/webp", "image/avif"],
     // Cache optimized images
     minimumCacheTTL: 31536000, // 1 year
-    // Restrict remote image loading to Supabase storage only
-    remotePatterns: supabaseHostname
-      ? [
-          {
-            protocol: "https",
-            hostname: supabaseHostname,
-            pathname: "/storage/v1/object/public/**",
-          },
-        ]
-      : [],
-    // Disable optimization in Docker to avoid sharp issues
-    unoptimized: process.env.NODE_ENV === 'production',
+    // Restrict remote image loading to Supabase storage + Google review avatars
+    remotePatterns: [
+      ...(supabaseHostname
+        ? [
+            {
+              protocol: "https" as const,
+              hostname: supabaseHostname,
+              pathname: "/storage/v1/object/public/**",
+            },
+          ]
+        : []),
+      // Google review author photos (Places API)
+      {
+        protocol: "https" as const,
+        hostname: "lh3.googleusercontent.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https" as const,
+        hostname: "*.googleusercontent.com",
+        pathname: "/**",
+      },
+    ],
+    // Optimization enabled (sharp is installed as a dependency)
+    unoptimized: false,
   },
   
   // Performance: Enable experimental features

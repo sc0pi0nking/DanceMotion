@@ -1,12 +1,12 @@
 import { supabaseServer } from '@/lib/supabase'
 import { logLoginAction } from '@/lib/audit-logger'
-import { checkRateLimit, getClientIp } from '@/lib/rate-limiter'
+import { checkRateLimitDistributed, getClientIp } from '@/lib/rate-limiter'
 import { cookies } from 'next/headers'
 import type { NextRequest } from 'next/server'
 
 export async function POST(req: NextRequest) {
   // Rate-Limit: max. 5 Login-Versuche pro IP in 15 Minuten -> 429 mit Retry-After
-  const rateLimited = checkRateLimit(req, `login:${getClientIp(req)}`, 5, 15 * 60 * 1000)
+  const rateLimited = await checkRateLimitDistributed(`login:${getClientIp(req)}`, 5, 15 * 60 * 1000)
   if (rateLimited) {
     return rateLimited
   }
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
         req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || undefined,
         error.message
       )
-      return Response.json({ error: error.message }, { status: 401 })
+      return Response.json({ error: 'Ungültige Anmeldedaten' }, { status: 401 })
     }
 
     if (!data.user?.id || !data.session?.access_token) {

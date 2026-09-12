@@ -55,7 +55,7 @@ export async function DELETE(
     const { error } = await supabaseServer.from('groups').delete().eq('id', id)
 
     if (error) {
-      // FK violation (e.g. trial_bookings referencing group slug)
+      // FK violation (another row still references this group)
       if (error.code === '23503') {
         return Response.json(
           { error: 'Gruppe wird noch referenziert und kann nicht gelöscht werden. Deaktiviere sie stattdessen.' },

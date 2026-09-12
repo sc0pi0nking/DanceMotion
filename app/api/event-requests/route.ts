@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase';
+import { serverError } from '@/lib/api-error';
 
 // NOTE: GET wurde entfernt - Admin-Zugriff auf Event-Anfragen nur über /api/admin/event-requests
 
@@ -120,11 +121,7 @@ export async function POST(request: NextRequest) {
     if (error) throw error;
 
     return NextResponse.json(request_data, { status: 201 });
-  } catch (error: any) {
-    console.error('Error creating event request:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to create event request' },
-      { status: 500 }
-    );
+  } catch (error) {
+    return serverError('event-requests.create', error);
   }
 }

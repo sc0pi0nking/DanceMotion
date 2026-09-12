@@ -1,4 +1,5 @@
 import { supabaseServer } from '@/lib/supabase'
+import { serverError } from '@/lib/api-error'
 
 export async function GET() {
   try {
@@ -37,11 +38,7 @@ export async function GET() {
     }).filter((album) => album.image_count > 0)
 
     return Response.json(albums)
-  } catch (error: any) {
-    console.error('GET /api/gallery error:', error)
-    return Response.json(
-      { error: error.message },
-      { status: 500 }
-    )
+  } catch (error) {
+    return serverError('gallery.list', error)
   }
 }

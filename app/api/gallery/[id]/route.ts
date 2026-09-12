@@ -1,4 +1,5 @@
 import { supabaseServer } from '@/lib/supabase'
+import { serverError } from '@/lib/api-error'
 
 export async function GET(
   req: Request,
@@ -39,11 +40,7 @@ export async function GET(
       images,
       created_at: data.created_at,
     })
-  } catch (error: any) {
-    console.error('GET /api/gallery/[id] error:', error)
-    return Response.json(
-      { error: error.message },
-      { status: 500 }
-    )
+  } catch (error) {
+    return serverError('gallery.detail', error)
   }
 }

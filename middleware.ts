@@ -6,6 +6,30 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
   response.headers.set('X-Frame-Options', 'SAMEORIGIN');
   response.headers.set('X-XSS-Protection', '1; mode=block');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  response.headers.set(
+    'Permissions-Policy',
+    'camera=(), microphone=(), geolocation=(self), interest-cohort=()'
+  );
+
+  // Content-Security-Policy — deckt die genutzten Fremd-Quellen ab:
+  // Supabase (API/Storage/Realtime), Google (Reviews-Fotos, Maps), OpenStreetMap
+  // (Leaflet-Tiles + Nominatim), YouTube (Video-Embeds).
+  const csp = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob: https:",
+    "font-src 'self' data:",
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://maps.googleapis.com https://nominatim.openstreetmap.org https://*.tile.openstreetmap.org",
+    "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://www.google.com",
+    "media-src 'self' https:",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'self'",
+    'upgrade-insecure-requests',
+  ].join('; ');
+  response.headers.set('Content-Security-Policy', csp);
 
   // HSTS Header (for HTTPS)
   if (process.env.NODE_ENV === 'production') {

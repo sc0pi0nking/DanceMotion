@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabase'
 import { getClientIp, rateLimit } from '@/lib/rate-limiter'
+import { serverError } from '@/lib/api-error'
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
@@ -58,8 +59,7 @@ export async function POST(request: NextRequest) {
       url: data.publicUrl,
       path: filePath,
     })
-  } catch (error: any) {
-    console.error('Ticket image upload error:', error)
-    return NextResponse.json({ error: error.message || 'Upload fehlgeschlagen' }, { status: 500 })
+  } catch (error) {
+    return serverError('tickets.upload', error)
   }
 }
