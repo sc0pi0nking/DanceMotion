@@ -59,17 +59,18 @@ export default function AdminModal({
 
       {/* Modal */}
       <div
-        className={`relative bg-slate-800 border border-slate-700 rounded-xl shadow-2xl w-full ${sizeClasses[size]} max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-200`}
+        className={`dm-admin relative adm-panel shadow-2xl w-full ${sizeClasses[size]} max-h-[90vh] flex flex-col adm-fade-in`}
+        style={{ background: 'var(--a-surface-2)' }}
       >
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 p-4 md:p-6 border-b border-slate-700">
+        <div className="flex items-start justify-between gap-4 p-4 md:p-6" style={{ borderBottom: '1px solid var(--a-border)' }}>
           <div>
-            <h2 className="text-xl font-bold text-white">{title}</h2>
-            {description && <p className="text-sm text-slate-400 mt-1">{description}</p>}
+            <h2 className="text-xl font-bold" style={{ color: 'var(--a-fg)' }}>{title}</h2>
+            {description && <p className="text-sm mt-1" style={{ color: 'var(--a-muted)' }}>{description}</p>}
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-white transition flex-shrink-0"
+            className="adm-btn adm-btn--ghost !p-2 flex-shrink-0"
           >
             <X size={20} />
           </button>
@@ -82,7 +83,7 @@ export default function AdminModal({
 
         {/* Footer */}
         {footer && (
-          <div className="flex items-center justify-end gap-3 p-4 md:p-6 border-t border-slate-700">
+          <div className="flex items-center justify-end gap-3 p-4 md:p-6" style={{ borderTop: '1px solid var(--a-border)' }}>
             {footer}
           </div>
         )}
@@ -97,7 +98,7 @@ export function ModalCancelButton({ onClick, children = 'Abbrechen' }: { onClick
     <button
       type="button"
       onClick={onClick}
-      className="px-4 py-2.5 rounded-lg bg-slate-700 text-slate-200 hover:bg-slate-600 border border-slate-600 font-medium transition"
+      className="adm-btn adm-btn--secondary"
     >
       {children}
     </button>
@@ -118,8 +119,8 @@ export function ModalConfirmButton({
   loading?: boolean
 }) {
   const variantClasses = {
-    primary: 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:shadow-lg hover:shadow-teal-500/30',
-    danger: 'bg-red-500 text-white hover:bg-red-600',
+    primary: 'adm-btn--primary',
+    danger: 'adm-btn--danger',
   }
 
   return (
@@ -127,11 +128,11 @@ export function ModalConfirmButton({
       type={onClick ? 'button' : 'submit'}
       onClick={onClick}
       disabled={disabled || loading}
-      className={`px-4 py-2.5 rounded-lg font-medium transition flex items-center gap-2 ${variantClasses[variant]} ${
+      className={`adm-btn ${variantClasses[variant]} ${
         disabled || loading ? 'opacity-50 cursor-not-allowed' : ''
       }`}
     >
-      {loading && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+      {loading && <div className="w-4 h-4 adm-spinner" />}
       {children}
     </button>
   )

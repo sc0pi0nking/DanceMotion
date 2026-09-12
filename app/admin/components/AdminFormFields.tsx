@@ -14,24 +14,18 @@ export const AdminInput = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, icon: Icon, className = '', ...props }, ref) => {
     return (
       <div className="space-y-1.5">
-        {label && <label className="block text-sm font-medium text-slate-300">{label}</label>}
+        {label && <label className="adm-label">{label}</label>}
         <div className="relative">
           {Icon && (
-            <Icon size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Icon size={18} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--a-faint)' }} />
           )}
           <input
             ref={ref}
-            className={`
-              w-full px-4 py-2.5 bg-slate-700 border rounded-lg text-white placeholder-slate-400
-              focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition
-              ${Icon ? 'pl-10' : ''}
-              ${error ? 'border-red-500' : 'border-slate-600'}
-              ${className}
-            `}
+            className={`adm-input ${Icon ? 'pl-10' : ''} ${error ? 'adm-input--error' : ''} ${className}`}
             {...props}
           />
         </div>
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className="text-sm" style={{ color: 'var(--a-danger)' }}>{error}</p>}
       </div>
     )
   }
@@ -48,18 +42,13 @@ export const AdminTextarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ label, error, className = '', ...props }, ref) => {
     return (
       <div className="space-y-1.5">
-        {label && <label className="block text-sm font-medium text-slate-300">{label}</label>}
+        {label && <label className="adm-label">{label}</label>}
         <textarea
           ref={ref}
-          className={`
-            w-full px-4 py-2.5 bg-slate-700 border rounded-lg text-white placeholder-slate-400
-            focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition resize-none
-            ${error ? 'border-red-500' : 'border-slate-600'}
-            ${className}
-          `}
+          className={`adm-input resize-none ${error ? 'adm-input--error' : ''} ${className}`}
           {...props}
         />
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className="text-sm" style={{ color: 'var(--a-danger)' }}>{error}</p>}
       </div>
     )
   }
@@ -78,15 +67,10 @@ export const AdminSelect = forwardRef<HTMLSelectElement, SelectProps>(
   ({ label, error, options, placeholder, className = '', ...props }, ref) => {
     return (
       <div className="space-y-1.5">
-        {label && <label className="block text-sm font-medium text-slate-300">{label}</label>}
+        {label && <label className="adm-label">{label}</label>}
         <select
           ref={ref}
-          className={`
-            w-full px-4 py-2.5 bg-slate-700 border rounded-lg text-white
-            focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition
-            ${error ? 'border-red-500' : 'border-slate-600'}
-            ${className}
-          `}
+          className={`adm-input ${error ? 'adm-input--error' : ''} ${className}`}
           {...props}
         >
           {placeholder && (
@@ -100,7 +84,7 @@ export const AdminSelect = forwardRef<HTMLSelectElement, SelectProps>(
             </option>
           ))}
         </select>
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className="text-sm" style={{ color: 'var(--a-danger)' }}>{error}</p>}
       </div>
     )
   }
@@ -120,12 +104,13 @@ export const AdminCheckbox = forwardRef<HTMLInputElement, CheckboxProps>(
         <input
           ref={ref}
           type="checkbox"
-          className="w-5 h-5 mt-0.5 rounded bg-slate-700 border-slate-600 text-teal-500 focus:ring-teal-500 focus:ring-offset-0 cursor-pointer"
+          className="w-5 h-5 mt-0.5 rounded cursor-pointer"
+          style={{ accentColor: 'var(--a-accent)' }}
           {...props}
         />
         <div>
-          <span className="text-sm font-medium text-white">{label}</span>
-          {description && <p className="text-sm text-slate-400 mt-0.5">{description}</p>}
+          <span className="text-sm font-medium" style={{ color: 'var(--a-fg)' }}>{label}</span>
+          {description && <p className="text-sm mt-0.5" style={{ color: 'var(--a-muted)' }}>{description}</p>}
         </div>
       </label>
     )
@@ -146,8 +131,8 @@ export function AdminToggle({ label, description, checked, onChange, disabled }:
   return (
     <label className={`flex items-center justify-between gap-4 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
       <div>
-        <span className="text-sm font-medium text-white">{label}</span>
-        {description && <p className="text-sm text-slate-400">{description}</p>}
+        <span className="text-sm font-medium" style={{ color: 'var(--a-fg)' }}>{label}</span>
+        {description && <p className="text-sm" style={{ color: 'var(--a-muted)' }}>{description}</p>}
       </div>
       <button
         type="button"
@@ -155,9 +140,8 @@ export function AdminToggle({ label, description, checked, onChange, disabled }:
         aria-checked={checked}
         disabled={disabled}
         onClick={() => !disabled && onChange(!checked)}
-        className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:ring-offset-slate-800 ${
-          checked ? 'bg-teal-500' : 'bg-slate-600'
-        }`}
+        className="relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+        style={{ background: checked ? 'var(--a-accent)' : 'var(--a-surface-3)' }}
       >
         <span
           className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${

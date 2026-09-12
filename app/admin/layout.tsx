@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { Toaster } from 'sonner'
 import { Calendar, FileText, BarChart3, Images, LogOut, Menu, X, FileDown, HelpCircle, Users, Book, Home, Share2, Repeat, Shield, Activity, LogIn, Settings, MessageSquare, AlertCircle, ImageIcon, Users2, Newspaper } from 'lucide-react'
+import './admin.css'
 
 interface AdminLayoutProps {
   children: React.ReactNode
@@ -235,7 +236,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: "var(--bg)", color: "var(--fg)" }}>
+    <div className="dm-admin flex h-screen overflow-hidden">
       <Toaster position="top-right" richColors theme="dark" />
       {/* Session Timeout Warning */}
       {showTimeoutWarning && (
@@ -268,25 +269,24 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         className={`
           fixed lg:relative inset-y-0 left-0 z-50
           w-72 lg:w-64
-          border-r flex flex-col h-screen
+          adm-panel-2 flex flex-col h-screen rounded-none
           transform transition-transform duration-300 ease-in-out
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0 lg:w-20'}
         `}
-        style={{ backgroundColor: "var(--panel)", borderColor: "var(--border)" }}
+        style={{ borderTop: 0, borderBottom: 0, borderLeft: 0 }}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between border-b px-4" style={{ borderColor: "var(--border)" }}>
+        <div className="h-16 flex items-center justify-between px-4" style={{ borderBottom: "1px solid var(--a-border)" }}>
           <Link href="/admin" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center font-bold text-white text-sm flex-shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center font-bold text-sm flex-shrink-0" style={{ color: '#04211f', boxShadow: '0 6px 16px rgba(46,196,198,0.28)' }}>
               DM
             </div>
-            <span className="font-bold text-white lg:hidden xl:block">DanceMotion</span>
+            <span className="font-bold lg:hidden xl:block" style={{ color: 'var(--a-fg)' }}>DanceMotion</span>
           </Link>
           {/* Close button on mobile */}
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-2 rounded-lg"
-            style={{ backgroundColor: "var(--border)", color: "var(--fg)" }}
+            className="lg:hidden adm-btn adm-btn--ghost !p-2"
           >
             <X size={24} />
           </button>
@@ -298,7 +298,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             {filteredCategories.map((category) => (
               <div key={category.label}>
                 {/* Category Label */}
-                <p className="px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider lg:hidden xl:block">
+                <p className="adm-nav-cat lg:hidden xl:block">
                   {category.label}
                 </p>
                 <div className="space-y-0.5">
@@ -306,16 +306,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`
-                        flex items-center gap-3 px-4 py-2.5 rounded-lg transition
-                        ${isActive(item.href) 
-                          ? 'bg-teal-500/20 text-teal-400 border-l-4 border-teal-500 -ml-0.5' 
-                          : 'text-slate-300 hover:bg-slate-700/50 hover:text-white'
-                        }
-                      `}
+                      className={`adm-nav-link ${isActive(item.href) ? 'is-active' : ''}`}
                     >
                       <item.icon size={18} className="flex-shrink-0" />
-                      <span className="text-sm font-medium lg:hidden xl:block">{item.label}</span>
+                      <span className="lg:hidden xl:block">{item.label}</span>
                     </Link>
                   ))}
                 </div>
@@ -325,24 +319,25 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </nav>
 
         {/* Back to Site Link */}
-        <div className="border-t border-slate-700 p-3">
+        <div className="p-3" style={{ borderTop: "1px solid var(--a-border)" }}>
           <Link
             href="/"
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-slate-700 hover:text-white transition"
+            className="adm-nav-link"
           >
             <Home size={20} className="flex-shrink-0" />
-            <span className="text-sm font-medium lg:hidden xl:block">Zur Website</span>
+            <span className="lg:hidden xl:block">Zur Website</span>
           </Link>
         </div>
 
         {/* Logout Button */}
-        <div className="border-t border-slate-700 p-3">
+        <div className="p-3" style={{ borderTop: "1px solid var(--a-border)" }}>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-red-500/20 hover:text-red-400 transition"
+            className="adm-nav-link w-full"
+            style={{ color: '#fca5a5' }}
           >
             <LogOut size={20} className="flex-shrink-0" />
-            <span className="text-sm font-medium lg:hidden xl:block">Abmelden</span>
+            <span className="lg:hidden xl:block">Abmelden</span>
           </button>
         </div>
       </aside>
@@ -350,43 +345,33 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden w-full lg:pl-20 xl:pl-0 min-w-0 min-h-0">
         {/* Header */}
-        <header className="h-16 bg-slate-800 border-b border-slate-700 px-4 md:px-6 flex items-center justify-between sticky top-0 z-30">
+        <header className="h-16 px-4 md:px-6 flex items-center justify-between sticky top-0 z-30" style={{ background: "var(--a-surface-2)", borderBottom: "1px solid var(--a-border)" }}>
           <div className="flex items-center gap-3">
             {/* Hamburger Menu Button */}
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 hover:bg-slate-700 rounded-lg text-slate-300"
+              className="lg:hidden adm-btn adm-btn--ghost !p-2"
               aria-label="Menü öffnen"
             >
               <Menu size={24} />
             </button>
-            <h1 className="text-lg md:text-xl font-bold text-white truncate">Admin Panel</h1>
+            <h1 className="text-lg md:text-xl font-bold truncate" style={{ color: 'var(--a-fg)' }}>Admin Panel</h1>
           </div>
 
           {/* User Info */}
           <div className="flex items-center gap-2 md:gap-4">
             <div className="text-right hidden sm:block">
-              <p className="text-sm font-medium text-white truncate max-w-[150px] md:max-w-none">{user?.email}</p>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-xs text-slate-400 capitalize">{userRole || 'Administrator'}</span>
+              <p className="text-sm font-medium truncate max-w-[150px] md:max-w-none" style={{ color: 'var(--a-fg)' }}>{user?.email}</p>
+              <div className="flex items-center gap-2 mt-1 justify-end">
+                <span className="text-xs capitalize" style={{ color: 'var(--a-muted)' }}>{userRole || 'Administrator'}</span>
                 {userRole && (
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
-                      userRole === 'admin'
-                        ? 'bg-red-500/20 text-red-300'
-                        : userRole === 'event-manager'
-                        ? 'bg-blue-500/20 text-blue-300'
-                        : userRole === 'editor'
-                        ? 'bg-purple-500/20 text-purple-300'
-                        : 'bg-slate-500/20 text-slate-300'
-                    }`}
-                  >
+                  <span className="adm-chip adm-chip--accent">
                     {userRole}
                   </span>
                 )}
               </div>
             </div>
-            <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+            <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center font-bold text-sm flex-shrink-0" style={{ color: '#04211f' }}>
               {user?.email?.[0]?.toUpperCase() || '?'}
             </div>
           </div>

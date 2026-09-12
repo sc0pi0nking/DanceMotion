@@ -195,16 +195,16 @@ export default function AdminDashboard() {
           <Link
             key={action.href}
             href={action.href}
-            className="group bg-slate-800 border border-slate-700 rounded-xl p-4 hover:border-slate-600 hover:bg-slate-800/80 transition"
+            className="group adm-panel adm-hoverable p-4"
           >
             <div className={`w-10 h-10 rounded-lg ${action.bgColor} flex items-center justify-center mb-3`}>
               <action.icon size={20} className={action.color} />
             </div>
-            <h3 className="font-semibold text-white group-hover:text-teal-400 transition flex items-center gap-2">
+            <h3 className="font-semibold transition flex items-center gap-2" style={{ color: 'var(--a-fg)' }}>
               {action.title}
               <ArrowRight size={14} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition" />
             </h3>
-            <p className="text-sm text-slate-400">{action.description}</p>
+            <p className="text-sm" style={{ color: 'var(--a-muted)' }}>{action.description}</p>
           </Link>
         ))}
       </div>
@@ -217,7 +217,7 @@ export default function AdminDashboard() {
           icon={Activity}
           className="lg:col-span-2"
           headerAction={
-            <Link href="/admin/audit" className="text-sm text-teal-400 hover:text-teal-300 transition">
+            <Link href="/admin/audit" className="text-sm transition" style={{ color: 'var(--a-accent)' }}>
               Alle anzeigen →
             </Link>
           }
@@ -229,24 +229,24 @@ export default function AdminDashboard() {
                 return (
                   <div
                     key={log.id}
-                    className="flex items-center justify-between text-sm py-2.5 px-3 -mx-3 hover:bg-slate-700/50 rounded-lg transition"
+                    className="flex items-center justify-between text-sm py-2.5 px-3 -mx-3 rounded-lg transition adm-hoverable"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <span className="text-lg flex-shrink-0">{actionInfo.emoji}</span>
                       <div className="min-w-0">
                         <span className={`font-medium ${actionInfo.color}`}>{actionInfo.label}</span>
-                        <span className="text-slate-500 mx-2">·</span>
-                        <span className="text-slate-400 capitalize">{log.target_type}</span>
+                        <span className="mx-2" style={{ color: 'var(--a-faint)' }}>·</span>
+                        <span className="capitalize" style={{ color: 'var(--a-muted)' }}>{log.target_type}</span>
                       </div>
                     </div>
-                    <span className="text-xs text-slate-500 flex-shrink-0 ml-2">
+                    <span className="text-xs flex-shrink-0 ml-2" style={{ color: 'var(--a-faint)' }}>
                       {new Date(log.created_at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
                 )
               })
             ) : (
-              <p className="text-slate-400 text-sm py-8 text-center">Keine Aktivitäten vorhanden</p>
+              <p className="text-sm py-8 text-center" style={{ color: 'var(--a-muted)' }}>Keine Aktivitäten vorhanden</p>
             )}
           </div>
         </AdminCard>
@@ -259,8 +259,8 @@ export default function AdminDashboard() {
                 <Users size={24} className="text-pink-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-white">{stats.teamMembers}</p>
-                <p className="text-sm text-slate-400">Team Mitglieder</p>
+                <p className="text-2xl font-bold" style={{ color: 'var(--a-fg)' }}>{stats.teamMembers}</p>
+                <p className="text-sm" style={{ color: 'var(--a-muted)' }}>Team Mitglieder</p>
               </div>
             </div>
           </AdminCard>
@@ -271,15 +271,15 @@ export default function AdminDashboard() {
                 <Images size={24} className="text-violet-400" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-white">{stats.galleryItems}</p>
-                <p className="text-sm text-slate-400">Galerie Alben</p>
+                <p className="text-2xl font-bold" style={{ color: 'var(--a-fg)' }}>{stats.galleryItems}</p>
+                <p className="text-sm" style={{ color: 'var(--a-muted)' }}>Galerie Alben</p>
               </div>
             </div>
           </AdminCard>
 
           {/* Tip Box */}
-          <div className="p-4 bg-teal-500/10 border border-teal-500/30 rounded-xl">
-            <p className="text-sm text-teal-300">
+          <div className="p-4 rounded-xl" style={{ background: 'var(--a-accent-soft)', border: '1px solid var(--a-accent-line)' }}>
+            <p className="text-sm" style={{ color: 'var(--a-accent)' }}>
               💡 <strong>Tipp:</strong> Alle Änderungen werden sofort live geschaltet.
             </p>
           </div>

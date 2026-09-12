@@ -38,19 +38,19 @@ export default function AdminPageHeader({
     <div className="mb-6 md:mb-8">
       {/* Breadcrumbs */}
       {breadcrumbs && breadcrumbs.length > 0 && (
-        <nav className="flex items-center gap-1.5 text-sm text-slate-400 mb-3">
-          <Link href="/admin" className="hover:text-white transition">
+        <nav className="flex items-center gap-1.5 text-sm mb-3" style={{ color: 'var(--a-muted)' }}>
+          <Link href="/admin" className="transition hover:opacity-80">
             Admin
           </Link>
           {breadcrumbs.map((crumb, index) => (
             <div key={index} className="flex items-center gap-1.5">
-              <ChevronRight size={14} className="text-slate-600" />
+              <ChevronRight size={14} style={{ color: 'var(--a-faint)' }} />
               {crumb.href ? (
-                <Link href={crumb.href} className="hover:text-white transition">
+                <Link href={crumb.href} className="transition hover:opacity-80">
                   {crumb.label}
                 </Link>
               ) : (
-                <span className="text-slate-300">{crumb.label}</span>
+                <span style={{ color: 'var(--a-fg)' }}>{crumb.label}</span>
               )}
             </div>
           ))}
@@ -62,14 +62,14 @@ export default function AdminPageHeader({
         {/* Title & Description */}
         <div className="flex items-start gap-3">
           {Icon && (
-            <div className="hidden sm:flex w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500/20 to-cyan-500/20 items-center justify-center flex-shrink-0">
-              <Icon size={24} className="text-teal-400" />
+            <div className="hidden sm:flex w-12 h-12 rounded-xl items-center justify-center flex-shrink-0" style={{ background: 'var(--a-accent-soft)', border: '1px solid var(--a-accent-line)' }}>
+              <Icon size={24} style={{ color: 'var(--a-accent)' }} />
             </div>
           )}
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white">{title}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--a-fg)' }}>{title}</h1>
             {description && (
-              <p className="text-slate-400 text-sm md:text-base mt-1">{description}</p>
+              <p className="text-sm md:text-base mt-1" style={{ color: 'var(--a-muted)' }}>{description}</p>
             )}
           </div>
         </div>
@@ -78,11 +78,11 @@ export default function AdminPageHeader({
         {actions && actions.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap">
             {actions.map((action, index) => {
-              const baseClasses = "flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition text-sm"
+              const baseClasses = "adm-btn"
               const variantClasses = {
-                primary: "bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:shadow-lg hover:shadow-teal-500/30",
-                secondary: "bg-slate-700 text-slate-200 hover:bg-slate-600 border border-slate-600",
-                danger: "bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30",
+                primary: "adm-btn--primary",
+                secondary: "adm-btn--secondary",
+                danger: "adm-btn--danger",
               }
               const disabledClasses = action.disabled ? "opacity-50 cursor-not-allowed" : ""
               

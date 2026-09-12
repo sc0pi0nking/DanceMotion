@@ -1,0 +1,312 @@
+/* =====================================================================
+   DanceMotion Admin 2.0 — "Cockpit" Design System
+   Scoped under .dm-admin so the admin always renders as a refined dark
+   surface, independent of the public site's light/dark theme.
+   ===================================================================== */
+
+.dm-admin {
+  --a-bg: #0a0a0a;
+  --a-surface: #111214; /* base panel */
+  --a-surface-2: #16181b; /* elevated panel / header */
+  --a-surface-3: #1c1f23; /* hover / inputs */
+  --a-border: #24272b;
+  --a-border-soft: #1a1d20;
+  --a-fg: #f4f4f5;
+  --a-muted: #9ba1a6;
+  --a-faint: #6b7076;
+  --a-accent: #2ec4c6;
+  --a-accent-2: #24a7a9;
+  --a-accent-soft: rgba(46, 196, 198, 0.12);
+  --a-accent-line: rgba(46, 196, 198, 0.35);
+  --a-danger: #ef4444;
+  --a-danger-soft: rgba(239, 68, 68, 0.14);
+  --a-success: #22c55e;
+  --a-success-soft: rgba(34, 197, 94, 0.14);
+  --a-warn: #f59e0b;
+  --a-warn-soft: rgba(245, 158, 11, 0.14);
+  --a-radius: 16px;
+  --a-radius-md: 12px;
+  --a-radius-sm: 9px;
+  --a-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+  --a-shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.3);
+
+  background: var(--a-bg);
+  color: var(--a-fg);
+}
+
+/* Subtle radial glow behind the whole admin */
+.dm-admin::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(900px 500px at 12% -10%, rgba(46, 196, 198, 0.06), transparent 60%),
+    radial-gradient(700px 500px at 100% 0%, rgba(46, 196, 198, 0.04), transparent 55%);
+  z-index: 0;
+}
+
+/* ---------- Surfaces ---------- */
+.adm-panel {
+  background: var(--a-surface);
+  border: 1px solid var(--a-border);
+  border-radius: var(--a-radius);
+}
+.adm-panel-2 {
+  background: var(--a-surface-2);
+  border: 1px solid var(--a-border);
+  border-radius: var(--a-radius);
+}
+.adm-hoverable {
+  transition: border-color 0.18s ease, transform 0.18s ease, background 0.18s ease;
+}
+.adm-hoverable:hover {
+  border-color: color-mix(in srgb, var(--a-accent) 45%, var(--a-border));
+}
+
+/* ---------- Buttons ---------- */
+.adm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  border-radius: var(--a-radius-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.12s ease,
+    box-shadow 0.18s ease, color 0.18s ease;
+  white-space: nowrap;
+}
+.adm-btn:active {
+  transform: translateY(1px);
+}
+.adm-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.adm-btn--primary {
+  background: linear-gradient(135deg, var(--a-accent), var(--a-accent-2));
+  color: #04211f;
+  box-shadow: 0 6px 18px rgba(46, 196, 198, 0.22);
+}
+.adm-btn--primary:hover:not(:disabled) {
+  box-shadow: 0 10px 26px rgba(46, 196, 198, 0.34);
+}
+.adm-btn--secondary {
+  background: var(--a-surface-3);
+  color: var(--a-fg);
+  border-color: var(--a-border);
+}
+.adm-btn--secondary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--a-surface-3) 70%, var(--a-accent) 8%);
+  border-color: color-mix(in srgb, var(--a-accent) 40%, var(--a-border));
+}
+.adm-btn--danger {
+  background: var(--a-danger-soft);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+.adm-btn--danger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.24);
+}
+.adm-btn--ghost {
+  background: transparent;
+  color: var(--a-muted);
+}
+.adm-btn--ghost:hover:not(:disabled) {
+  background: var(--a-surface-3);
+  color: var(--a-fg);
+}
+
+/* ---------- Form fields ---------- */
+.adm-label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--a-muted);
+  margin-bottom: 0.4rem;
+}
+.adm-input {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  background: var(--a-surface-3);
+  border: 1px solid var(--a-border);
+  border-radius: var(--a-radius-sm);
+  color: var(--a-fg);
+  font-size: 0.9rem;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+.adm-input::placeholder {
+  color: var(--a-faint);
+}
+.adm-input:focus {
+  outline: none;
+  border-color: var(--a-accent);
+  box-shadow: 0 0 0 3px var(--a-accent-soft);
+}
+.adm-input--error {
+  border-color: var(--a-danger);
+}
+select.adm-input option {
+  background: var(--a-surface-2);
+  color: var(--a-fg);
+}
+
+/* ---------- Chips / badges ---------- */
+.adm-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: 1px solid var(--a-border);
+  color: var(--a-muted);
+  background: var(--a-surface-3);
+}
+.adm-chip--accent {
+  color: var(--a-accent);
+  background: var(--a-accent-soft);
+  border-color: var(--a-accent-line);
+}
+.adm-chip--success {
+  color: #86efac;
+  background: var(--a-success-soft);
+  border-color: rgba(34, 197, 94, 0.3);
+}
+.adm-chip--danger {
+  color: #fca5a5;
+  background: var(--a-danger-soft);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+.adm-chip--warn {
+  color: #fcd34d;
+  background: var(--a-warn-soft);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+/* ---------- Sidebar navigation ---------- */
+.adm-nav-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--a-radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--a-muted);
+  transition: background 0.16s ease, color 0.16s ease;
+}
+.adm-nav-link:hover {
+  background: var(--a-surface-3);
+  color: var(--a-fg);
+}
+.adm-nav-link.is-active {
+  background: var(--a-accent-soft);
+  color: var(--a-accent);
+}
+.adm-nav-link.is-active::before {
+  content: "";
+  position: absolute;
+  left: -0.3rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  border-radius: 999px;
+  background: var(--a-accent);
+}
+.adm-nav-cat {
+  padding: 0.5rem 0.8rem 0.3rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--a-faint);
+}
+
+/* ---------- Table ---------- */
+.adm-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.adm-table thead {
+  background: var(--a-surface-2);
+}
+.adm-table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--a-faint);
+}
+.adm-table td {
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--a-fg);
+  border-top: 1px solid var(--a-border-soft);
+}
+.adm-table tbody tr {
+  transition: background 0.14s ease;
+}
+.adm-table tbody tr:hover {
+  background: var(--a-surface-2);
+}
+
+/* ---------- Misc ---------- */
+.adm-divider {
+  height: 1px;
+  background: var(--a-border);
+  border: 0;
+}
+.adm-spinner {
+  border: 2px solid rgba(46, 196, 198, 0.25);
+  border-top-color: var(--a-accent);
+  border-radius: 999px;
+  animation: adm-spin 0.7s linear infinite;
+}
+@keyframes adm-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.adm-fade-in {
+  animation: adm-fade 0.22s ease both;
+}
+@keyframes adm-fade {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Ensure content sits above the ::before glow */
+.dm-admin > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Custom scrollbar inside admin */
+.dm-admin .admin-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+.dm-admin .admin-scroll::-webkit-scrollbar-thumb {
+  background: var(--a-border);
+  border-radius: 999px;
+  border: 2px solid var(--a-bg);
+}
+.dm-admin .admin-scroll::-webkit-scrollbar-thumb:hover {
+  background: #2f3338;
+}
