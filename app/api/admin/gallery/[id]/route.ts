@@ -2,12 +2,43 @@ import { supabaseServer } from '@/lib/supabase'
 import { createClient } from '@supabase/supabase-js'
 import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
 
+export const runtime = 'nodejs'
+export const maxDuration = 60
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-// POST - Add images to existing gallery/album
+interface GalleryImage {
+  url: string
+  title: string
+  description: string
+  is_hidden: boolean
+}
+
+function normalizeImage(entry: unknown): GalleryImage | null {
+  if (typeof entry === 'string') {
+    const url = entry.trim()
+    return url ? { url, title: '', description: '', is_hidden: false } : null
+  }
+  if (entry && typeof entry === 'object' && 'url' in entry) {
+    const obj = entry as Record<string, unknown>
+    const url = typeof obj.url === 'string' ? obj.url.trim() : ''
+    if (!url) return null
+    return {
+      url,
+      title: typeof obj.title === 'string' ? obj.title : '',
+      description: typeof obj.description === 'string' ? obj.description : '',
+      is_hidden: obj.is_hidden === true,
+    }
+  }
+  return null
+}
+
+// POST - Add images to existing gallery/album.
+// Preferred path: JSON body { images: [{url,...}] | [url] } (already uploaded).
+// Fallback path: multipart/form-data with image files.
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -19,11 +50,44 @@ export async function POST(
     }
 
     const { id } = await params
-    const formData = await req.formData()
-    const imageFiles = formData.getAll('images') as File[]
+    const contentType = req.headers.get('content-type') || ''
 
-    if (imageFiles.length === 0) {
-      return Response.json({ error: 'Keine Bilder ausgewählt' }, { status: 400 })
+    let newImageObjects: GalleryImage[] = []
+
+    if (contentType.includes('application/json')) {
+      const body = await req.json()
+      const rawImages = Array.isArray(body.images) ? body.images : []
+      newImageObjects = rawImages
+        .map(normalizeImage)
+        .filter((img: GalleryImage | null): img is GalleryImage => img !== null)
+    } else {
+      const formData = await req.formData()
+      const imageFiles = (formData.getAll('images') as File[]).filter(
+        (f) => f && typeof (f as File).arrayBuffer === 'function'
+      )
+
+      for (const file of imageFiles) {
+        const mimeType = (file.type || '').toLowerCase()
+        const ext = mimeType.split('/')[1]?.replace('jpeg', 'jpg') || 'jpg'
+        const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${ext}`
+        const filePath = `gallery/${fileName}`
+
+        const arrayBuffer = await file.arrayBuffer()
+        const buffer = Buffer.from(arrayBuffer)
+
+        const { error: uploadError } = await supabase.storage
+          .from('images')
+          .upload(filePath, buffer, { contentType: mimeType || 'application/octet-stream', upsert: false })
+
+        if (uploadError) throw uploadError
+
+        const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(filePath)
+        newImageObjects.push({ url: publicUrl, title: '', description: '', is_hidden: false })
+      }
+    }
+
+    if (newImageObjects.length === 0) {
+      return Response.json({ error: 'Keine Bilder übermittelt' }, { status: 400 })
     }
 
     // Get existing gallery
@@ -34,30 +98,6 @@ export async function POST(
       .single()
 
     if (fetchError) throw fetchError
-
-    // Upload new images
-    const newImageObjects: { url: string; title: string; description: string; is_hidden: boolean }[] = []
-
-    for (const file of imageFiles) {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
-      const filePath = `gallery/${fileName}`
-
-      const arrayBuffer = await file.arrayBuffer()
-      const buffer = Buffer.from(arrayBuffer)
-
-      const { error: uploadError } = await supabase.storage
-        .from('images')
-        .upload(filePath, buffer, { contentType: file.type, upsert: false })
-
-      if (uploadError) throw uploadError
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('images')
-        .getPublicUrl(filePath)
-
-      newImageObjects.push({ url: publicUrl, title: '', description: '', is_hidden: false })
-    }
 
     // Merge with existing images
     const existingImages = Array.isArray(gallery.images) ? gallery.images : []
@@ -74,7 +114,7 @@ export async function POST(
     return Response.json(data[0])
   } catch (error: any) {
     console.error('POST /api/admin/gallery/[id] error:', error)
-    return Response.json({ error: error.message }, { status: 500 })
+    return Response.json({ error: error?.message || 'Hinzufügen fehlgeschlagen' }, { status: 500 })
   }
 }
 

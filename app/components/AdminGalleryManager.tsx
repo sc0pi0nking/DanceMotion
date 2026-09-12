@@ -108,6 +108,62 @@ export default function AdminGalleryManager() {
     maxSize: 25 * 1024 * 1024,
   })
 
+  // Uploads files one-by-one to a dedicated single-file endpoint. This keeps
+  // every request small (well under proxy/CDN body limits), allows retrying
+  // individual files, and lets the batch partially succeed instead of failing
+  // as a whole. Returns the successfully uploaded image objects and the names
+  // of any files that ultimately failed.
+  async function uploadFilesIndividually(
+    files: File[]
+  ): Promise<{ uploaded: GalleryImage[]; failed: string[] }> {
+    const uploaded: GalleryImage[] = []
+    const failed: string[] = []
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      setUploadStatus(`Lade Bild ${i + 1} von ${files.length} hoch: ${file.name}`)
+
+      let success = false
+      let lastError = ''
+
+      // Retry each file up to 3 times for transient network/storage errors.
+      for (let attempt = 1; attempt <= 3 && !success; attempt++) {
+        try {
+          const fd = new FormData()
+          fd.append('file', file)
+
+          const res = await fetch('/api/admin/gallery/upload', {
+            method: 'POST',
+            body: fd,
+            credentials: 'include',
+          })
+
+          if (res.ok) {
+            const data = await res.json()
+            uploaded.push({ url: data.url, title: '', description: '', is_hidden: false })
+            success = true
+          } else {
+            const err = await res.json().catch(() => ({}))
+            lastError = err.error || `HTTP ${res.status}`
+            // 4xx errors (e.g. invalid format) won't succeed on retry.
+            if (res.status >= 400 && res.status < 500) break
+          }
+        } catch (e) {
+          lastError = e instanceof Error ? e.message : 'Netzwerkfehler'
+        }
+      }
+
+      if (!success) {
+        console.error(`Upload failed for ${file.name}: ${lastError}`)
+        failed.push(file.name)
+      }
+
+      setUploadProgress(Math.round(((i + 1) / files.length) * 100))
+    }
+
+    return { uploaded, failed }
+  }
+
   async function handleCreateGallery() {
     if (!newGallery.title || uploadedFiles.length === 0) {
       setError('Bitte Titel eingeben und mindestens ein Bild auswählen')
@@ -116,28 +172,38 @@ export default function AdminGalleryManager() {
 
     setUploading(true)
     setError('')
+    setUploadProgress(0)
     setUploadStatus(`Lade ${uploadedFiles.length} Bilder hoch...`)
 
     try {
-      const formData = new FormData()
-      formData.append('title', newGallery.title)
-      formData.append('category', newGallery.category)
-      formData.append('description', newGallery.description)
-      formData.append('is_published', String(newGallery.is_published))
+      const { uploaded, failed } = await uploadFilesIndividually(uploadedFiles)
 
-      uploadedFiles.forEach((file, index) => {
-        formData.append('images', file)
-        setUploadProgress(Math.round((index / uploadedFiles.length) * 100))
-      })
+      if (uploaded.length === 0) {
+        setError('Alle Bilder konnten nicht hochgeladen werden. Bitte erneut versuchen.')
+        setUploadStatus('')
+        return
+      }
 
+      setUploadStatus('Album wird erstellt...')
       const res = await fetch('/api/admin/gallery', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
+        body: JSON.stringify({
+          title: newGallery.title,
+          category: newGallery.category,
+          description: newGallery.description,
+          is_published: newGallery.is_published,
+          images: uploaded,
+        }),
       })
 
       if (res.ok) {
-        setUploadStatus('Erfolgreich erstellt!')
+        setUploadStatus(
+          failed.length > 0
+            ? `Album erstellt – ${uploaded.length} Bilder hochgeladen, ${failed.length} fehlgeschlagen.`
+            : 'Erfolgreich erstellt!'
+        )
         setTimeout(() => {
           setShowCreateModal(false)
           setUploadedFiles([])
@@ -145,10 +211,10 @@ export default function AdminGalleryManager() {
           setUploadStatus('')
           setNewGallery({ title: '', category: 'general', description: '', is_published: true })
           loadGalleries()
-        }, 1500)
+        }, failed.length > 0 ? 2500 : 1500)
       } else {
-        const errorData = await res.json()
-        setError(`Fehler: ${errorData.error}`)
+        const errorData = await res.json().catch(() => ({}))
+        setError(`Fehler: ${errorData.error || 'Album konnte nicht erstellt werden'}`)
         setUploadStatus('')
       }
     } catch (error) {
@@ -168,29 +234,42 @@ export default function AdminGalleryManager() {
 
     setUploading(true)
     setError('')
+    setUploadProgress(0)
     setUploadStatus(`Lade ${addImageFiles.length} Bilder hoch...`)
 
     try {
-      const formData = new FormData()
-      addImageFiles.forEach(file => formData.append('images', file))
+      const { uploaded, failed } = await uploadFilesIndividually(addImageFiles)
 
+      if (uploaded.length === 0) {
+        setError('Alle Bilder konnten nicht hochgeladen werden. Bitte erneut versuchen.')
+        setUploadStatus('')
+        return
+      }
+
+      setUploadStatus('Bilder werden gespeichert...')
       const res = await fetch(`/api/admin/gallery/${galleryId}`, {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
+        body: JSON.stringify({ images: uploaded }),
       })
 
       if (res.ok) {
-        setUploadStatus('Bilder hinzugefügt!')
+        setUploadStatus(
+          failed.length > 0
+            ? `${uploaded.length} Bilder hinzugefügt, ${failed.length} fehlgeschlagen.`
+            : 'Bilder hinzugefügt!'
+        )
         setTimeout(() => {
           setShowAddImagesModal(null)
           setAddImageFiles([])
+          setUploadProgress(0)
           setUploadStatus('')
           loadGalleries()
-        }, 1500)
+        }, failed.length > 0 ? 2500 : 1500)
       } else {
-        const errorData = await res.json()
-        setError(`Fehler: ${errorData.error}`)
+        const errorData = await res.json().catch(() => ({}))
+        setError(`Fehler: ${errorData.error || 'Bilder konnten nicht gespeichert werden'}`)
         setUploadStatus('')
       }
     } catch (error) {
