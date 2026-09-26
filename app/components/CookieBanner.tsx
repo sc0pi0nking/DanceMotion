@@ -18,6 +18,7 @@ export default function CookieBanner() {
   const handleAccept = () => {
     localStorage.setItem('dancemotion_cookie_consent', 'accepted')
     localStorage.setItem('dancemotion_cookies_accepted', 'true')
+    localStorage.setItem('dancemotion_consent_at', new Date().toISOString())
     window.dispatchEvent(new Event('dancemotion-consent-changed'))
     setIsVisible(false)
   }
@@ -25,6 +26,7 @@ export default function CookieBanner() {
   const handleReject = () => {
     localStorage.setItem('dancemotion_cookie_consent', 'rejected')
     localStorage.setItem('dancemotion_cookies_accepted', 'rejected')
+    localStorage.setItem('dancemotion_consent_at', new Date().toISOString())
     window.dispatchEvent(new Event('dancemotion-consent-changed'))
     setIsVisible(false)
   }

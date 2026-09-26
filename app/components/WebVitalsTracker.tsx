@@ -1,72 +1,67 @@
 'use client';
 
 import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 
 /**
- * Track Core Web Vitals for performance monitoring
- * Using performance observer API
+ * Collects Core Web Vitals (LCP, CLS, FCP, INP, TTFB) via the `web-vitals`
+ * library and reports them to /api/analytics/vitals.
+ *
+ * DSGVO: only runs after explicit opt-in via the cookie banner and respects
+ * Do-Not-Track. No personal data is sent — the server derives an anonymous,
+ * daily-rotating session hash. Admin pages are excluded.
  */
 export function WebVitalsTracker() {
+  const pathname = usePathname();
+
   useEffect(() => {
-    // Track Largest Contentful Paint
-    if ('PerformanceObserver' in window) {
+    if (typeof window === 'undefined') return;
+    if (pathname.startsWith('/admin')) return;
+    if (navigator.doNotTrack === '1') return;
+
+    const consent = localStorage.getItem('dancemotion_cookie_consent');
+    const legacyConsent = localStorage.getItem('dancemotion_cookies_accepted');
+    const hasOptIn = consent === 'accepted' || legacyConsent === 'true';
+    if (!hasOptIn) return;
+
+    let cancelled = false;
+
+    const send = (name: string, value: number) => {
+      if (cancelled) return;
+      const body = JSON.stringify({ name, value, path: pathname });
       try {
-        const paintObserver = new PerformanceObserver((list) => {
-          for (const entry of list.getEntries()) {
-            console.log('Paint timing:', {
-              name: entry.name,
-              startTime: Math.round(entry.startTime),
-              duration: Math.round(entry.duration),
-            });
-          }
-        });
-        paintObserver.observe({ entryTypes: ['paint'] });
-
-        const lcpObserver = new PerformanceObserver((list) => {
-          const lastEntry = list.getEntries().pop() as any;
-          if (lastEntry) {
-            console.log('LCP:', Math.round(lastEntry.renderTime || lastEntry.loadTime));
-          }
-        });
-        lcpObserver.observe({ entryTypes: ['largest-contentful-paint'] });
-
-        const clsObserver = new PerformanceObserver((list) => {
-          let clsValue = 0;
-          for (const entry of list.getEntries()) {
-            if (!(entry as any).hadRecentInput) {
-              clsValue += (entry as any).value;
-            }
-          }
-          console.log('CLS:', Math.round(clsValue * 100) / 100);
-        });
-        clsObserver.observe({ entryTypes: ['layout-shift'] });
-      } catch (error) {
-        console.warn('Performance observer error:', error);
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon('/api/analytics/vitals', body);
+        } else {
+          fetch('/api/analytics/vitals', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body,
+            keepalive: true,
+          }).catch(() => {});
+        }
+      } catch {
+        // analytics must never break the site
       }
-    }
+    };
 
-    // Track First Input Delay via navigation timing
-    if ('navigation' in window.performance) {
-      window.addEventListener(
-        'load',
-        () => {
-          const perfData = (window.performance as any).timing;
-          if (perfData) {
-            const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
-            const connectTime = perfData.responseEnd - perfData.requestStart;
-            const renderTime = perfData.domComplete - perfData.domLoading;
-            
-            console.log('Performance metrics:', {
-              pageLoadTime: Math.round(pageLoadTime),
-              connectTime: Math.round(connectTime),
-              renderTime: Math.round(renderTime),
-            });
-          }
-        },
-        false
-      );
-    }
-  }, []);
+    import('web-vitals')
+      .then(({ onLCP, onCLS, onFCP, onINP, onTTFB }) => {
+        if (cancelled) return;
+        const report = (metric: { name: string; value: number }) =>
+          send(metric.name, metric.value);
+        onLCP(report);
+        onCLS(report);
+        onFCP(report);
+        onINP(report);
+        onTTFB(report);
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname]);
 
   return null;
 }

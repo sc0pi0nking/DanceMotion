@@ -128,7 +128,7 @@ export default async function Home() {
           )}
         </section>
 
-        {/* GOOGLE REVIEWS — rendert nur, wenn konfiguriert + Rezensionen vorhanden */}
+        {/* GOOGLE REVIEWS — Live-Rezensionen wenn API konfiguriert, sonst Google-CTA */}
         <GoogleReviews data={reviews} />
 
         {/* CTA */}
