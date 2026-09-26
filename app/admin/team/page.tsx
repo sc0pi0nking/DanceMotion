@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Eye, EyeOff, Save, X, Upload, ArrowUp, ArrowDown, AlertCircle, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Eye, EyeOff, Save, X, Upload, ArrowUp, ArrowDown, AlertCircle, Loader2, GripVertical } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { useDragSort } from '@/app/admin/components';
 import Image from 'next/image';
 
 interface TeamMember {
@@ -287,6 +288,23 @@ export default function TeamAdminPage() {
     }
   };
 
+  const persistOrder = async (ordered: TeamMember[]) => {
+    setMembers(ordered);
+    try {
+      setError(null);
+      await Promise.all(
+        ordered.map((m, i) => supabase.from('team_members').update({ order_index: i }).eq('id', m.id))
+      );
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Fehler beim Sortieren';
+      console.error('Reorder error:', err);
+      setError(msg);
+      loadMembers();
+    }
+  };
+
+  const { getItemProps, overIndex } = useDragSort(members, persistOrder);
+
   const handleEdit = (member: TeamMember) => {
     const socialLinks = member.social_links || { instagram: '', facebook: '', email: '' };
     setFormData({
@@ -506,11 +524,17 @@ export default function TeamAdminPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {members.map((member) => (
+          {members.map((member, index) => (
             <div
               key={member.id}
-              className="p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg flex gap-4 items-start"
+              {...getItemProps(index)}
+              className={`p-4 bg-white dark:bg-gray-800 border rounded-lg flex gap-3 items-start transition ${
+                overIndex === index ? 'border-blue-500 ring-2 ring-blue-500/40' : 'border-gray-200 dark:border-gray-700'
+              }`}
             >
+              <div className="pt-1 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 flex-shrink-0" title="Zum Sortieren ziehen">
+                <GripVertical size={18} />
+              </div>
               {member.image_url && (
                 <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700">
                   <img 

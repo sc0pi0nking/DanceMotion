@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Plus, Edit2, Trash2, ArrowUp, ArrowDown, Eye, EyeOff, ExternalLink, Building2, Upload, X, Image as ImageIcon, Instagram, Facebook, Globe } from 'lucide-react';
+import { Plus, Edit2, Trash2, ArrowUp, ArrowDown, Eye, EyeOff, ExternalLink, Building2, Upload, X, Image as ImageIcon, Instagram, Facebook, Globe, GripVertical } from 'lucide-react';
 import {
   AdminCard,
   StatCard,
@@ -14,6 +14,7 @@ import {
   AdminTextarea,
   AdminSelect,
   FormGroup,
+  useDragSort,
 } from '@/app/admin/components';
 
 interface Sponsor {
@@ -386,6 +387,29 @@ export default function AdminSponsorsManager() {
     }
   };
 
+  const persistSponsorOrder = async (newSponsors: Sponsor[]) => {
+    const previous = sponsors;
+    setSponsors(newSponsors.map((s, i) => ({ ...s, sort_order: i })));
+    try {
+      const updates = newSponsors.map((s, i) =>
+        fetch(`/api/sponsors/${s.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ sort_order: i }),
+        })
+      );
+      const results = await Promise.all(updates);
+      if (results.some((r) => !r.ok)) throw new Error('Sort update failed');
+    } catch (error) {
+      console.error('Error reordering sponsors:', error);
+      setSponsors(previous);
+      alert(error instanceof Error ? error.message : 'Fehler beim Sortieren');
+    }
+  };
+
+  const { getItemProps, overIndex } = useDragSort(sponsors, persistSponsorOrder);
+
   // Stats
   const activeCount = sponsors.filter(s => s.is_active).length;
   const inactiveCount = sponsors.filter(s => !s.is_active).length;
@@ -448,6 +472,7 @@ export default function AdminSponsorsManager() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-slate-700">
+                  <th className="px-2 py-3 w-8"></th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-slate-400 w-16">Logo</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-slate-400">Name</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-slate-400">Kategorie</th>
@@ -457,7 +482,23 @@ export default function AdminSponsorsManager() {
               </thead>
               <tbody>
                 {sponsors.map((sponsor, index) => (
-                  <tr key={sponsor.id} className={`border-b border-slate-700/50 hover:bg-slate-800/30 transition ${!sponsor.is_active ? 'opacity-50' : ''}`}>
+                  <tr
+                    key={sponsor.id}
+                    {...getItemProps(index)}
+                    className={`border-b transition ${!sponsor.is_active ? 'opacity-50' : ''} ${
+                      overIndex === index
+                        ? 'border-teal-500 bg-teal-500/5'
+                        : 'border-slate-700/50 hover:bg-slate-800/30'
+                    }`}
+                  >
+                    <td className="px-2 py-3">
+                      <span
+                        className="cursor-grab active:cursor-grabbing text-slate-500 hover:text-white inline-flex"
+                        title="Zum Sortieren ziehen"
+                      >
+                        <GripVertical className="w-4 h-4" />
+                      </span>
+                    </td>
                     <td className="px-4 py-3">
                       {sponsor.logo_url ? (
                         <img 

@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Save, X, Eye, EyeOff, CheckSquare } from 'lucide-react';
-import { BulkActionBar } from '@/app/admin/components';
+import { Plus, Edit2, Trash2, Save, X, Eye, EyeOff, CheckSquare, GripVertical } from 'lucide-react';
+import { BulkActionBar, useDragSort } from '@/app/admin/components';
 
 interface FAQ {
   id: string;
@@ -218,6 +218,33 @@ export default function FAQManager() {
     ? faqs
     : faqs.filter(f => f.category === filterCategory);
 
+  const persistFaqOrder = async (reorderedFiltered: FAQ[]) => {
+    const filteredIds = new Set(filteredFAQs.map((f) => f.id));
+    let ptr = 0;
+    const newFull = faqs.map((f) => (filteredIds.has(f.id) ? reorderedFiltered[ptr++] : f));
+    const withOrder = newFull.map((f, i) => ({ ...f, order_index: i }));
+    const previous = faqs;
+    setFaqs(withOrder);
+    try {
+      const results = await Promise.all(
+        withOrder.map((f, i) =>
+          fetch(`/api/admin/faqs/${f.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ order_index: i }),
+          })
+        )
+      );
+      if (results.some((r) => !r.ok)) throw new Error('Sortierung fehlgeschlagen');
+    } catch (error: any) {
+      setFaqs(previous);
+      showMessage('error', `❌ ${error.message || 'Fehler beim Sortieren'}`);
+    }
+  };
+
+  const { getItemProps, overIndex } = useDragSort(filteredFAQs, persistFaqOrder);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -384,11 +411,18 @@ export default function FAQManager() {
             {filteredFAQs.every((f) => selectedIds.has(f.id)) ? 'Auswahl aufheben' : 'Alle auswählen'}
           </button>
         )}
-        {filteredFAQs.map((faq) => (
+        {filteredFAQs.map((faq, index) => {
+          const dragProps = getItemProps(index);
+          return (
           <div
             key={faq.id}
+            onDragOver={dragProps.onDragOver}
+            onDragLeave={dragProps.onDragLeave}
+            onDrop={dragProps.onDrop}
             className={`bg-slate-800 border rounded-xl p-5 ${
-              !faq.published
+              overIndex === index
+                ? 'border-teal-500 ring-2 ring-teal-500/40'
+                : !faq.published
                 ? 'opacity-60 border-dashed border-slate-500'
                 : 'border-slate-700'
             }`}
@@ -455,6 +489,15 @@ export default function FAQManager() {
               /* View Mode */
               <div>
                 <div className="flex items-start justify-between gap-4">
+                  <div
+                    draggable
+                    onDragStart={dragProps.onDragStart}
+                    onDragEnd={dragProps.onDragEnd}
+                    className="mt-0.5 cursor-grab active:cursor-grabbing text-slate-500 hover:text-white flex-shrink-0"
+                    title="Zum Sortieren ziehen"
+                  >
+                    <GripVertical size={18} />
+                  </div>
                   <input
                     type="checkbox"
                     checked={selectedIds.has(faq.id)}
@@ -512,7 +555,8 @@ export default function FAQManager() {
               </div>
             )}
           </div>
-        ))}
+          );
+        })}
 
         {filteredFAQs.length === 0 && (
           <div className="text-center py-12 text-slate-400">

@@ -7,6 +7,7 @@ export { default as AdminLoadingState } from './AdminLoadingState'
 export { default as AdminModal, ModalCancelButton, ModalConfirmButton } from './AdminModal'
 export { default as BulkActionBar } from './BulkActionBar'
 export type { BulkAction } from './BulkActionBar'
+export { useDragSort } from './useDragSort'
 export {
   AdminInput,
   AdminTextarea,

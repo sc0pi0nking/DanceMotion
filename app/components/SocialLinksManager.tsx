@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Instagram, Facebook, Youtube, Twitter, Music2, Link, Plus, Trash2, Save, GripVertical, Eye, EyeOff } from "lucide-react";
+import { useDragSort } from "@/app/admin/components";
 
 interface SocialLink {
   id: string;
@@ -176,6 +177,30 @@ export default function SocialLinksManager() {
     setLinks(links.map(l => l.id === id ? { ...l, [field]: value } : l));
   };
 
+  // Persist new order after drag-and-drop
+  const persistOrder = async (reordered: SocialLink[]) => {
+    const previous = links;
+    setLinks(reordered.map((l, i) => ({ ...l, sort_order: i })));
+    try {
+      const results = await Promise.all(
+        reordered.map((l, i) =>
+          fetch("/api/social-links", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: l.id, sort_order: i }),
+          })
+        )
+      );
+      if (results.some((r) => !r.ok)) throw new Error("Sortierung fehlgeschlagen");
+    } catch (err) {
+      console.error(err);
+      setError("Fehler beim Sortieren");
+      setLinks(previous);
+    }
+  };
+
+  const { getItemProps, overIndex } = useDragSort(links, persistOrder);
+
   if (loading) {
     return (
       <div className="p-8 text-center">
@@ -300,17 +325,30 @@ export default function SocialLinksManager() {
             <p>Noch keine Social Media Links vorhanden</p>
           </div>
         ) : (
-          links.map((link) => {
+          links.map((link, index) => {
             const IconComponent = getIconComponent(link.icon);
+            const dragProps = getItemProps(index);
             return (
               <div
                 key={link.id}
+                onDragOver={dragProps.onDragOver}
+                onDragLeave={dragProps.onDragLeave}
+                onDrop={dragProps.onDrop}
                 className={`p-3 sm:p-4 rounded-xl transition-all ${!link.is_visible ? 'opacity-50' : ''}`}
-                style={{ backgroundColor: "var(--panel)", border: "1px solid var(--border)" }}
+                style={{
+                  backgroundColor: "var(--panel)",
+                  border: overIndex === index ? "1px solid var(--accent)" : "1px solid var(--border)",
+                }}
               >
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                  {/* Drag handle placeholder - hidden on mobile */}
-                  <div className="hidden sm:block text-muted cursor-move flex-shrink-0">
+                  {/* Drag handle - hidden on mobile */}
+                  <div
+                    draggable
+                    onDragStart={dragProps.onDragStart}
+                    onDragEnd={dragProps.onDragEnd}
+                    className="hidden sm:block text-muted cursor-grab active:cursor-grabbing flex-shrink-0"
+                    title="Zum Sortieren ziehen"
+                  >
                     <GripVertical size={20} />
                   </div>
 
