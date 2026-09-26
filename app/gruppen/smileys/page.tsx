@@ -6,6 +6,14 @@ import { Clock, MapPin, Calendar } from "lucide-react";
 export const metadata = {
   title: "Smileys — DanceMotion Eschweiler",
   description: "Fröhliche Tanzgruppe für Kinder mit Bewegung und Musik.",
+  alternates: { canonical: "/gruppen/smileys" },
+  openGraph: {
+    type: "website",
+    url: "https://dancemotion.org/gruppen/smileys",
+    title: "Smileys — DanceMotion Eschweiler",
+    description: "Fröhliche Tanzgruppe für Kinder mit Bewegung und Musik.",
+    images: ["/og-image.jpg"],
+  },
 };
 
 export default function SmileysPage() {

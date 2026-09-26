@@ -6,6 +6,14 @@ import { Clock, MapPin, Calendar } from "lucide-react";
 export const metadata = {
   title: "Emotion — DanceMotion Eschweiler",
   description: "Ausdrucksstarker Tanz für Jugendliche und Erwachsene.",
+  alternates: { canonical: "/gruppen/emotion" },
+  openGraph: {
+    type: "website",
+    url: "https://dancemotion.org/gruppen/emotion",
+    title: "Emotion — DanceMotion Eschweiler",
+    description: "Ausdrucksstarker Tanz für Jugendliche und Erwachsene.",
+    images: ["/og-image.jpg"],
+  },
 };
 
 export default function EmotionPage() {

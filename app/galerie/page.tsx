@@ -4,6 +4,14 @@ import GalleryView from "../components/GalleryView"
 export const metadata = {
   title: "Galerie — DanceMotion Eschweiler",
   description: "Bilder von unseren Auftritten, Events und Trainings.",
+  alternates: { canonical: "/galerie" },
+  openGraph: {
+    type: "website",
+    url: "https://dancemotion.org/galerie",
+    title: "Galerie — DanceMotion Eschweiler",
+    description: "Bilder von unseren Auftritten, Events und Trainings.",
+    images: ["/og-image.jpg"],
+  },
 }
 
 export default function GalleryPage() {

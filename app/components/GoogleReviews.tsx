@@ -165,7 +165,7 @@ export default function GoogleReviews() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={review.profile_photo_url}
-                      alt=""
+                      alt={`Profilbild von ${review.author_name}`}
                       className="h-11 w-11 rounded-full object-cover"
                       width={44}
                       height={44}

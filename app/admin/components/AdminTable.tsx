@@ -178,7 +178,7 @@ export default function AdminTable<T extends Record<string, any>>({
               {columns.map((col) => (
                 <th
                   key={String(col.key)}
-                  className={`px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider ${
+                  className={`px-3 sm:px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider ${
                     col.sortable ? 'cursor-pointer hover:text-white transition' : ''
                   } ${col.className || ''}`}
                   onClick={() => col.sortable && handleSort(String(col.key))}
@@ -226,7 +226,7 @@ export default function AdminTable<T extends Record<string, any>>({
                     </td>
                   )}
                   {columns.map((col) => (
-                    <td key={String(col.key)} className={`px-4 py-3 text-sm text-slate-300 ${col.className || ''}`}>
+                    <td key={String(col.key)} className={`px-3 sm:px-4 py-3 text-sm text-slate-300 ${col.className || ''}`}>
                       {col.render ? col.render(item, index) : String(item[col.key as keyof T] ?? '')}
                     </td>
                   ))}

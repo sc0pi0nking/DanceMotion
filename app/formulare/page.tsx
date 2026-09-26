@@ -1,8 +1,16 @@
 import DocumentsView from '@/app/components/DocumentsView';
 
 export const metadata = {
-  title: 'Dokumente - DanceMotion',
-  description: 'Download von wichtigen Dokumenten',
+  title: 'Dokumente — DanceMotion Eschweiler',
+  description: 'Download von wichtigen Dokumenten, Formularen und Unterlagen von DanceMotion Eschweiler.',
+  alternates: { canonical: '/formulare' },
+  openGraph: {
+    type: 'website',
+    url: 'https://dancemotion.org/formulare',
+    title: 'Dokumente — DanceMotion Eschweiler',
+    description: 'Download von wichtigen Dokumenten, Formularen und Unterlagen von DanceMotion Eschweiler.',
+    images: ['/og-image.jpg'],
+  },
 };
 
 export default function FormularePage() {

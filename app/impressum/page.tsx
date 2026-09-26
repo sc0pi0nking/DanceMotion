@@ -4,6 +4,7 @@ import EditableContent from "@/app/components/EditableContent";
 export const metadata = {
   title: "Impressum — DanceMotion Eschweiler",
   description: "Impressum und Kontaktinformationen von DanceMotion Eschweiler.",
+  alternates: { canonical: "/impressum" },
 };
 
 export default function ImpressumPage() {

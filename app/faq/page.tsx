@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import FAQAccordion from '@/app/components/FAQAccordion';
 import { supabaseServer } from '@/lib/supabase';
+import { getFaqSchema } from '@/lib/structured-data';
 
 export const metadata = {
   title: 'Häufig gestellte Fragen — DanceMotion Eschweiler',
@@ -38,6 +39,12 @@ export default async function FAQPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-16">
+      {faqs.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(getFaqSchema(faqs)) }}
+        />
+      )}
       <Link
         href="/"
         className="inline-flex items-center gap-2 text-sm hover:underline"

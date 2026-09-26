@@ -4,6 +4,7 @@ import EditableContent from "@/app/components/EditableContent";
 export const metadata = {
   title: "Datenschutz — DanceMotion Eschweiler",
   description: "Datenschutzerklärung von DanceMotion Eschweiler.",
+  alternates: { canonical: "/datenschutz" },
 };
 
 export default function DatenschutzPage() {
