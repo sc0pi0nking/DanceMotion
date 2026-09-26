@@ -2,13 +2,14 @@
 
 import { useEffect, useState, type ChangeEvent } from 'react'
 import { ImageIcon, Save, RefreshCw, Eye, AlertCircle, CheckCircle, Upload } from 'lucide-react'
-import { AdminPageHeader } from '@/app/admin/components'
+import { AdminPageHeader, CropModal } from '@/app/admin/components'
 
 export default function HeroBannerAdminPage() {
   const [imageUrl, setImageUrl] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [cropSrc, setCropSrc] = useState<string | null>(null)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   useEffect(() => {
@@ -66,7 +67,11 @@ export default function HeroBannerAdminPage() {
   const handleUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    setCropSrc(URL.createObjectURL(file))
+    e.target.value = ''
+  }
 
+  const uploadHeroImage = async (file: File) => {
     try {
       setUploading(true)
       setMessage(null)
@@ -93,7 +98,6 @@ export default function HeroBannerAdminPage() {
       setMessage({ type: 'error', text: `❌ ${err.message || 'Upload fehlgeschlagen'}` })
     } finally {
       setUploading(false)
-      e.target.value = ''
     }
   }
 
@@ -110,6 +114,24 @@ export default function HeroBannerAdminPage() {
 
   return (
     <div className="space-y-6">
+      {cropSrc && (
+        <CropModal
+          imageSrc={cropSrc}
+          aspect={16 / 9}
+          fileName="hero-banner.jpg"
+          title="Hero-Banner zuschneiden"
+          onCancel={() => {
+            URL.revokeObjectURL(cropSrc)
+            setCropSrc(null)
+          }}
+          onConfirm={async (file) => {
+            const src = cropSrc
+            setCropSrc(null)
+            await uploadHeroImage(file)
+            if (src) URL.revokeObjectURL(src)
+          }}
+        />
+      )}
       <AdminPageHeader
         icon={ImageIcon}
         title="Hero Banner"

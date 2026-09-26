@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, Eye, EyeOff, Save, X, Upload, ArrowUp, ArrowDown, AlertCircle, Loader2, GripVertical } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { useDragSort } from '@/app/admin/components';
+import { useDragSort, CropModal } from '@/app/admin/components';
 import Image from 'next/image';
 
 interface TeamMember {
@@ -30,6 +30,7 @@ export default function TeamAdminPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -74,21 +75,25 @@ export default function TeamAdminPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg'];
+    if (!allowedTypes.includes(file.type)) {
+      setError(`Dateiformat nicht erlaubt: ${file.type}. Erlaubte Formate: JPG, PNG, GIF, WebP`);
+      return;
+    }
+
+    // Bild zuerst zuschneiden lassen
+    setCropSrc(URL.createObjectURL(file));
+    e.target.value = '';
+  };
+
+  const uploadTeamImage = async (file: File) => {
     try {
       setError(null);
       setUploading(true);
-      console.log('📤 Uploading image:', file.name, 'Type:', file.type, 'Size:', file.size);
 
-      // Validiere File-Typ
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jpg'];
-      if (!allowedTypes.includes(file.type)) {
-        throw new Error(`Dateiformat nicht erlaubt: ${file.type}. Erlaubte Formate: JPG, PNG, GIF, WebP`);
-      }
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
 
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${file.name.split('.').pop()}`;
-      console.log('📝 Filename:', fileName);
-      
-      const { error: uploadErr, data } = await supabase.storage
+      const { error: uploadErr } = await supabase.storage
         .from('team-images')
         .upload(fileName, file, {
           contentType: file.type,
@@ -96,22 +101,17 @@ export default function TeamAdminPage() {
         });
 
       if (uploadErr) {
-        console.error('❌ Upload error:', uploadErr);
-        console.error('Details:', JSON.stringify(uploadErr, null, 2));
         throw new Error(`Upload fehlgeschlagen: ${uploadErr.message}`);
       }
 
-      console.log('✅ File uploaded, data:', data);
-
       const { data: publicUrl } = supabase.storage.from('team-images').getPublicUrl(fileName);
-      console.log('✅ Upload successful:', publicUrl.publicUrl);
-      
+
       setFormData(prev => ({ ...prev, image_url: publicUrl.publicUrl }));
       setSuccess('Bild erfolgreich hochgeladen!');
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Fehler beim Hochladen';
-      console.error('❌ Upload error:', err);
+      console.error('Upload error:', err);
       setError(msg);
     } finally {
       setUploading(false);
@@ -347,6 +347,24 @@ export default function TeamAdminPage() {
 
   return (
     <div className="p-4 md:p-6 max-w-5xl mx-auto">
+      {cropSrc && (
+        <CropModal
+          imageSrc={cropSrc}
+          aspect={1}
+          cropShape="round"
+          title="Profilbild zuschneiden"
+          onCancel={() => {
+            URL.revokeObjectURL(cropSrc);
+            setCropSrc(null);
+          }}
+          onConfirm={async (file) => {
+            const src = cropSrc;
+            setCropSrc(null);
+            await uploadTeamImage(file);
+            if (src) URL.revokeObjectURL(src);
+          }}
+        />
+      )}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Team-Mitglieder</h1>
         {!showForm && (

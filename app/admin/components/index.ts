@@ -8,6 +8,7 @@ export { default as AdminModal, ModalCancelButton, ModalConfirmButton } from './
 export { default as BulkActionBar } from './BulkActionBar'
 export type { BulkAction } from './BulkActionBar'
 export { useDragSort } from './useDragSort'
+export { default as CropModal } from './CropModal'
 export {
   AdminInput,
   AdminTextarea,
