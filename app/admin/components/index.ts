@@ -5,6 +5,8 @@ export { default as AdminTable } from './AdminTable'
 export { default as AdminEmptyState } from './AdminEmptyState'
 export { default as AdminLoadingState } from './AdminLoadingState'
 export { default as AdminModal, ModalCancelButton, ModalConfirmButton } from './AdminModal'
+export { default as BulkActionBar } from './BulkActionBar'
+export type { BulkAction } from './BulkActionBar'
 export {
   AdminInput,
   AdminTextarea,

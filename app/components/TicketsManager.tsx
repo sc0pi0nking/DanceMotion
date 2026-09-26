@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Trash2, ChevronDown, MessageSquare, Clock, CheckCircle, Plus, X, ImagePlus, Image } from 'lucide-react'
+import { Trash2, ChevronDown, MessageSquare, Clock, CheckCircle, Plus, X, ImagePlus, Image, CheckSquare } from 'lucide-react'
+import { BulkActionBar } from '@/app/admin/components'
 
 interface Ticket {
   id: string
@@ -68,6 +69,9 @@ export default function TicketsManager() {
 
   // Image lightbox
   const [lightboxImage, setLightboxImage] = useState<string | null>(null)
+
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkBusy, setBulkBusy] = useState(false)
 
   useEffect(() => {
     loadTickets()
@@ -241,6 +245,58 @@ export default function TicketsManager() {
       setSelectedTicket(null)
     } catch (error) {
       console.error('Delete failed:', error)
+    }
+  }
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  async function handleBulkDelete() {
+    const ids = Array.from(selectedIds)
+    if (ids.length === 0) return
+    if (!confirm(`${ids.length} Tickets wirklich löschen?`)) return
+    setBulkBusy(true)
+    try {
+      await Promise.all(
+        ids.map((id) => fetch(`/api/admin/tickets/${id}`, { method: 'DELETE', credentials: 'include' }))
+      )
+      setSelectedIds(new Set())
+      if (selectedTicket && ids.includes(selectedTicket.id)) setSelectedTicket(null)
+      loadTickets()
+    } catch (error) {
+      console.error('Bulk delete failed:', error)
+    } finally {
+      setBulkBusy(false)
+    }
+  }
+
+  async function handleBulkStatus(status: string) {
+    const ids = Array.from(selectedIds)
+    if (ids.length === 0) return
+    setBulkBusy(true)
+    try {
+      await Promise.all(
+        ids.map((id) =>
+          fetch(`/api/admin/tickets/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ status }),
+          })
+        )
+      )
+      setSelectedIds(new Set())
+      loadTickets()
+    } catch (error) {
+      console.error('Bulk status update failed:', error)
+    } finally {
+      setBulkBusy(false)
     }
   }
 
@@ -503,33 +559,41 @@ export default function TicketsManager() {
               </div>
             ) : (
               filteredTickets.map((ticket) => (
-                <button
-                  key={ticket.id}
-                  onClick={() => setSelectedTicket(ticket)}
-                  className={`w-full text-left p-3.5 rounded-lg border-2 transition-all ${
-                    selectedTicket?.id === ticket.id
-                      ? 'border-accent bg-accent/10 dark:bg-accent/5 shadow-md'
-                      : 'border-gray-300 dark:border-gray-600 hover:border-accent/50 hover:bg-gray-100 dark:hover:bg-gray-700/50'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">
-                        {ticket.title}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 font-medium">
-                        {new Date(ticket.created_at).toLocaleDateString('de-DE', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: '2-digit',
-                        })}
-                      </p>
+                <div key={ticket.id} className="relative">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.has(ticket.id)}
+                    onChange={() => toggleSelect(ticket.id)}
+                    aria-label="Ticket auswählen"
+                    className="absolute top-3 left-3 z-10 h-4 w-4 rounded border-gray-300 text-accent focus:ring-accent"
+                  />
+                  <button
+                    onClick={() => setSelectedTicket(ticket)}
+                    className={`w-full text-left p-3.5 pl-9 rounded-lg border-2 transition-all ${
+                      selectedTicket?.id === ticket.id
+                        ? 'border-accent bg-accent/10 dark:bg-accent/5 shadow-md'
+                        : 'border-gray-300 dark:border-gray-600 hover:border-accent/50 hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">
+                          {ticket.title}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5 font-medium">
+                          {new Date(ticket.created_at).toLocaleDateString('de-DE', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: '2-digit',
+                          })}
+                        </p>
+                      </div>
+                      <span className={`text-xs px-2.5 py-1 rounded-md font-bold whitespace-nowrap ${getStatusColor(ticket.status)}`}>
+                        {statusLabels[ticket.status as keyof typeof statusLabels]}
+                      </span>
                     </div>
-                    <span className={`text-xs px-2.5 py-1 rounded-md font-bold whitespace-nowrap ${getStatusColor(ticket.status)}`}>
-                      {statusLabels[ticket.status as keyof typeof statusLabels]}
-                    </span>
-                  </div>
-                </button>
+                  </button>
+                </div>
               ))
             )}
           </div>
@@ -745,6 +809,17 @@ export default function TicketsManager() {
         )}
       </div>
     </div>
+
+      <BulkActionBar
+        count={selectedIds.size}
+        busy={bulkBusy}
+        itemLabel="Tickets"
+        onClear={() => setSelectedIds(new Set())}
+        actions={[
+          { label: 'Gelöst', icon: CheckCircle, onClick: () => handleBulkStatus('resolved') },
+          { label: 'Löschen', icon: Trash2, variant: 'danger', onClick: handleBulkDelete },
+        ]}
+      />
     </div>
   )
 }

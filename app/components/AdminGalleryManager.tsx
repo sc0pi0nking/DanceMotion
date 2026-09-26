@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Upload, Trash2, Image as ImageIcon, X, Plus, Pencil, Eye, EyeOff, Images } from 'lucide-react'
+import { Upload, Trash2, Image as ImageIcon, X, Plus, Pencil, Eye, EyeOff, Images, CheckSquare } from 'lucide-react'
 import { useDropzone } from 'react-dropzone'
 import Image from 'next/image'
+import { BulkActionBar } from '@/app/admin/components'
 
 interface GalleryImage {
   url: string
@@ -51,6 +52,8 @@ export default function AdminGalleryManager() {
   const [addImageFiles, setAddImageFiles] = useState<File[]>([])
   const [error, setError] = useState<string>('')
   const [expandedGallery, setExpandedGallery] = useState<string | null>(null)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkBusy, setBulkBusy] = useState(false)
 
   useEffect(() => {
     loadGalleries()
@@ -318,6 +321,33 @@ export default function AdminGalleryManager() {
     }
   }
 
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  async function handleBulkDelete() {
+    const ids = Array.from(selectedIds)
+    if (ids.length === 0) return
+    if (!confirm(`${ids.length} Alben mit allen Bildern wirklich löschen?`)) return
+    setBulkBusy(true)
+    try {
+      await Promise.all(
+        ids.map((id) => fetch(`/api/admin/gallery/${id}`, { method: 'DELETE', credentials: 'include' }))
+      )
+      setSelectedIds(new Set())
+      loadGalleries()
+    } catch (error) {
+      console.error('Bulk delete failed:', error)
+    } finally {
+      setBulkBusy(false)
+    }
+  }
+
   async function updateImageMetadata(galleryId: string, imageIndex: number) {
     try {
       const res = await fetch(`/api/admin/gallery/${galleryId}`, {
@@ -379,6 +409,19 @@ export default function AdminGalleryManager() {
 
       {/* Gallery / Album List */}
       <div className="space-y-4">
+        {galleries.length > 0 && (
+          <button
+            type="button"
+            onClick={() => {
+              const allSelected = galleries.every((g) => selectedIds.has(g.id))
+              setSelectedIds(allSelected ? new Set() : new Set(galleries.map((g) => g.id)))
+            }}
+            className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition"
+          >
+            <CheckSquare size={16} />
+            {galleries.every((g) => selectedIds.has(g.id)) ? 'Auswahl aufheben' : 'Alle auswählen'}
+          </button>
+        )}
         {galleries.map((gallery) => (
           <div
             key={gallery.id}
@@ -389,6 +432,14 @@ export default function AdminGalleryManager() {
               className="flex items-center gap-4 p-4 cursor-pointer hover:bg-slate-750"
               onClick={() => setExpandedGallery(expandedGallery === gallery.id ? null : gallery.id)}
             >
+              <input
+                type="checkbox"
+                checked={selectedIds.has(gallery.id)}
+                onClick={(e) => e.stopPropagation()}
+                onChange={() => toggleSelect(gallery.id)}
+                aria-label={`${gallery.title} auswählen`}
+                className="h-4 w-4 flex-shrink-0 rounded bg-slate-700 border-slate-600 text-teal-500 focus:ring-teal-500"
+              />
               {/* Cover thumbnail */}
               <div className="w-16 h-16 rounded-lg overflow-hidden bg-slate-700 flex-shrink-0">
                 {gallery.images.length > 0 ? (
@@ -516,6 +567,16 @@ export default function AdminGalleryManager() {
           <p className="text-sm mt-1">Erstelle dein erstes Album mit dem Button oben</p>
         </div>
       )}
+
+      <BulkActionBar
+        count={selectedIds.size}
+        busy={bulkBusy}
+        itemLabel="Alben"
+        onClear={() => setSelectedIds(new Set())}
+        actions={[
+          { label: 'Löschen', icon: Trash2, variant: 'danger', onClick: handleBulkDelete },
+        ]}
+      />
 
       {/* === CREATE ALBUM MODAL === */}
       {showCreateModal && (

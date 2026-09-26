@@ -13,6 +13,7 @@ import {
   Clock,
   XCircle
 } from 'lucide-react';
+import { BulkActionBar } from '@/app/admin/components';
 
 interface EventRequest {
   id: string;
@@ -50,6 +51,8 @@ export default function EventRequestsManager() {
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState<EventRequest | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   useEffect(() => {
     fetchRequests();
@@ -123,6 +126,57 @@ export default function EventRequestsManager() {
     }
   };
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleBulkDelete = async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    if (!confirm(`${ids.length} Anfragen wirklich löschen?`)) return;
+    setBulkBusy(true);
+    try {
+      await Promise.all(
+        ids.map((id) => fetch(`/api/admin/event-requests/${id}`, { method: 'DELETE' }))
+      );
+      setSelectedIds(new Set());
+      if (selectedRequest && ids.includes(selectedRequest.id)) setSelectedRequest(null);
+      fetchRequests();
+    } catch (error) {
+      console.error('Bulk delete failed:', error);
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  const handleBulkStatus = async (status: string) => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    setBulkBusy(true);
+    try {
+      await Promise.all(
+        ids.map((id) =>
+          fetch(`/api/admin/event-requests/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status }),
+          })
+        )
+      );
+      setSelectedIds(new Set());
+      fetchRequests();
+    } catch (error) {
+      console.error('Bulk status update failed:', error);
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
   const filteredRequests = filterStatus === 'all' 
     ? requests 
     : requests.filter(r => r.status === filterStatus);
@@ -187,6 +241,14 @@ export default function EventRequestsManager() {
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(request.id)}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={() => toggleSelect(request.id)}
+                        aria-label="Anfrage auswählen"
+                        className="mt-1 h-4 w-4 flex-shrink-0 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <h3 className="font-semibold truncate text-gray-900 dark:text-white">{request.name}</h3>
@@ -352,6 +414,17 @@ export default function EventRequestsManager() {
           </div>
         )}
       </div>
+
+      <BulkActionBar
+        count={selectedIds.size}
+        busy={bulkBusy}
+        itemLabel="Anfragen"
+        onClear={() => setSelectedIds(new Set())}
+        actions={[
+          { label: 'Abgeschlossen', icon: CheckCircle2, onClick: () => handleBulkStatus('completed') },
+          { label: 'Löschen', icon: Trash2, variant: 'danger', onClick: handleBulkDelete },
+        ]}
+      />
     </div>
   );
 }

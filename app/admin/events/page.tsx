@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, Trash2, Edit2, ChevronDown, Calendar, X } from 'lucide-react'
+import { Plus, Trash2, Edit2, ChevronDown, Calendar, X, CheckSquare } from 'lucide-react'
 import type { Event } from '@/lib/supabase'
-import { AdminPageHeader, AdminCard, AdminLoadingState, AdminEmptyState, AdminModal, ModalCancelButton, ModalConfirmButton, AdminInput, AdminSelect, FormGroup } from '../components'
+import { AdminPageHeader, AdminCard, AdminLoadingState, AdminEmptyState, AdminModal, ModalCancelButton, ModalConfirmButton, AdminInput, AdminSelect, FormGroup, BulkActionBar } from '../components'
 
 export default function AdminEventsPage() {
   const [events, setEvents] = useState<Event[]>([])
@@ -11,6 +11,8 @@ export default function AdminEventsPage() {
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('all')
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkBusy, setBulkBusy] = useState(false)
   const [formData, setFormData] = useState<Partial<Event>>({
     title: '',
     date: '',
@@ -78,6 +80,34 @@ export default function AdminEventsPage() {
     setFormData(event)
     setEditingId(event.id)
     setShowForm(true)
+  }
+
+  function toggleSelect(id: string): void {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  async function handleBulkDelete(): Promise<void> {
+    const ids = Array.from(selectedIds)
+    if (ids.length === 0) return
+    if (!confirm(`${ids.length} Termine wirklich löschen?`)) return
+
+    setBulkBusy(true)
+    try {
+      await Promise.all(
+        ids.map((id) => fetch(`/api/admin/events/${id}`, { method: 'DELETE' }))
+      )
+      setSelectedIds(new Set())
+      await loadEvents()
+    } catch (error) {
+      console.error('Bulk-Löschen fehlgeschlagen:', error)
+    } finally {
+      setBulkBusy(false)
+    }
   }
 
   function resetForm(): void {
@@ -283,16 +313,40 @@ export default function AdminEventsPage() {
         />
       ) : (
         <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                const allSelected = filteredEvents.every((e) => selectedIds.has(e.id))
+                setSelectedIds(allSelected ? new Set() : new Set(filteredEvents.map((e) => e.id)))
+              }}
+              className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition"
+            >
+              <CheckSquare size={16} />
+              {filteredEvents.every((e) => selectedIds.has(e.id)) ? 'Auswahl aufheben' : 'Alle auswählen'}
+            </button>
+          </div>
           {filteredEvents.map((event) => (
             <EventCard
               key={event.id}
               event={event}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              selected={selectedIds.has(event.id)}
+              onToggleSelect={toggleSelect}
             />
           ))}
         </div>
       )}
+
+      <BulkActionBar
+        count={selectedIds.size}
+        busy={bulkBusy}
+        onClear={() => setSelectedIds(new Set())}
+        actions={[
+          { label: 'Löschen', icon: Trash2, variant: 'danger', onClick: handleBulkDelete },
+        ]}
+      />
     </div>
   )
 }
@@ -301,17 +355,29 @@ interface EventCardProps {
   event: Event
   onEdit: (event: Event) => void
   onDelete: (id: string) => void
+  selected?: boolean
+  onToggleSelect?: (id: string) => void
 }
 
-function EventCard({ event, onEdit, onDelete }: EventCardProps) {
+function EventCard({ event, onEdit, onDelete, selected = false, onToggleSelect }: EventCardProps) {
   const [expanded, setExpanded] = useState(false)
 
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-lg hover:border-slate-600 transition">
+    <div className={`bg-slate-800 border rounded-lg transition ${selected ? 'border-teal-500/60 bg-teal-500/5' : 'border-slate-700 hover:border-slate-600'}`}>
       <div
         className="p-3 md:p-4 flex items-start justify-between cursor-pointer gap-2"
         onClick={() => setExpanded(!expanded)}
       >
+        {onToggleSelect && (
+          <input
+            type="checkbox"
+            checked={selected}
+            onClick={(e) => e.stopPropagation()}
+            onChange={() => onToggleSelect(event.id)}
+            aria-label={`${event.title} auswählen`}
+            className="mt-1 h-4 w-4 flex-shrink-0 rounded bg-slate-700 border-slate-600 text-teal-500 focus:ring-teal-500"
+          />
+        )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 md:gap-3 mb-2">
             <div className="text-xl md:text-2xl font-bold text-teal-400 flex-shrink-0">

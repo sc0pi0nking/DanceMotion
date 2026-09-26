@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Save, X, Eye, EyeOff } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, Eye, EyeOff, CheckSquare } from 'lucide-react';
+import { BulkActionBar } from '@/app/admin/components';
 
 interface FAQ {
   id: string;
@@ -29,6 +30,8 @@ export default function FAQManager() {
   const [isCreating, setIsCreating] = useState(false);
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   const [formData, setFormData] = useState({
     question: '',
@@ -135,6 +138,59 @@ export default function FAQManager() {
 
   const togglePublished = async (faq: FAQ) => {
     await handleUpdate(faq.id, { published: !faq.published });
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleBulkDelete = async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    if (!confirm(`${ids.length} FAQs wirklich löschen?`)) return;
+    setBulkBusy(true);
+    try {
+      await Promise.all(
+        ids.map((id) => fetch(`/api/admin/faqs/${id}`, { method: 'DELETE', credentials: 'include' }))
+      );
+      setSelectedIds(new Set());
+      showMessage('success', `✅ ${ids.length} FAQs gelöscht`);
+      fetchFAQs();
+    } catch (error: any) {
+      showMessage('error', `❌ ${error.message || 'Bulk-Löschen fehlgeschlagen'}`);
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  const handleBulkPublish = async (published: boolean) => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    setBulkBusy(true);
+    try {
+      await Promise.all(
+        ids.map((id) =>
+          fetch(`/api/admin/faqs/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ published }),
+          })
+        )
+      );
+      setSelectedIds(new Set());
+      showMessage('success', published ? `✅ ${ids.length} FAQs veröffentlicht` : `✅ ${ids.length} FAQs verborgen`);
+      fetchFAQs();
+    } catch (error: any) {
+      showMessage('error', `❌ ${error.message || 'Bulk-Aktion fehlgeschlagen'}`);
+    } finally {
+      setBulkBusy(false);
+    }
   };
 
   const resetForm = () => {
@@ -315,6 +371,19 @@ export default function FAQManager() {
 
       {/* FAQ List */}
       <div className="space-y-3">
+        {filteredFAQs.length > 0 && (
+          <button
+            type="button"
+            onClick={() => {
+              const allSelected = filteredFAQs.every((f) => selectedIds.has(f.id));
+              setSelectedIds(allSelected ? new Set() : new Set(filteredFAQs.map((f) => f.id)));
+            }}
+            className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition"
+          >
+            <CheckSquare size={16} />
+            {filteredFAQs.every((f) => selectedIds.has(f.id)) ? 'Auswahl aufheben' : 'Alle auswählen'}
+          </button>
+        )}
         {filteredFAQs.map((faq) => (
           <div
             key={faq.id}
@@ -386,6 +455,13 @@ export default function FAQManager() {
               /* View Mode */
               <div>
                 <div className="flex items-start justify-between gap-4">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.has(faq.id)}
+                    onChange={() => toggleSelect(faq.id)}
+                    aria-label="FAQ auswählen"
+                    className="mt-1 h-4 w-4 flex-shrink-0 rounded bg-slate-700 border-slate-600 text-teal-500 focus:ring-teal-500"
+                  />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2 flex-wrap">
                       <span className="px-2 py-0.5 text-xs font-medium bg-teal-500/20 text-teal-300 rounded">
@@ -444,6 +520,17 @@ export default function FAQManager() {
           </div>
         )}
       </div>
+
+      <BulkActionBar
+        count={selectedIds.size}
+        busy={bulkBusy}
+        onClear={() => setSelectedIds(new Set())}
+        actions={[
+          { label: 'Veröffentlichen', icon: Eye, onClick: () => handleBulkPublish(true) },
+          { label: 'Verbergen', icon: EyeOff, onClick: () => handleBulkPublish(false) },
+          { label: 'Löschen', icon: Trash2, variant: 'danger', onClick: handleBulkDelete },
+        ]}
+      />
     </div>
   );
 }
