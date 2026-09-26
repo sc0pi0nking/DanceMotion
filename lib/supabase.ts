@@ -56,6 +56,7 @@ export interface Event {
   updated_at: string
   updated_by?: string
   is_published: boolean
+  publish_at?: string | null
 }
 
 export interface ContentItem {
@@ -80,6 +81,7 @@ export interface GalleryItem {
     caption?: string
   }>
   is_published: boolean
+  publish_at?: string | null
   created_at: string
   updated_at: string
   updated_by?: string

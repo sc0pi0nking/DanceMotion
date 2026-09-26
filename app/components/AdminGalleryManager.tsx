@@ -20,7 +20,17 @@ interface GalleryItem {
   description?: string
   images: GalleryImage[]
   is_published: boolean
+  publish_at?: string | null
   created_at: string
+}
+
+// ISO-Timestamp -> 'YYYY-MM-DDTHH:mm' (lokal) für datetime-local-Input
+function toLocalInput(iso?: string | null): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return ''
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
 const categoryLabels: Record<string, string> = {
@@ -41,12 +51,13 @@ export default function AdminGalleryManager() {
   const [editingGallery, setEditingGallery] = useState<GalleryItem | null>(null)
   const [editingImage, setEditingImage] = useState<{ galleryId: string; index: number } | null>(null)
   const [editImageData, setEditImageData] = useState({ title: '', description: '', is_hidden: false })
-  const [editGalleryData, setEditGalleryData] = useState({ title: '', category: 'general', description: '', is_published: true })
+  const [editGalleryData, setEditGalleryData] = useState({ title: '', category: 'general', description: '', is_published: true, publish_at: '' })
   const [newGallery, setNewGallery] = useState({
     title: '',
     category: 'general',
     description: '',
     is_published: true,
+    publish_at: '',
   })
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const [addImageFiles, setAddImageFiles] = useState<File[]>([])
@@ -197,6 +208,7 @@ export default function AdminGalleryManager() {
           category: newGallery.category,
           description: newGallery.description,
           is_published: newGallery.is_published,
+          publish_at: newGallery.publish_at || null,
           images: uploaded,
         }),
       })
@@ -212,7 +224,7 @@ export default function AdminGalleryManager() {
           setUploadedFiles([])
           setUploadProgress(0)
           setUploadStatus('')
-          setNewGallery({ title: '', category: 'general', description: '', is_published: true })
+          setNewGallery({ title: '', category: 'general', description: '', is_published: true, publish_at: '' })
           loadGalleries()
         }, failed.length > 0 ? 2500 : 1500)
       } else {
@@ -497,6 +509,7 @@ export default function AdminGalleryManager() {
                       category: gallery.category,
                       description: gallery.description || '',
                       is_published: gallery.is_published,
+                      publish_at: gallery.publish_at || '',
                     })
                   }}
                   className="p-2 rounded-lg bg-slate-700 hover:bg-blue-600 text-slate-300 hover:text-white transition-colors"
@@ -644,6 +657,24 @@ export default function AdminGalleryManager() {
                   rows={2}
                   placeholder="Kurze Beschreibung des Albums..."
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1.5 text-slate-300">Geplante Veröffentlichung (optional)</label>
+                <input
+                  type="datetime-local"
+                  value={toLocalInput(newGallery.publish_at)}
+                  onChange={(e) =>
+                    setNewGallery({
+                      ...newGallery,
+                      publish_at: e.target.value ? new Date(e.target.value).toISOString() : '',
+                    })
+                  }
+                  className="w-full px-3 py-2 rounded-lg bg-slate-700 border border-slate-600 text-white focus:border-teal-500 focus:outline-none"
+                />
+                <p className="mt-1 text-xs text-slate-500">
+                  Leer = sofort sichtbar (sofern veröffentlicht). Mit Datum/Uhrzeit erscheint das Album erst ab dann.
+                </p>
               </div>
 
               {/* Dropzone */}
@@ -827,6 +858,24 @@ export default function AdminGalleryManager() {
                 />
                 <span className="text-sm font-medium text-slate-300">Veröffentlicht</span>
               </label>
+
+              <div>
+                <label className="block text-sm font-medium mb-1.5 text-slate-300">Geplante Veröffentlichung (optional)</label>
+                <input
+                  type="datetime-local"
+                  value={toLocalInput(editGalleryData.publish_at)}
+                  onChange={(e) =>
+                    setEditGalleryData({
+                      ...editGalleryData,
+                      publish_at: e.target.value ? new Date(e.target.value).toISOString() : '',
+                    })
+                  }
+                  className="w-full px-3 py-2 rounded-lg bg-slate-700 border border-slate-600 text-white focus:border-teal-500 focus:outline-none"
+                />
+                <p className="mt-1 text-xs text-slate-500">
+                  Leer = sofort sichtbar. Mit Datum/Uhrzeit erscheint das Album erst ab diesem Zeitpunkt.
+                </p>
+              </div>
             </div>
 
             <div className="flex gap-3">

@@ -12,6 +12,7 @@ export async function GET(
       .select('*')
       .eq('id', id)
       .eq('is_published', true)
+      .or(`publish_at.is.null,publish_at.lte.${new Date().toISOString()}`)
       .single()
 
     if (error || !data) {

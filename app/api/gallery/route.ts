@@ -6,6 +6,7 @@ export async function GET() {
       .from('gallery')
       .select('*')
       .eq('is_published', true)
+      .or(`publish_at.is.null,publish_at.lte.${new Date().toISOString()}`)
       .order('created_at', { ascending: false })
 
     if (error) throw error

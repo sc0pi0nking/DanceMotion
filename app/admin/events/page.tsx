@@ -5,6 +5,15 @@ import { Plus, Trash2, Edit2, ChevronDown, Calendar, X, CheckSquare } from 'luci
 import type { Event } from '@/lib/supabase'
 import { AdminPageHeader, AdminCard, AdminLoadingState, AdminEmptyState, AdminModal, ModalCancelButton, ModalConfirmButton, AdminInput, AdminSelect, FormGroup, BulkActionBar } from '../components'
 
+// ISO-Timestamp -> 'YYYY-MM-DDTHH:mm' (lokal) für datetime-local-Input
+function toLocalInput(iso?: string | null): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return ''
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
 export default function AdminEventsPage() {
   const [events, setEvents] = useState<Event[]>([])
   const [loading, setLoading] = useState(true)
@@ -271,6 +280,23 @@ export default function AdminEventsPage() {
           </FormGroup>
 
           <div>
+            <AdminInput
+              type="datetime-local"
+              label="Geplante Veröffentlichung (optional)"
+              value={toLocalInput(formData.publish_at)}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  publish_at: e.target.value ? new Date(e.target.value).toISOString() : '',
+                })
+              }
+            />
+            <p className="mt-1 text-xs text-slate-500">
+              Leer lassen = sofort sichtbar. Mit Datum/Uhrzeit wird der Termin erst ab diesem Zeitpunkt öffentlich angezeigt.
+            </p>
+          </div>
+
+          <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">Gruppen</label>
             <div className="flex flex-wrap gap-3">
               {groupOptions.map((group) => (
@@ -399,6 +425,11 @@ function EventCard({ event, onEdit, onDelete, selected = false, onToggleSelect }
             <span className="inline-block px-2 py-0.5 md:py-1 bg-blue-500/20 text-blue-300 text-xs rounded">
               {event.category}
             </span>
+            {event.publish_at && new Date(event.publish_at) > new Date() && (
+              <span className="inline-block px-2 py-0.5 md:py-1 bg-amber-500/20 text-amber-300 text-xs rounded">
+                Geplant · {new Date(event.publish_at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
+              </span>
+            )}
             {event.groups?.slice(0, 2).map((group) => (
               <span key={group} className="inline-block px-2 py-0.5 md:py-1 bg-purple-500/20 text-purple-300 text-xs rounded">
                 {group}

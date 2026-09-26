@@ -49,6 +49,11 @@ export async function POST(req: Request) {
       event.time = null as any
     }
 
+    // Geplante Veröffentlichung: leerer String -> null (sofort sichtbar)
+    if ((event as any).publish_at === '') {
+      ;(event as any).publish_at = null
+    }
+
     console.log('Creating event:', event);
 
     const { data, error } = await supabaseServer

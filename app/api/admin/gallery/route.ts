@@ -80,6 +80,7 @@ export async function POST(req: Request) {
     let category = 'general'
     let description = ''
     let is_published = false
+    let publish_at: string | null = null
     let imageObjects: GalleryImage[] = []
 
     if (contentType.includes('application/json')) {
@@ -89,6 +90,7 @@ export async function POST(req: Request) {
       category = typeof body.category === 'string' && body.category ? body.category : 'general'
       description = typeof body.description === 'string' ? body.description : ''
       is_published = body.is_published === true || body.is_published === 'true'
+      publish_at = body.publish_at ? String(body.publish_at) : null
 
       const rawImages = Array.isArray(body.images) ? body.images : []
       imageObjects = rawImages
@@ -143,6 +145,7 @@ export async function POST(req: Request) {
         description,
         images: imageObjects,
         is_published,
+        publish_at,
       }])
       .select()
 

@@ -50,6 +50,11 @@ export async function PUT(
       event.time = null as any
     }
 
+    // Geplante Veröffentlichung: leerer String -> null (sofort sichtbar)
+    if ((event as any).publish_at === '') {
+      ;(event as any).publish_at = null
+    }
+
     const { data, error } = await supabaseServer
       .from('events')
       .update({

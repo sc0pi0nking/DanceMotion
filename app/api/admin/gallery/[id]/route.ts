@@ -140,6 +140,7 @@ export async function PATCH(
       if (metadata.category !== undefined) updateData.category = metadata.category
       if (metadata.description !== undefined) updateData.description = metadata.description
       if (metadata.is_published !== undefined) updateData.is_published = metadata.is_published
+      if (metadata.publish_at !== undefined) updateData.publish_at = metadata.publish_at === '' ? null : metadata.publish_at
 
       const { data, error } = await supabaseServer
         .from('gallery')

@@ -11,6 +11,7 @@ export async function fetchAllEvents(): Promise<Event[]> {
       .from('events')
       .select('*')
       .eq('is_published', true)
+      .or(`publish_at.is.null,publish_at.lte.${new Date().toISOString()}`)
       .order('date', { ascending: true })
 
     if (error) {
@@ -38,6 +39,7 @@ export async function fetchUpcomingEvents(limit?: number): Promise<Event[]> {
       .from('events')
       .select('*')
       .eq('is_published', true)
+      .or(`publish_at.is.null,publish_at.lte.${new Date().toISOString()}`)
       .gte('date', todayISO)
       .order('date', { ascending: true })
 
@@ -72,6 +74,7 @@ export async function fetchPastEvents(limit?: number): Promise<Event[]> {
       .from('events')
       .select('*')
       .eq('is_published', true)
+      .or(`publish_at.is.null,publish_at.lte.${new Date().toISOString()}`)
       .lt('date', todayISO)
       .order('date', { ascending: false })
 
@@ -103,6 +106,7 @@ export async function fetchEventById(id: string): Promise<Event | null> {
       .select('*')
       .eq('id', id)
       .eq('is_published', true)
+      .or(`publish_at.is.null,publish_at.lte.${new Date().toISOString()}`)
       .single()
 
     if (error) {
