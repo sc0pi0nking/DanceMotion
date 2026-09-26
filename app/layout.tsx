@@ -5,6 +5,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import ParallaxBackground from "./components/ParallaxBackground";
 import AnalyticsTracker from "./components/AnalyticsTracker";
+import { WebVitalsTracker } from "./components/WebVitalsTracker";
 import CookieBanner from "./components/CookieBanner";
 import AlertsDisplay from "./components/AlertsDisplay";
 import PublicShell from "./components/PublicShell";
@@ -96,6 +97,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}>
         {/* Analytics Tracking (DSGVO-konform) */}
         <AnalyticsTracker />
+        {/* Core Web Vitals (DSGVO-konform, nur mit Einwilligung) */}
+        <WebVitalsTracker />
         {/* Cookie Banner */}
         <CookieBanner />
         {/* Public-only elements (hidden on /admin/*) */}

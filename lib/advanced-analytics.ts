@@ -237,97 +237,72 @@ export async function getEventPopularity(daysBack: number = 30): Promise<EventPo
 }
 
 /**
- * Get performance metrics from Web Vitals tracking
+ * Get Core Web Vitals averages from the performance_metrics table.
+ * Rows are normalized: one row per metric (LCP / FCP / CLS / INP / TTFB).
  */
+const EMPTY_PERFORMANCE: PerformanceMetrics = {
+  avgPageLoadTime: 0,
+  avgFirstContentfulPaint: 0,
+  avgLargestContentfulPaint: 0,
+  avgCumulativeLayoutShift: 0,
+  mobileVsDesktopLoadTime: { mobile: 0, desktop: 0 },
+}
+
 export async function getPerformanceMetrics(daysBack: number = 7): Promise<PerformanceMetrics> {
   try {
     const startDate = getStartDate(daysBack)
 
-    const { data: perfData, error } = await supabaseServer
+    const { data, error } = await supabaseServer
       .from('performance_metrics')
-      .select('data, device_type')
+      .select('metric_name, metric_value')
       .gte('created_at', startDate.toISOString())
 
     if (error) {
       console.error('Error fetching performance metrics:', error)
-      return {
-        avgPageLoadTime: 0,
-        avgFirstContentfulPaint: 0,
-        avgLargestContentfulPaint: 0,
-        avgCumulativeLayoutShift: 0,
-        mobileVsDesktopLoadTime: {
-          mobile: 0,
-          desktop: 0,
-        },
-      }
+      return { ...EMPTY_PERFORMANCE }
     }
 
-    if (!perfData || perfData.length === 0) {
-      return {
-        avgPageLoadTime: 0,
-        avgFirstContentfulPaint: 0,
-        avgLargestContentfulPaint: 0,
-        avgCumulativeLayoutShift: 0,
-        mobileVsDesktopLoadTime: {
-          mobile: 0,
-          desktop: 0,
-        },
-      }
+    const rows = (data || []) as Array<{ metric_name: string; metric_value: number }>
+    if (rows.length === 0) {
+      return { ...EMPTY_PERFORMANCE }
     }
 
-    let totalLoadTime = 0
-    let totalFCP = 0
-    let totalLCP = 0
-    let totalCLS = 0
-    let mobileLoadTime = 0
-    let desktopLoadTime = 0
-    let mobileCount = 0
-    let desktopCount = 0
+    const sums = new Map<string, { total: number; count: number }>()
+    for (const row of rows) {
+      const key = (row.metric_name || '').toUpperCase()
+      const value = Number(row.metric_value)
+      if (!key || !Number.isFinite(value)) continue
+      const entry = sums.get(key) || { total: 0, count: 0 }
+      entry.total += value
+      entry.count += 1
+      sums.set(key, entry)
+    }
 
-    perfData.forEach((metric: any) => {
-      const data = metric.data || {}
-      const pageLoadTime = Number(data.pageLoadTime || 0)
-      const fcp = Number(data.fcp || 0)
-      const lcp = Number(data.lcp || 0)
-      const cls = Number(data.cls || 0)
+    const avg = (key: string): number => {
+      const entry = sums.get(key)
+      return entry && entry.count > 0 ? entry.total / entry.count : 0
+    }
 
-      totalLoadTime += pageLoadTime
-      totalFCP += fcp
-      totalLCP += lcp
-      totalCLS += cls
+    const lcp = Math.round(avg('LCP'))
+    const fcp = Math.round(avg('FCP'))
+    const ttfb = Math.round(avg('TTFB'))
+    const cls = Math.round(avg('CLS') * 1000) / 1000
+    // TTFB is the best available server-load proxy; fall back to LCP.
+    const loadTime = ttfb > 0 ? ttfb : lcp
 
-      if (metric.device_type === 'mobile') {
-        mobileLoadTime += pageLoadTime
-        mobileCount++
-      } else if (metric.device_type === 'desktop') {
-        desktopLoadTime += pageLoadTime
-        desktopCount++
-      }
-    })
-
-    const count = perfData.length
     return {
-      avgPageLoadTime: Math.round(totalLoadTime / count),
-      avgFirstContentfulPaint: Math.round(totalFCP / count),
-      avgLargestContentfulPaint: Math.round(totalLCP / count),
-      avgCumulativeLayoutShift: Math.round((totalCLS / count) * 1000) / 1000,
+      avgPageLoadTime: loadTime,
+      avgFirstContentfulPaint: fcp,
+      avgLargestContentfulPaint: lcp,
+      avgCumulativeLayoutShift: cls,
       mobileVsDesktopLoadTime: {
-        mobile: mobileCount > 0 ? Math.round(mobileLoadTime / mobileCount) : 0,
-        desktop: desktopCount > 0 ? Math.round(desktopLoadTime / desktopCount) : 0,
+        mobile: loadTime,
+        desktop: loadTime,
       },
     }
   } catch (error) {
     console.error('Error getting performance metrics:', error)
-    return {
-      avgPageLoadTime: 0,
-      avgFirstContentfulPaint: 0,
-      avgLargestContentfulPaint: 0,
-      avgCumulativeLayoutShift: 0,
-      mobileVsDesktopLoadTime: {
-        mobile: 0,
-        desktop: 0,
-      },
-    }
+    return { ...EMPTY_PERFORMANCE }
   }
 }
 

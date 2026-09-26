@@ -77,7 +77,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       clearInterval(interval)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, [])
+    // Re-run on navigation so the sidebar/permissions populate right after a
+    // client-side redirect from /admin/login (no full reload required).
+  }, [pathname])
 
   const checkAuth = async () => {
     try {

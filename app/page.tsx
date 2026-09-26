@@ -5,6 +5,7 @@ import { useState, useEffect, memo } from "react";
 import HeroScene from "./components/HeroScene";
 import EventTimeline from "./components/EventTimeline";
 import EditableContent from "./components/EditableContent";
+import GoogleReviews from "./components/GoogleReviews";
 import { Button, LinkButton } from "./components/Button";
 import { tiles } from "../lib/site-data";
 import { fetchUpcomingEvents } from "../lib/events-db";
@@ -204,6 +205,9 @@ export default function Home() {
           </LinkButton>
         </div>
       </section>
+
+      {/* Google Reviews — Live-Rezensionen wenn API konfiguriert, sonst Google-CTA */}
+      <GoogleReviews />
 
       </div>
     </div>
