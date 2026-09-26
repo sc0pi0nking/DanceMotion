@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Upload, Trash2, Image as ImageIcon, X, Plus, Pencil, Eye, EyeOff, Images, CheckSquare } from 'lucide-react'
+import { Upload, Trash2, Image as ImageIcon, X, Plus, Pencil, Eye, EyeOff, Images, CheckSquare, Crop } from 'lucide-react'
 import { useDropzone } from 'react-dropzone'
 import Image from 'next/image'
-import { BulkActionBar } from '@/app/admin/components'
+import { BulkActionBar, CropModal } from '@/app/admin/components'
 
 interface GalleryImage {
   url: string
@@ -65,6 +65,31 @@ export default function AdminGalleryManager() {
   const [expandedGallery, setExpandedGallery] = useState<string | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [bulkBusy, setBulkBusy] = useState(false)
+  // Zuschnitt einzelner Upload-Bilder (vor dem Hochladen)
+  const [cropTarget, setCropTarget] = useState<{ list: 'create' | 'add'; index: number } | null>(null)
+  const [cropSrc, setCropSrc] = useState<string | null>(null)
+
+  function openCrop(list: 'create' | 'add', index: number, file: File) {
+    setCropSrc(URL.createObjectURL(file))
+    setCropTarget({ list, index })
+  }
+
+  function closeCrop() {
+    if (cropSrc) URL.revokeObjectURL(cropSrc)
+    setCropSrc(null)
+    setCropTarget(null)
+  }
+
+  function applyCrop(file: File) {
+    if (!cropTarget) return
+    const { list, index } = cropTarget
+    if (list === 'create') {
+      setUploadedFiles((prev) => prev.map((f, idx) => (idx === index ? file : f)))
+    } else {
+      setAddImageFiles((prev) => prev.map((f, idx) => (idx === index ? file : f)))
+    }
+    closeCrop()
+  }
 
   useEffect(() => {
     loadGalleries()
@@ -408,6 +433,17 @@ export default function AdminGalleryManager() {
 
   return (
     <div className="space-y-6">
+      {cropSrc && cropTarget && (
+        <CropModal
+          imageSrc={cropSrc}
+          aspect={4 / 3}
+          allowAspectSelect
+          fileName="galerie-bild.jpg"
+          title="Bild zuschneiden"
+          onCancel={closeCrop}
+          onConfirm={applyCrop}
+        />
+      )}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-white">Alben verwalten</h2>
         <button
@@ -703,6 +739,13 @@ export default function AdminGalleryManager() {
                       <div key={i} className="relative aspect-square rounded-lg overflow-hidden bg-slate-700">
                         <img src={URL.createObjectURL(file)} alt={file.name} className="w-full h-full object-cover" />
                         <button
+                          onClick={() => openCrop('create', i, file)}
+                          className="absolute top-1 left-1 p-0.5 bg-slate-900/80 text-white rounded-full hover:bg-teal-600"
+                          title="Zuschneiden"
+                        >
+                          <Crop size={14} />
+                        </button>
+                        <button
                           onClick={() => setUploadedFiles(prev => prev.filter((_, idx) => idx !== i))}
                           className="absolute top-1 right-1 p-0.5 bg-red-500 text-white rounded-full hover:bg-red-600"
                         >
@@ -772,6 +815,13 @@ export default function AdminGalleryManager() {
                   {addImageFiles.map((file, i) => (
                     <div key={i} className="relative aspect-square rounded-lg overflow-hidden bg-slate-700">
                       <img src={URL.createObjectURL(file)} alt={file.name} className="w-full h-full object-cover" />
+                      <button
+                        onClick={() => openCrop('add', i, file)}
+                        className="absolute top-1 left-1 p-0.5 bg-slate-900/80 text-white rounded-full hover:bg-teal-600"
+                        title="Zuschneiden"
+                      >
+                        <Crop size={14} />
+                      </button>
                       <button
                         onClick={() => setAddImageFiles(prev => prev.filter((_, idx) => idx !== i))}
                         className="absolute top-1 right-1 p-0.5 bg-red-500 text-white rounded-full hover:bg-red-600"

@@ -10,6 +10,8 @@ interface CropModalProps {
   imageSrc: string
   /** Seitenverhältnis (Breite/Höhe). Weglassen = frei. */
   aspect?: number
+  /** Wenn true, kann der Nutzer das Seitenverhältnis im Dialog umschalten (z.B. Galerie) */
+  allowAspectSelect?: boolean
   /** 'rect' (Standard) oder 'round' für runde Avatare */
   cropShape?: 'rect' | 'round'
   /** Dateiname des Ergebnisses */
@@ -73,6 +75,7 @@ async function getCroppedFile(
 export default function CropModal({
   imageSrc,
   aspect = 1,
+  allowAspectSelect = false,
   cropShape = 'rect',
   fileName = 'zuschnitt.jpg',
   mimeType = 'image/jpeg',
@@ -82,8 +85,16 @@ export default function CropModal({
 }: CropModalProps) {
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
+  const [aspectValue, setAspectValue] = useState(aspect)
   const [areaPixels, setAreaPixels] = useState<Area | null>(null)
   const [saving, setSaving] = useState(false)
+
+  const ASPECT_OPTIONS: { label: string; value: number }[] = [
+    { label: 'Quer 4:3', value: 4 / 3 },
+    { label: 'Breit 16:9', value: 16 / 9 },
+    { label: 'Quadrat 1:1', value: 1 },
+    { label: 'Hoch 3:4', value: 3 / 4 },
+  ]
 
   const onCropComplete = useCallback((_area: Area, areaPx: Area) => {
     setAreaPixels(areaPx)
@@ -123,7 +134,7 @@ export default function CropModal({
             image={imageSrc}
             crop={crop}
             zoom={zoom}
-            aspect={aspect}
+            aspect={aspectValue}
             cropShape={cropShape}
             showGrid={cropShape === 'rect'}
             onCropChange={setCrop}
@@ -131,6 +142,25 @@ export default function CropModal({
             onCropComplete={onCropComplete}
           />
         </div>
+
+        {allowAspectSelect && (
+          <div className="flex flex-wrap items-center gap-2 border-t border-slate-700 px-5 py-3">
+            <span className="text-xs text-slate-400">Format:</span>
+            {ASPECT_OPTIONS.map((opt) => (
+              <button
+                key={opt.label}
+                onClick={() => setAspectValue(opt.value)}
+                className={`rounded-lg px-2.5 py-1 text-xs font-medium transition ${
+                  Math.abs(aspectValue - opt.value) < 0.001
+                    ? 'bg-teal-500 text-white'
+                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="flex items-center gap-3 border-t border-slate-700 px-5 py-3">
           <ZoomIn size={18} className="flex-shrink-0 text-slate-400" />
