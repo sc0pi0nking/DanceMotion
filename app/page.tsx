@@ -59,6 +59,34 @@ export default function Home() {
           style={{ background: "var(--gradient-hero-fade)" }}
         />
 
+      {/* About / Vereinsgeschichte - Freitext-Block (inline & im Admin-Bereich "Inhalte" editierbar) */}
+      <section id="about" className="mx-auto max-w-5xl px-6 py-20 sm:py-24 relative z-20">
+        <div className="mx-auto max-w-3xl text-center">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full px-3 py-1"
+               style={{ backgroundColor: "var(--badge-bg-subtle)" }}>
+            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: "var(--accent-dot)" }}></span>
+            <span className="text-xs font-semibold" style={{ color: "var(--accent)" }}>Über uns</span>
+          </div>
+
+          <EditableContent
+            contentKey="home.about.title"
+            defaultValue="Unser Verein"
+            as="h2"
+            className="text-4xl font-bold"
+            style={{ color: "var(--fg)" }}
+          />
+
+          <EditableContent
+            contentKey="home.about.text"
+            defaultValue={"DanceMotion Eschweiler entstand aus der Leidenschaft für Tanz und Gemeinschaft. Was als kleine Gruppe begann, ist über die Jahre zu einem lebendigen Verein mit mehreren Tanzgruppen für jedes Alter gewachsen.\n\nBei uns stehen die Freude an der Bewegung, der Zusammenhalt und das gemeinsame Erleben im Mittelpunkt – von den ersten Schritten bis zum großen Auftritt auf der Bühne."}
+            as="div"
+            multiline
+            className="mt-6 text-lg leading-relaxed whitespace-pre-line"
+            style={{ color: "var(--muted)" }}
+          />
+        </div>
+      </section>
+
       {/* Groups Section - Alternating Layout */}
       <section id="groups" className="mx-auto max-w-6xl px-6 py-20 sm:py-24 relative z-20">
         <div className="mb-16">
