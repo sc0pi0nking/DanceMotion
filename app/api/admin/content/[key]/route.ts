@@ -1,6 +1,7 @@
 import { supabaseServer } from '@/lib/supabase'
 import type { ContentItem } from '@/lib/supabase'
 import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
+import { snapshotContentVersion } from '@/lib/content-versions'
 
 // GET - Fetch single content item
 export async function GET(
@@ -44,6 +45,9 @@ export async function PUT(
 
     const { key } = await params
     const item: Partial<ContentItem> = await req.json()
+
+    // Aktuellen Wert vor dem Überschreiben in die Historie sichern
+    await snapshotContentVersion(key)
 
     // Try to upsert (update if exists, insert if not)
     const { data, error } = await supabaseServer

@@ -1,6 +1,7 @@
 import { supabaseServer } from '@/lib/supabase'
 import type { ContentItem } from '@/lib/supabase'
 import { getAdminUserWithPermissions, PERMISSIONS } from '@/lib/auth'
+import { snapshotContentVersion } from '@/lib/content-versions'
 
 // GET - Fetch all content
 export async function GET() {
@@ -75,6 +76,9 @@ export async function PUT(req: Request) {
 
     let result
     if (existing) {
+      // Aktuellen Wert vor dem Überschreiben in die Historie sichern
+      await snapshotContentVersion(key)
+
       // Update existing
       const { data, error } = await supabaseServer
         .from('content')

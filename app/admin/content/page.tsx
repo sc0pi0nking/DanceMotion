@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { FileText, Plus, Save, X, Eye, Search, Tag, Trash2 } from 'lucide-react'
+import { FileText, Plus, Save, X, Eye, Search, Tag, Trash2, History, RotateCcw } from 'lucide-react'
 import type { ContentItem } from '@/lib/supabase'
+import type { ContentVersion } from '@/lib/content-versions'
 import { AdminPageHeader, AdminCard, AdminLoadingState, AdminModal, ModalCancelButton, ModalConfirmButton, AdminInput, AdminTextarea, FormGroup } from '../components'
 
 interface ContentSection {
@@ -19,6 +20,10 @@ export default function AdminContentPage() {
   const [selectedSection, setSelectedSection] = useState<string>('all')
   const [showAddNew, setShowAddNew] = useState(false)
   const [newItem, setNewItem] = useState({ key: '', section: '', description: '', value: '' })
+  const [historyKey, setHistoryKey] = useState<string | null>(null)
+  const [versions, setVersions] = useState<ContentVersion[]>([])
+  const [loadingVersions, setLoadingVersions] = useState(false)
+  const [restoringId, setRestoringId] = useState<string | null>(null)
 
   useEffect(() => {
     void loadContent()
@@ -115,6 +120,42 @@ export default function AdminContentPage() {
       }
     } catch (error) {
       console.error('Failed to delete content:', error)
+    }
+  }
+
+  async function openHistory(key: string): Promise<void> {
+    setHistoryKey(key)
+    setLoadingVersions(true)
+    setVersions([])
+    try {
+      const res = await fetch(`/api/admin/content/${encodeURIComponent(key)}/versions`)
+      if (res.ok) {
+        setVersions(await res.json())
+      }
+    } catch (error) {
+      console.error('Failed to load versions:', error)
+    } finally {
+      setLoadingVersions(false)
+    }
+  }
+
+  async function restoreVersion(versionId: string): Promise<void> {
+    if (!historyKey) return
+    setRestoringId(versionId)
+    try {
+      const res = await fetch(`/api/admin/content/${encodeURIComponent(historyKey)}/versions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ versionId }),
+      })
+      if (res.ok) {
+        setHistoryKey(null)
+        await loadContent()
+      }
+    } catch (error) {
+      console.error('Failed to restore version:', error)
+    } finally {
+      setRestoringId(null)
     }
   }
 
@@ -237,6 +278,51 @@ export default function AdminContentPage() {
         </div>
       </AdminModal>
 
+      {/* Versionsverlauf Modal */}
+      <AdminModal
+        isOpen={historyKey !== null}
+        onClose={() => setHistoryKey(null)}
+        title="Versionsverlauf"
+        description={historyKey ? `Frühere Werte von ${historyKey}` : undefined}
+        size="lg"
+        footer={<ModalCancelButton onClick={() => setHistoryKey(null)}>Schließen</ModalCancelButton>}
+      >
+        {loadingVersions ? (
+          <p className="text-slate-400 py-6 text-center">Verlauf wird geladen...</p>
+        ) : versions.length === 0 ? (
+          <p className="text-slate-400 py-6 text-center">
+            Noch keine früheren Versionen vorhanden. Ab der nächsten Änderung wird der bisherige Wert hier gesichert.
+          </p>
+        ) : (
+          <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+            {versions.map((version) => (
+              <div
+                key={version.id}
+                className="bg-slate-900/50 border border-slate-700 rounded-lg p-3"
+              >
+                <div className="flex items-center justify-between gap-3 mb-2">
+                  <div className="text-xs text-slate-400">
+                    {new Date(version.created_at).toLocaleString('de-DE')}
+                    {version.updated_by && <span className="ml-2">· {version.updated_by}</span>}
+                  </div>
+                  <button
+                    onClick={() => void restoreVersion(version.id)}
+                    disabled={restoringId !== null}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 bg-teal-500 hover:bg-teal-600 text-white rounded text-sm transition disabled:opacity-50"
+                  >
+                    <RotateCcw size={13} />
+                    {restoringId === version.id ? 'Stelle wieder her...' : 'Wiederherstellen'}
+                  </button>
+                </div>
+                <pre className="text-sm text-slate-300 whitespace-pre-wrap break-words font-sans max-h-32 overflow-y-auto">
+                  {version.value?.text ?? JSON.stringify(version.value)}
+                </pre>
+              </div>
+            ))}
+          </div>
+        )}
+      </AdminModal>
+
       {filteredSections.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-slate-400 mb-4">
@@ -290,6 +376,13 @@ export default function AdminContentPage() {
                             className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm transition"
                           >
                             Bearbeiten
+                          </button>
+                          <button
+                            onClick={() => void openHistory(item.key)}
+                            className="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded text-sm transition"
+                            title="Versionsverlauf"
+                          >
+                            <History size={14} />
                           </button>
                           <button
                             onClick={() => void handleDelete(item.key)}
